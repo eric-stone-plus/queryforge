@@ -16,6 +16,13 @@ export type AgentResult = {
   data: Record<string, unknown>[];
   chartConfig: { type: string; x_key: string; y_key: string; title: string };
   explanation: string;
+  corrected?: boolean;
+  correctionNote?: string;
+};
+
+export type AgentProgress = {
+  step: "analyzing" | "generating_sql" | "executing" | "correcting" | "done" | "error";
+  message: string;
 };
 
 const systemPrompt = `You are a data analyst agent for a SQLite ecommerce database.
@@ -54,7 +61,6 @@ function validateSelectOnly(sql: string): string {
   if (stmts.length !== 1 || stmts[0].type !== "select") {
     throw new Error("Only a single SELECT statement is allowed.");
   }
-  // Auto-add LIMIT if missing to prevent browser freeze
   if (!sql.toUpperCase().includes("LIMIT")) {
     return sql.replace(/;?\s*$/, " LIMIT 500");
   }
@@ -62,35 +68,39 @@ function validateSelectOnly(sql: string): string {
 }
 
 function extractJson(text: string): Record<string, unknown> {
-  // Try direct parse first
-  try {
-    return JSON.parse(text);
-  } catch { /* continue */ }
-
-  // Find outermost { } with balanced brace counting
+  try { return JSON.parse(text); } catch { /* continue */ }
   const start = text.indexOf("{");
   if (start === -1) throw new Error("No JSON in response");
-
   let depth = 0;
   for (let i = start; i < text.length; i++) {
     if (text[i] === "{") depth++;
     if (text[i] === "}") depth--;
     if (depth === 0) {
-      const candidate = text.slice(start, i + 1);
-      try {
-        return JSON.parse(candidate);
-      } catch { /* try next candidate - find next { */ }
+      try { return JSON.parse(text.slice(start, i + 1)); } catch { /* next */ }
     }
   }
-
-  // Fallback: regex (original behavior)
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) throw new Error("No JSON in response");
   return JSON.parse(m[0]);
 }
 
-export async function runAgent(query: string): Promise<AgentResult> {
+function tryExecute(sql: string): { success: boolean; data?: Record<string, unknown>[]; error?: string } {
+  try {
+    const safeSql = validateSelectOnly(sql);
+    const data = queryDb(safeSql);
+    return { success: true, data };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export async function runAgent(
+  query: string,
+  onProgress?: (p: AgentProgress) => void,
+): Promise<AgentResult> {
   getDb();
+
+  onProgress?.({ step: "analyzing", message: "AI 正在分析您的问题..." });
 
   const { text } = await generateText({
     model: mimo("mimo-v2.5-pro"),
@@ -99,17 +109,65 @@ export async function runAgent(query: string): Promise<AgentResult> {
     abortSignal: AbortSignal.timeout(30000),
   });
 
+  onProgress?.({ step: "generating_sql", message: "正在解析 SQL 查询..." });
+
   const obj = extractJson(text);
   const sql = obj.sql as string;
-  const safeSql = validateSelectOnly(sql);
-  const data = queryDb(safeSql);
 
-  return {
-    thinking: (obj.thinking as string) ?? "",
-    intent: (obj.intent as string) ?? "",
-    sql,
-    data,
-    chartConfig: (obj.chart_config as AgentResult["chartConfig"]) ?? { type: "bar", x_key: "", y_key: "", title: "" },
-    explanation: (obj.explanation as string) ?? "",
-  };
+  onProgress?.({ step: "executing", message: "正在执行数据库查询..." });
+
+  const result = tryExecute(sql);
+
+  if (result.success) {
+    onProgress?.({ step: "done", message: "查询完成" });
+    return {
+      thinking: (obj.thinking as string) ?? "",
+      intent: (obj.intent as string) ?? "",
+      sql,
+      data: result.data!,
+      chartConfig: (obj.chart_config as AgentResult["chartConfig"]) ?? { type: "bar", x_key: "", y_key: "", title: "" },
+      explanation: (obj.explanation as string) ?? "",
+    };
+  }
+
+  // Self-correction loop
+  onProgress?.({ step: "correcting", message: `SQL 报错，正在自动修正: ${result.error?.slice(0, 60)}...` });
+
+  const fixPrompt = `The previous SQL query failed. Fix it and respond with the same JSON format.
+
+Original SQL: ${sql}
+Error: ${result.error}
+
+Respond with corrected JSON only:`;
+
+  const { text: fixText } = await generateText({
+    model: mimo("mimo-v2.5-pro"),
+    system: systemPrompt,
+    prompt: fixPrompt,
+    abortSignal: AbortSignal.timeout(30000),
+  });
+
+  const fixObj = extractJson(fixText);
+  const fixedSql = fixObj.sql as string;
+
+  onProgress?.({ step: "executing", message: "正在执行修正后的查询..." });
+
+  const fixResult = tryExecute(fixedSql);
+
+  if (fixResult.success) {
+    onProgress?.({ step: "done", message: "修正成功" });
+    return {
+      thinking: (fixObj.thinking as string) ?? "",
+      intent: (fixObj.intent as string) ?? "",
+      sql: fixedSql,
+      data: fixResult.data!,
+      chartConfig: (fixObj.chart_config as AgentResult["chartConfig"]) ?? { type: "bar", x_key: "", y_key: "", title: "" },
+      explanation: (fixObj.explanation as string) ?? "",
+      corrected: true,
+      correctionNote: `SQL 已自动修正（原始错误: ${result.error?.slice(0, 80)}）`,
+    };
+  }
+
+  onProgress?.({ step: "error", message: `修正失败: ${fixResult.error}` });
+  throw new Error(`SQL 执行失败（已尝试修正）: ${result.error}`);
 }
