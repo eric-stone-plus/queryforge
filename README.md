@@ -54,16 +54,16 @@
 
 ## 快速开始
 
+**在线体验**：[queryforge-production-8d6f.up.railway.app](https://queryforge-production-8d6f.up.railway.app)
+
+本地开发：
 ```bash
 git clone https://github.com/eric-stone-plus/queryforge.git
 cd queryforge && npm install
-
 echo "AI_API_KEY=your_key" > .env.local
 echo "AI_BASE_URL=https://api.kimi.com/coding/v1" >> .env.local
 echo "AI_MODEL=kimi-for-coding" >> .env.local
-
 npm run dev
-# 访问 http://localhost:3000
 ```
 
 ## 演示示例
