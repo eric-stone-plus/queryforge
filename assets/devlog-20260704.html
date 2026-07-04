@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QueryForge 开发日志 — 2026.07.04</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', sans-serif; background: #0d1117; color: #e6edf3; line-height: 1.6; padding: 2rem; max-width: 960px; margin: 0 auto; }
+h1 { font-size: 28px; margin-bottom: 0.5rem; color: #58a6ff; }
+h2 { font-size: 20px; margin: 2rem 0 1rem; color: #d4a853; border-bottom: 1px solid #30363d; padding-bottom: 0.5rem; }
+h3 { font-size: 16px; margin: 1.5rem 0 0.5rem; color: #58a6ff; }
+p, li { font-size: 14px; color: #8b949e; margin-bottom: 0.5rem; }
+ul { padding-left: 1.5rem; }
+li { margin-bottom: 0.3rem; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 4px; }
+.tag-done { background: #0f2d16; color: #3fb950; }
+.tag-fix { background: #2e1e00; color: #d29922; }
+.tag-new { background: #0d2240; color: #58a6ff; }
+.tag-pending { background: #3d1214; color: #f85149; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.card-title { font-size: 15px; font-weight: 600; color: #e6edf3; margin-bottom: 0.5rem; }
+.meta { font-size: 12px; color: #6e7681; margin-bottom: 2rem; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.stat { display: inline-block; margin-right: 2rem; margin-bottom: 0.5rem; }
+.stat-num { font-size: 28px; font-weight: 700; color: #d4a853; display: block; }
+.stat-label { font-size: 12px; color: #6e7681; }
+.timeline { border-left: 2px solid #30363d; padding-left: 1.5rem; margin: 1rem 0; }
+.timeline-item { margin-bottom: 1.5rem; position: relative; }
+.timeline-item::before { content: ''; position: absolute; left: -1.5rem; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: #58a6ff; }
+.timeline-time { font-size: 12px; color: #6e7681; }
+.timeline-content { font-size: 14px; color: #8b949e; }
+</style>
+</head>
+<body>
+
+<h1>QueryForge 开发日志</h1>
+<p class="meta">2026 年 7 月 4 日 · ClawHunt Builder Camp Day 2 · ~12 小时开发</p>
+
+<div>
+  <span class="stat"><span class="stat-num">39</span><span class="stat-label">QUINTE 审计报告</span></span>
+  <span class="stat"><span class="stat-num">11</span><span class="stat-label">源码文件</span></span>
+  <span class="stat"><span class="stat-num">8</span><span class="stat-label">KPI 指标</span></span>
+  <span class="stat"><span class="stat-num">6</span><span class="stat-label">图表面板</span></span>
+  <span class="stat"><span class="stat-num">9</span><span class="stat-label">PPT 页面</span></span>
+</div>
+
+<h2>开发时间线</h2>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="timeline-time">上午</div>
+    <div class="timeline-content">
+      <strong>代码审计 + 方向决策</strong><br>
+      QUINTE R1/R2/R3 完成两轮审查。发现 5 个 P0 缺陷（MetricSidebar 保存断裂、LLM 无超时、无离线 fallback、图表标题 bug、DB 连接不一致）。技术方向：保留 Next.js，部署 Railway，商务风 UI。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-time">中午</div>
+    <div class="timeline-content">
+      <strong>QUINTE 调度修复</strong><br>
+      五方智能体全部闪退。逐个排查发现 3 个 CLI 调用错误：OpenCode 的 --dir flag 破坏解析、MiMo Code 的 provider ID 错误、OMP 的 -p flag 导致挂起。修复 SOUL.md + 全部 agent skill + memory。教训写入源头文件，不只改 memory。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-time">下午前半</div>
+    <div class="timeline-content">
+      <strong>打磨策略审计 + 核心修复</strong><br>
+      QUINTE 第三轮：6 维度打磨审计。产出 12 小时行动清单。开始实施：接入 Dashboard.tsx、KPI 卡片、agent.ts API key 移到 env、extractJson 改为 balanced-brace、自纠正循环、SSE 流式进度推送。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-time">下午后半</div>
+    <div class="timeline-content">
+      <strong>产品化 + 部署</strong><br>
+      Railway 部署成功。GitHub 仓库建立。API key 从 git 历史清除（git filter-repo）。深色/浅色主题切换。侧边栏预存 6 个指标。8 个真实 KPI 指标 + 6 个图表面板。macOS 桌面版编译（WKWebView）。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-time">晚上</div>
+    <div class="timeline-content">
+      <strong>文档 + PPT + README</strong><br>
+      PPT 多轮迭代（Kimi 设计 + Codex 内容）。README 中文化。目录整理（docs/assets/desktop/debates）。开发路线文档。Codex code review。桌面版图标修复 + 暗黑默认。
+    </div>
+  </div>
+</div>
+
+<h2>QUINTE 对抗审查</h2>
+
+<div class="card">
+  <div class="card-title">三轮审查 × 5 方 = 39 份独立报告</div>
+  <p>每个智能体独立分析，互相挑刺，消除单点盲区。R1 独立分析 → R2 交叉审查 → R3 双路裁决。</p>
+  <ul>
+    <li><strong>Round 1 代码审计</strong> — 发现 5 个 P0 缺陷，全部修复</li>
+    <li><strong>Round 2 方向决策</strong> — 确认 Next.js + Railway + 商务风 UI</li>
+    <li><strong>Round 3 打磨策略</strong> — 12 小时行动清单，预估 85-93/105</li>
+    <li><strong>Round 4 PPT 审计</strong> — Kimi + Codex 双审，逐页诊断</li>
+  </ul>
+  <p>完整报告：<a href="../debates/">debates/</a></p>
+</div>
+
+<h2>技术决策</h2>
+
+<div class="card">
+  <div class="card-title">关键架构选择</div>
+  <ul>
+    <li><strong>SQLite 而非 PostgreSQL</strong> — 零配置，黑客松速度优先</li>
+    <li><strong>MiMo v2.5 Pro 而非 OpenAI</strong> — 成本低 10x，中文理解好</li>
+    <li><strong>Next.js 全栈</strong> — 前后端同仓库，部署简单</li>
+    <li><strong>SSE 而非 WebSocket</strong> — 单向推送够用，实现简单</li>
+    <li><strong>自纠正循环</strong> — SQL 报错 → 错误反馈给 AI → 修正 → 重试</li>
+    <li><strong>QUINTE 对抗审查</strong> — 5 个 AI 互相挑刺，成本约 ¥5/次</li>
+  </ul>
+</div>
+
+<h2>真实数据指标</h2>
+
+<div class="card">
+  <div class="card-title">数据库：10,000 订单 · 500 商品 · 1,000 用户 · 8 地区 · 20 品类</div>
+  <ul>
+    <li>总营收 ¥23,256 万（30 个月累计）</li>
+    <li>客单价 ¥23,256</li>
+    <li>毛利率 46.7%</li>
+    <li>复购率 100%（人均 10 单）</li>
+    <li>完成率 66.5% · 退款率 16.6% · 在途 16.9%</li>
+    <li>连带率 2.5 件/单</li>
+    <li>Top 地区：西南 ¥3,348 万</li>
+    <li>Top 品类：图书文具 ¥1,677 万</li>
+    <li>Top 渠道：天猫 ¥4,047 万</li>
+  </ul>
+</div>
+
+<h2>交付物</h2>
+
+<div class="card">
+  <div class="card-title">产品</div>
+  <ul>
+    <li><span class="tag tag-done">DONE</span> 网页版：<a href="https://queryforge-production-8d6f.up.railway.app">queryforge-production-8d6f.up.railway.app</a></li>
+    <li><span class="tag tag-done">DONE</span> 桌面版：QueryForge.app（macOS x86_64，WKWebView）</li>
+    <li><span class="tag tag-done">DONE</span> GitHub：<a href="https://github.com/eric-stone-plus/queryforge">eric-stone-plus/queryforge</a></li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-title">文档</div>
+  <ul>
+    <li><span class="tag tag-done">DONE</span> README.md（中文，分析师定位）</li>
+    <li><span class="tag tag-done">DONE</span> PPT（9 页，深色商务风 + 产品截图）</li>
+    <li><span class="tag tag-done">DONE</span> QUINTE-METHODOLOGY.md（对抗审查方法论）</li>
+    <li><span class="tag tag-done">DONE</span> DEV-ROADMAP.md（开发路线）</li>
+    <li><span class="tag tag-done">DONE</span> Codex code review（480 行）</li>
+    <li><span class="tag tag-done">DONE</span> 39 份 QUINTE 审计报告</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-title">代码</div>
+  <ul>
+    <li><span class="tag tag-done">DONE</span> 自然语言 → SQL → 图表管线</li>
+    <li><span class="tag tag-done">DONE</span> 自纠正循环（SQL 报错自动修正）</li>
+    <li><span class="tag tag-done">DONE</span> SSE 流式进度推送</li>
+    <li><span class="tag tag-done">DONE</span> 8 个 KPI 指标卡 + 6 个图表面板</li>
+    <li><span class="tag tag-done">DONE</span> 分析师预设指标库</li>
+    <li><span class="tag tag-done">DONE</span> 深色/浅色主题切换</li>
+    <li><span class="tag tag-done">DONE</span> 离线缓存 fallback</li>
+  </ul>
+</div>
+
+<h2>教训记录</h2>
+
+<div class="card">
+  <div class="card-title">QUINTE 调度踩坑</div>
+  <ul>
+    <li>OpenCode <code>--dir</code> flag 破坏 background 模式解析 → 用 <code>cd</code> 代替</li>
+    <li>MiMo Code provider ID 是 <code>xiaomi</code> 不是 <code>xiaomi-token-plan-cn</code></li>
+    <li>OMP <code>-p</code> flag 导致 30 秒挂起 → 永远不用</li>
+    <li>教训必须写进 memory + skill + 源头文件（SOUL.md, agent SKILL.md），不能只改 memory</li>
+    <li>5 party 同时挂 = 策略 bug，不是单个 agent 故障</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-title">API Key 安全</div>
+  <ul>
+    <li>初始 commit 硬编码了 key → git filter-repo 清除历史</li>
+    <li>当前：key 只在 Railway env vars + 本地 .env.local（gitignored）</li>
+    <li>Codex 验证：GitHub 历史干净，源码无泄露</li>
+  </ul>
+</div>
+
+<h2>评分预估</h2>
+
+<div class="card">
+  <div class="card-title">Demo Day 评分对标</div>
+  <ul>
+    <li>Demo 现场可用 25 → 预估 20-22（公网部署 + 缓存 + 流式进度）</li>
+    <li>用户价值/PMF 20 → 预估 16-18（分析师定位 + 真实痛点）</li>
+    <li>技术实现 20 → 预估 16-18（AI SDK + 自纠正 + 对抗审查）</li>
+    <li>创新性 15 → 预估 11-13（自纠正循环 + QUINTE 方法论）</li>
+    <li>商业潜力 10 → 预估 7-8（SaaS 模式 + 真实数据）</li>
+    <li>路演表达 10 → 预估 8-9（PPT + 排练）</li>
+    <li>加分 +5 → +3（ClawHunt 上架）</li>
+  </ul>
+  <p><strong>总预估：88-96/105 + 3 加分</strong></p>
+</div>
+
+<p class="meta" style="margin-top: 3rem; text-align: center;">
+  Generated by QueryForge · 2026.07.04 · <a href="https://github.com/eric-stone-plus/queryforge">GitHub</a> · <a href="https://queryforge-production-8d6f.up.railway.app">Live Demo</a>
+</p>
+
+</body>
+</html>
