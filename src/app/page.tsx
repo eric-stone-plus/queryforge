@@ -54,8 +54,8 @@ async function query(sql: string): Promise<QueryResult[]> {
 
 // Static data loaded from DB (Olist Brazilian E-commerce)
 const REGION_STATIC = [
-  { name: "华东", value: 1034 }, { name: "华南", value: 233 }, { name: "华北", value: 190 },
-  { name: "华中", value: 144 }, { name: "西南", value: 0 },
+  { name: "Sudeste", value: 1034 }, { name: "Sul", value: 233 }, { name: "Nordeste", value: 190 },
+  { name: "Centro-Oeste", value: 144 }, { name: "Norte", value: 0 },
 ];
 const CATEGORY_STATIC = [
   { name: "health_beauty", value: 1259 }, { name: "watches_gifts", value: 1205 }, { name: "bed_bath_table", value: 1037 },
@@ -63,8 +63,8 @@ const CATEGORY_STATIC = [
   { name: "cool_stuff", value: 635 }, { name: "housewares", value: 632 },
 ];
 const CHANNEL_STATIC = [
-  { name: "天猫", orders: 75391 }, { name: "线下门店", orders: 19784 }, { name: "抖音", orders: 2739 },
-  { name: "微信小程序", orders: 1527 },
+  { name: "Cartão de Crédito", orders: 75391 }, { name: "Boleto", orders: 19784 }, { name: "Voucher", orders: 2739 },
+  { name: "Cartão de Débito", orders: 1527 },
 ];
 const SEGMENT_STATIC = [
   { name: "regular", avg_spend: 161, users: 96096 },
@@ -299,10 +299,10 @@ export default function Home() {
               {/* User Distribution */}
               <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                 <h3 className="mb-2 text-xs font-semibold" style={{ color: "var(--text)" }}>地区用户分布</h3>
-                <MetricRow label="华东（Sudeste）" value="65,900 用户 · 均单 R$151" color="var(--accent)" />
-                <MetricRow label="华南（Sul）" value="13,690 用户 · 均单 R$164" />
-                <MetricRow label="华北（Nordeste）" value="9,140 用户 · 均单 R$202" />
-                <MetricRow label="华中（Centro-Oeste）" value="7,389 用户 · 均单 R$189" />
+                <MetricRow label="Sudeste（Sudeste）" value="65,900 用户 · 均单 R$151" color="var(--accent)" />
+                <MetricRow label="Sul（Sul）" value="13,690 用户 · 均单 R$164" />
+                <MetricRow label="Nordeste（Nordeste）" value="9,140 用户 · 均单 R$202" />
+                <MetricRow label="Centro-Oeste（Centro-Oeste）" value="7,389 用户 · 均单 R$189" />
                 <MetricRow label="总用户" value="96,096" />
                 <MetricRow label="总订单" value="99,441（完成率 97%）" />
               </div>

@@ -41,18 +41,18 @@ JSON fields:
   "thinking": "your reasoning about the business question",
   "intent": "one-sentence summary of what the user wants to know",
   "sql": "a single valid SQLite SELECT query",
-  "chart_config": { "type": "bar|line|pie|area", "x_key": "column", "y_key": "column", "title": "Chinese title" },
-  "explanation": "一段完整的分析报告（150-250字中文），包含：1)数据结论：用数字说话，给出关键指标 2)趋势/对比：与什么比较，是高是低 3)业务建议：基于数据给出1-2条可执行建议 4)数据局限性：说明任何需要注意的数据特点"
+  "chart_config": { "type": "bar|line|pie|area", "x_key": "column", "y_key": "column", "title": "descriptive title" },
+  "explanation": "一段完整的分析报告（150-250字），包含：1)数据结论：用数字说话，给出关键指标 2)趋势/对比：与什么比较，是高是低 3)业务建议：基于数据给出1-2条可执行建议 4)数据局限性：说明任何需要注意的数据特点"
 }
 
 Rules:
 - Revenue = SUM(o.total_amount) from orders table. Or SUM(oi.unit_price) from order_items.
 - SELECT only. SQLite syntax.
 - Time series: strftime('%Y-%m', date_column).
-- Prefer ASCII column aliases; quote any Chinese aliases with double quotes.
+- Prefer ASCII column aliases.
 - Product names are in English (e.g. "health_beauty", "watches_gifts").
-- Region names are Chinese: 华东(Sudeste), 华南(Sul), 华北(Nordeste), 西南(Norte+Centro-Oeste).
-- Channel mapping: 天猫=credit_card, 线下门店=boleto, 抖音=voucher, 微信小程序=debit_card.
+- Region names: Sudeste, Sul, Nordeste, Centro-Oeste, Norte.
+- Channel mapping: Cartão de Crédito=credit_card, Boleto=boleto, Voucher=voucher, Cartão de Débito=debit_card.
 - Never invent numbers. Only discuss numbers you can derive from the schema.
 - If the question is ambiguous, make a conservative assumption and state it.
 

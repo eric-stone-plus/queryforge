@@ -52,7 +52,7 @@ const stateToRegion = {
   // Norte + Centro-Oeste
   AM: 4, PA: 4, GO: 4, MT: 4, MS: 4, DF: 4, RO: 4, AC: 4, AP: 4, RR: 4, TO: 4,
 };
-const regionNames = ["华东", "华南", "华北", "华中", "西南"];
+const regionNames = ["Sudeste", "Sul", "Nordeste", "Centro-Oeste", "Norte"];
 
 // Get unique categories from products
 const catSet = new Set();
@@ -114,10 +114,10 @@ const statusMap = {
 
 // Channel mapping (use payment_type)
 const channelMap = {
-  credit_card: "天猫",
-  boleto: "线下门店",
-  voucher: "抖音",
-  debit_card: "微信小程序",
+  credit_card: "Cartão de Crédito",
+  boleto: "Boleto",
+  voucher: "Voucher",
+  debit_card: "Cartão de Débito",
 };
 
 mkdirSync(dataDir, { recursive: true });
@@ -214,7 +214,7 @@ const seed = db.transaction(() => {
 
     // Get payment type for channel
     const pay = firstPayByOrder[o.order_id];
-    const channel = channelMap[pay ? pay.payment_type : "credit_card"] || "天猫";
+    const channel = channelMap[pay ? pay.payment_type : "credit_card"] || "Cartão de Crédito";
 
     insertOrder.run(id, userId, regionId, orderDate, status, +totalAmount.toFixed(2), channel);
 
