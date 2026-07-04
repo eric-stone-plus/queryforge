@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "QueryForge — 受治理的自助式商业分析层",
-  description: "自然语言驱动的商业分析平台。用中文提问，生成受控 SQL 查询、实时图表和分析师级解释。",
+  title: "QueryForge — 跨境电商经营分析工具",
+  description: "面向电商经营者的本地分析工具。用中文提问，生成受控 SQL 查询、实时图表和经营分析建议。",
 };
 
 export default function RootLayout({

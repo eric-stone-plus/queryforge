@@ -9,15 +9,15 @@ import {
 
 export type DataRow = Record<string, string | number | boolean | null>;
 export type ChartConfig = { type?: string; x_key?: string; xKey?: string; y_key?: string; yKey?: string; title?: string };
-export type ChatResult = { thinking?: string; intent?: string; sql?: string; data?: DataRow[]; chartConfig?: ChartConfig; chart_config?: ChartConfig; explanation?: string; error?: string; _cached?: boolean; corrected?: boolean; correctionNote?: string };
+export type ChatResult = { thinking?: string; intent?: string; sql?: string; data?: DataRow[]; chartConfig?: ChartConfig; chart_config?: ChartConfig; explanation?: string; error?: string; _cached?: boolean; corrected?: boolean; correctionNote?: string; conversational?: boolean };
 
 type ChatPanelProps = { onResult?: (r: ChatResult) => void; externalResult?: ChatResult | null; className?: string };
 
 const COLORS = ["#0969da", "#1a7f37", "#9a6700", "#cf222e", "#8250df", "#0550ae"];
 
 const DEMO_CHIPS = [
-  "各地区月度销售额趋势",
-  "各地区客单价差异分析",
+  "哪个地区最值得优先投放？",
+  "哪些品类适合做组合推荐？",
   "复购用户的品类跨越路径",
   "渠道表现对比分析",
 ];
@@ -97,6 +97,34 @@ function ChartResult({ result }: { result: ChatResult }) {
 
 type ProgressStep = { step: string; message: string };
 
+function summarizeResult(question: string, r: ChatResult) {
+  return {
+    question,
+    intent: r.intent,
+    sql: r.sql,
+    chartTitle: r.chartConfig?.title ?? r.chart_config?.title,
+    dataSample: (r.data ?? []).slice(0, 8),
+    explanation: r.explanation,
+  };
+}
+
+function normalizeError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/structured output|json|parse|model response|unexpected/i.test(message)) {
+    return "刚才响应格式有点乱，我已经拦住了原始错误。你可以直接接着问，我会继续按当前上下文分析。";
+  }
+  if (/timeout|aborted/i.test(message)) {
+    return "这次分析耗时偏长，请稍后重试，或把问题拆得更具体一点。";
+  }
+  if (/provider|api key|configured|401|403/i.test(message)) {
+    return "本地模型供应商还没有配置。打开右上角设置，填入 OpenAI-compatible API 地址、模型名和本地 API key 后，就可以进行真实对话分析。";
+  }
+  if (/budget|token/i.test(message)) {
+    return "本月 token 预算已触顶。可以在设置里提高预算或重置本地用量后继续分析。";
+  }
+  return message || "请求出错";
+}
+
 export default function ChatPanel({ onResult, externalResult, className = "" }: ChatPanelProps) {
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<ChatResult | null>(null);
@@ -125,12 +153,11 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
     setPendingQuestion(q);
 
     try {
-      const context = history.slice(-4).map(({ q: question, r }) => ({
-        question,
-        intent: r.intent,
-        sql: r.sql,
-        explanation: r.explanation,
-      }));
+      const context = history.length
+        ? history.slice(-4).map(({ q: question, r }) => summarizeResult(question, r))
+        : externalResult
+          ? [summarizeResult("当前展示的指标", externalResult)]
+          : [];
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -181,7 +208,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
       onResult?.(finalResult);
       setMessage("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "请求出错");
+      setError(normalizeError(e));
     } finally {
       setIsLoading(false);
       setPendingQuestion(null);
@@ -194,12 +221,12 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
   }
 
   const stepIcons: Record<string, string> = {
-    analyzing: "🧠",
-    generating_sql: "⚙️",
-    executing: "📊",
-    correcting: "🔧",
-    done: "✅",
-    error: "❌",
+    analyzing: "•",
+    generating_sql: "•",
+    executing: "•",
+    correcting: "•",
+    done: "•",
+    error: "!",
   };
 
   return (
@@ -208,8 +235,9 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
         {history.length === 0 && !displayResult && !isLoading && (
           <div className="mx-auto flex max-w-2xl flex-col items-center justify-center py-6 sm:py-20">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white sm:mb-5 sm:h-16 sm:w-16 sm:text-2xl" style={{ background: "linear-gradient(135deg, #0969da, #8250df)" }}>QF</div>
-            <h2 className="mb-2 text-lg font-semibold sm:text-xl" style={{ color: "var(--text)" }}>你好，我是 QueryForge</h2>
-            <p className="mb-5 text-center text-sm leading-relaxed sm:mb-8" style={{ color: "var(--text-secondary)" }}>面向经营问题的商业分析助手。你可以直接追问原因、对比和下一步动作，我会把口径落实到当前数据上。</p>
+            <h2 className="mb-2 text-lg font-semibold sm:text-xl" style={{ color: "var(--text)" }}>电商经营分析助手</h2>
+            <p className="mb-3 text-center text-sm leading-relaxed sm:mb-4" style={{ color: "var(--text-secondary)" }}>用 Olist 巴西电商案例分析地区、品类、渠道和复购，把经营问题拆成可执行的查询与建议。</p>
+            <p className="mb-5 rounded-full px-3 py-1 text-center text-xs sm:mb-8" style={{ color: "var(--text-muted)", background: "var(--surface-hover)" }}>Settings 可配置 OpenAI-compatible endpoint、model、API key 和 token 预算</p>
             <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
               {DEMO_CHIPS.map((chip) => (
                 <button key={chip} onClick={() => handleChipClick(chip)} className="rounded-full px-4 py-2 text-sm font-medium transition-default" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
@@ -242,7 +270,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
                   </details>
                 )}
                 {item.r.sql && (
-                  <details className="group" open>
+                  <details className="group">
                     <summary className="cursor-pointer text-xs font-medium transition-default" style={{ color: "var(--text-muted)" }}>
                       <span className="group-open:hidden">▸ SQL 查询</span>
                       <span className="hidden group-open:inline">▾ SQL 查询</span>
@@ -251,13 +279,15 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
                   </details>
                 )}
                 <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                  <h3 className="mb-3 text-sm font-semibold" style={{ color: "var(--text)" }}>
-                    {item.r.chartConfig?.title ?? item.r.chart_config?.title ?? "数据可视化"}
-                    {item.r._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>快速结果</span>}
-                    {item.r.corrected && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>AI 自纠正</span>}
-                  </h3>
+                  {!item.r.conversational && (
+                    <h3 className="mb-3 text-sm font-semibold" style={{ color: "var(--text)" }}>
+                      {item.r.chartConfig?.title ?? item.r.chart_config?.title ?? "数据可视化"}
+                      {item.r._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>样例结果</span>}
+                      {item.r.corrected && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>AI 自纠正</span>}
+                    </h3>
+                  )}
                   {item.r.explanation && <div className="mb-3 rounded-lg p-3 text-xs leading-relaxed" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}><p className="whitespace-pre-wrap">{item.r.explanation}</p></div>}
-                  <ChartResult result={item.r} />
+                  {!item.r.conversational && <ChartResult result={item.r} />}
                   {item.r.sql && (
                     <button onClick={() => {
                       const metrics = JSON.parse(localStorage.getItem("queryforge-metrics") || "[]");
@@ -287,7 +317,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
                 </details>
               )}
               {displayResult.sql && (
-                <details className="group" open>
+                <details className="group">
                   <summary className="cursor-pointer text-xs font-medium" style={{ color: "var(--text-muted)" }}>
                     <span className="group-open:hidden">▸ SQL 查询</span>
                     <span className="hidden group-open:inline">▾ SQL 查询</span>
@@ -296,11 +326,13 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
                 </details>
               )}
               <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                <h3 className="mb-3 text-sm font-semibold" style={{ color: "var(--text)" }}>{chartTitle}
-                  {displayResult._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>快速结果</span>}
-                </h3>
+                {!displayResult.conversational && (
+                  <h3 className="mb-3 text-sm font-semibold" style={{ color: "var(--text)" }}>{chartTitle}
+                    {displayResult._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>样例结果</span>}
+                  </h3>
+                )}
                 {displayResult.explanation && <div className="mb-3 rounded-lg p-3 text-xs leading-relaxed" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}><p className="whitespace-pre-wrap">{displayResult.explanation}</p></div>}
-                <ChartResult result={displayResult} />
+                {!displayResult.conversational && <ChartResult result={displayResult} />}
               </div>
             </div>
           )}
@@ -318,7 +350,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
                 <div className="space-y-2">
                   {progressSteps.map((step, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs" style={{ color: i === progressSteps.length - 1 ? "var(--text)" : "var(--text-muted)" }}>
-                      <span>{stepIcons[step.step] || "⏳"}</span>
+                      <span>{stepIcons[step.step] || "•"}</span>
                       <span>{step.message}</span>
                       {i === progressSteps.length - 1 && <div className="h-3 w-3 animate-spin rounded-full border-2" style={{ borderColor: "var(--border)", borderTopColor: "var(--accent)" }} />}
                     </div>
@@ -343,7 +375,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="mx-auto flex max-w-3xl items-end gap-2 sm:gap-3">
           <textarea ref={textareaRef} value={message} onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-            placeholder="用自然语言描述你的数据分析需求..." rows={1}
+            placeholder="直接问：哪个地区最值得投放？" rows={1}
             className="flex-1 resize-none rounded-xl border px-4 py-3 text-sm outline-none transition-default"
             style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)", minHeight: 44, maxHeight: 120 }}
             onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(9,105,218,0.12)"; }}

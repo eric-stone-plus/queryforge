@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { type AgentContextTurn, runAgent } from "@/lib/agent";
+import { type AgentContextTurn, runAgent, runConversationalAnswer } from "@/lib/agent";
 import { queryDb } from "@/lib/db";
 import { CACHED_RESULTS } from "@/lib/demo-cache";
+import { getPublicSettings } from "@/lib/local-settings";
 
 function cleanContext(value: unknown): AgentContextTurn[] {
   if (!Array.isArray(value)) return [];
@@ -15,6 +16,10 @@ function cleanContext(value: unknown): AgentContextTurn[] {
       question: record.question.slice(0, 500),
       intent: typeof record.intent === "string" ? record.intent.slice(0, 240) : undefined,
       sql: typeof record.sql === "string" ? record.sql.slice(0, 1200) : undefined,
+      chartTitle: typeof record.chartTitle === "string" ? record.chartTitle.slice(0, 180) : undefined,
+      dataSample: Array.isArray(record.dataSample)
+        ? record.dataSample.slice(0, 8).flatMap((row) => (row && typeof row === "object" ? [row as Record<string, unknown>] : []))
+        : undefined,
       explanation: typeof record.explanation === "string" ? record.explanation.slice(0, 700) : undefined,
     }];
   });
@@ -25,7 +30,7 @@ function userFacingError(error: unknown) {
   const lower = message.toLowerCase();
 
   if (lower.includes("timeout") || lower.includes("aborted")) {
-    return "这次分析耗时偏长，请稍后重试，或先用上方示例问题查看结果。";
+    return "这次分析耗时偏长，请稍后重试，或把问题拆成更具体的地区、品类、渠道再问。";
   }
   if (
     lower.includes("json") ||
@@ -33,98 +38,42 @@ function userFacingError(error: unknown) {
     lower.includes("unexpected") ||
     lower.includes("parse")
   ) {
-    return "这次模型输出格式不稳定，我没有把原始错误展示给你。请换个说法再问一次，我会重新生成查询。";
+    return "这次模型输出没有稳定形成可执行分析。请直接接着追问，我会保留上下文重新组织查询和解释。";
   }
   if (lower.includes("ai provider") || lower.includes("api key") || lower.includes("401") || lower.includes("403")) {
-    return "在线分析服务暂时不可用，示例问题仍可返回快速结果。";
+    return "模型供应商还没有可用配置。请打开 Settings，检查 endpoint、model 和 API key；凭证只保存在本机。";
   }
 
-  return "这次查询没有成功。请换个角度追问，或先使用示例问题进入分析。";
+  return "这次分析没有成功。请换个角度追问，或指定要拆解的地区、品类、渠道。";
 }
 
-function asNumber(value: unknown) {
-  return typeof value === "number" ? value : Number(value);
-}
+function webDemoAnswer(message: string, context: AgentContextTurn[]) {
+  const lower = message.toLowerCase();
+  const prior = context.at(-1);
+  const priorText = `${prior?.question ?? ""} ${prior?.chartTitle ?? ""} ${prior?.explanation ?? ""}`.toLowerCase();
+  const text = `${lower} ${priorText}`;
 
-function fmtInt(value: unknown) {
-  return Math.round(asNumber(value)).toLocaleString("en-US");
-}
+  let explanation = "这个扫码页面是公开演示环境，重点展示 QueryForge 的交互形态和 Olist 案例看板。随机追问会基于当前上下文给出稳定解读；真实模型调用、API key、本地 token plan 和完整 SQL 约束链路在桌面端运行。";
 
-function fmtWan(value: unknown) {
-  return `${Math.round(asNumber(value) / 10000).toLocaleString("en-US")}万`;
-}
-
-function semanticFallback(message: string, context: AgentContextTurn[]) {
-  const text = `${context.map((turn) => turn.question).join(" ")} ${message}`.toLowerCase();
-  const asksWhy = /为什么|why|原因|解释|营收|revenue/.test(message);
-
-  if (/客单价|aov|average order/.test(text) && /地区|region|regional|sudeste|nordeste/.test(text) && !asksWhy) {
-    const sql = `SELECT
-  r.name AS region,
-  COUNT(DISTINCT o.id) AS orders,
-  ROUND(AVG(o.total_amount), 0) AS avg_order,
-  ROUND(SUM(o.total_amount), 0) AS total_revenue
-FROM orders o
-JOIN regions r ON o.region_id = r.id
-WHERE o.status = 'completed'
-GROUP BY r.name
-ORDER BY avg_order DESC
-LIMIT 500`;
-
-    const rows = queryDb(sql);
-    const byRegion = Object.fromEntries(rows.map((row) => [row.region, row])) as Record<string, Record<string, unknown> | undefined>;
-    const nordeste = byRegion.Nordeste;
-    const sudeste = byRegion.Sudeste;
-    const centro = byRegion["Centro-Oeste"];
-    const sul = byRegion.Sul;
-
-    const explanation = nordeste && sudeste
-      ? `按已完成订单看，Nordeste 客单价最高，约 R$${fmtInt(nordeste.avg_order)}；Centro-Oeste 约 R$${fmtInt(centro?.avg_order)}，Sul 约 R$${fmtInt(sul?.avg_order)}，Sudeste 约 R$${fmtInt(sudeste.avg_order)}。但 Sudeste 有 ${fmtInt(sudeste.orders)} 单、营收约 R$${fmtWan(sudeste.total_revenue)}，是规模市场；Nordeste 是高客单市场。建议 Sudeste 做转化和复购，Nordeste 测试高价值品类、组合包和免邮门槛。局限是还未拆品类、物流和促销。`
-      : "按已完成订单看，不同地区客单价存在明显差异。建议继续拆到品类、物流和促销维度，判断差异来自消费能力还是商品结构。";
-
-    return {
-      thinking: "用已完成订单按地区计算订单数、客单价和营收，区分规模市场与高价值市场。",
-      intent: "对比各地区客单价，识别消费能力差异和运营机会",
-      sql,
-      data: rows,
-      chartConfig: { type: "bar", x_key: "region", y_key: "avg_order", title: "各地区平均客单价（R$）" },
-      explanation,
-    };
+  if (/家具|家居|furniture|bed_bath|housewares/.test(text)) {
+    explanation = "可以把家具/家居看成一个关联品类簇：furniture_decor 与 bed_bath_table 的复购跨品类路径最强，说明用户完成一次家居布置后，后续容易继续购买床品、收纳和家用品。业务上更适合做组合推荐、场景包和复购触达，而不是只看单品销量。公开演示页只给稳定解读，桌面端会继续调用模型查数并生成受控 SQL。";
+  } else if (/地区|region|sudeste|nordeste|sul|centro|norte/.test(text)) {
+    explanation = "地区分析要分开看规模和价值：Sudeste 是订单与营收规模核心，Nordeste 的客单价更高但订单量较小。运营动作不应一刀切，Sudeste 更适合做转化和复购效率，Nordeste 更适合测试高价值品类、免邮门槛和组合包。扫码页采用稳定答案；桌面端会按你的追问实时查库。";
+  } else if (/渠道|支付|channel|boleto|cart/.test(text)) {
+    explanation = "渠道表现不能只看订单量，还要同时看客单价、完成率和付款周期。Olist 案例里信用卡是主渠道，Boleto 规模也不小，但运营重点不同：信用卡适合优化高价值品类转化，Boleto 更适合到账提醒和付款激励。真实的渠道拆解和追问在本地桌面端由模型调用和 SQL 执行完成。";
+  } else if (/roi|成本|token|预算|价格|值不值/.test(text)) {
+    explanation = "QueryForge 的 ROI 不靠替代模型本身，而是把商业分析流程变成可控的本地 harness：减少反复取数和解释口径的人力时间，把每次模型调用纳入 token plan，并把有效查询沉淀成可复用指标。个人用户或小团队可以用自己的 provider key，本地衡量 token 成本与节省工时。";
+  } else if (/是什么|意义|为什么不用|直接问/.test(text)) {
+    explanation = "直接问模型的问题在于：模型默认没有数据库执行权、没有统一指标口径，也不会自动保留 SQL 审计和 token 预算。QueryForge 的价值是把外部模型放进受控分析运行层：它能看 schema、生成 SELECT、执行查询、用结果回填解释，并把凭证和预算留在本地。";
   }
 
-  if (asksWhy && text.includes("nordeste") && /客单价|avg|average|aov/.test(text)) {
-    const sql = `SELECT
-  r.name AS region,
-  COUNT(DISTINCT o.id) AS orders,
-  ROUND(AVG(o.total_amount), 0) AS avg_order,
-  ROUND(SUM(o.total_amount), 0) AS total_revenue,
-  ROUND(100.0 * SUM(o.total_amount) / (SELECT SUM(total_amount) FROM orders WHERE status = 'completed'), 1) AS revenue_share,
-  ROUND(100.0 * COUNT(DISTINCT o.id) / (SELECT COUNT(*) FROM orders WHERE status = 'completed'), 1) AS order_share
-FROM orders o
-JOIN regions r ON o.region_id = r.id
-WHERE o.status = 'completed'
-GROUP BY r.name
-ORDER BY avg_order DESC
-LIMIT 500`;
-
-    const rows = queryDb(sql);
-    const nordeste = rows.find((row) => row.region === "Nordeste") as Record<string, number | string> | undefined;
-    const sudeste = rows.find((row) => row.region === "Sudeste") as Record<string, number | string> | undefined;
-    const explanation = nordeste && sudeste
-      ? `接着上一个客单价结果看，Nordeste 的问题不是单笔价值，而是规模。它的客单价约 R$${nordeste.avg_order}，高于 Sudeste 的 R$${sudeste.avg_order}；但完成订单只有 ${nordeste.orders} 单，Sudeste 有 ${sudeste.orders} 单，所以 Nordeste 营收占比约 ${nordeste.revenue_share}%，低于 Sudeste 的 ${sudeste.revenue_share}%。业务上应把 Nordeste 当高价值市场做客单和利润，把 Sudeste 当规模市场做转化和复购。局限是这里还没拆品类和物流成本。`
-      : "Nordeste 客单价更高但订单规模更小，因此总营收未必领先。建议继续拆品类、物流和渠道结构验证。";
-
-    return {
-      thinking: "用户在追问地区客单价与总营收的差异。用完成订单按地区对比订单量、客单价、总营收和占比，可以解释高客单但低总额的原因。",
-      intent: "解释 Nordeste 客单价高但总营收不高的原因",
-      sql,
-      data: rows,
-      chartConfig: { type: "bar", x_key: "region", y_key: "total_revenue", title: "地区营收、订单量与客单价对比" },
-      explanation,
-    };
-  }
-
-  return null;
+  return {
+    thinking: "",
+    intent: "公开扫码演示追问",
+    explanation,
+    conversational: true,
+    _cached: true,
+  };
 }
 
 export async function POST(request: Request) {
@@ -132,6 +81,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as { message?: unknown; context?: unknown };
     const message = typeof body.message === "string" ? body.message.trim() : "";
     const context = cleanContext(body.context);
+    const settings = getPublicSettings();
 
     if (!message) {
       return NextResponse.json({ error: "Request body must include a non-empty message" }, { status: 400 });
@@ -145,13 +95,11 @@ export async function POST(request: Request) {
         }
 
         try {
-          const immediateFallback = semanticFallback(message, context);
-          if (immediateFallback) {
-            send({ type: "progress", step: "analyzing", message: "正在结合上一轮结果分析..." });
-            send({ type: "progress", step: "executing", message: "正在查询对比指标..." });
-            send({ type: "result", ...immediateFallback });
-            controller.close();
-            return;
+          if (settings.mode === "web-demo") {
+            throw new Error("web demo uses cached answers");
+          }
+          if (settings.mode === "desktop" && !settings.provider.configured) {
+            throw new Error("AI provider is not fully configured");
           }
 
           const result = await runAgent(message, context, (progress) => {
@@ -159,7 +107,9 @@ export async function POST(request: Request) {
           });
           send({ type: "result", ...result });
         } catch (apiError) {
-          const cached = CACHED_RESULTS[message] as { sql: string; thinking: string; intent: string; chartConfig: object; explanation: string } | undefined;
+          const cached = settings.mode === "web-demo" && !context.length
+            ? CACHED_RESULTS[message] as { sql: string; thinking: string; intent: string; chartConfig: object; explanation: string } | undefined
+            : undefined;
           if (cached) {
             try {
               const data = queryDb(cached.sql);
@@ -168,13 +118,26 @@ export async function POST(request: Request) {
               send({ type: "result", ...cached, data: [], _cached: true });
             }
           } else {
-            const fallback = semanticFallback(message, context);
-            if (fallback) {
-              send({ type: "result", ...fallback });
+            if (settings.mode === "web-demo") {
+              send({ type: "result", ...webDemoAnswer(message, context) });
               controller.close();
               return;
             }
-            send({ type: "error", error: userFacingError(apiError) });
+
+            if (settings.mode === "desktop" && !settings.provider.configured) {
+              send({ type: "error", error: userFacingError(apiError) });
+              controller.close();
+              return;
+            }
+
+            try {
+              const answer = await runConversationalAnswer(message, context, (progress) => {
+                send({ type: "progress", ...progress });
+              });
+              send({ type: "result", ...answer });
+            } catch {
+              send({ type: "error", error: userFacingError(apiError) });
+            }
           }
         }
         controller.close();

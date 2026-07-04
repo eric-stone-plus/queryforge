@@ -23,6 +23,16 @@ function withDefaultLimit(sql: string) {
   return normalized.toUpperCase().includes("LIMIT") ? normalized : `${normalized} LIMIT 500`;
 }
 
+function assertNoRestrictedProjection(sql: string) {
+  const normalized = sql.toLowerCase();
+  if (/\bemail\b/.test(normalized)) {
+    throw new Error("The email column is not exposed through QueryForge.");
+  }
+  if (/\bselect\s+\*/.test(normalized) || /,\s*\*/.test(normalized)) {
+    throw new Error("Wildcard SELECT is disabled. Choose explicit business columns.");
+  }
+}
+
 export async function POST(request: Request) {
   let body: unknown;
 
@@ -51,6 +61,7 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    assertNoRestrictedProjection(sql);
   } catch (error) {
     return NextResponse.json(
       { rows: [], error: `Invalid SQL: ${errorMessage(error)}` },

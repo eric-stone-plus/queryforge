@@ -29,6 +29,7 @@ yarn-error.log*
 logs/
 *.log
 .firecrawl/
+.queryforge/
 
 # local env files
 .env*.local
@@ -36,6 +37,10 @@ logs/
 
 # vercel
 .vercel
+
+# railway local project link
+.railway/
+desktop/.runtime/
 
 # typescript
 *.tsbuildinfo
@@ -64,6 +69,10 @@ docs/PROJECT-MEMO.md
 docs/SESSION-NOTES-*.md
 
 # QUINTE dispatch scripts (generated, not source)
+debates/quinte/
+debates/private/
+debates/archive/
+debates/task-*.md
 debates/*/run-r*.sh
 debates/*/prompt-r*.md
 debates/*/stale-*/

@@ -7,6 +7,7 @@ import {
   Area, AreaChart,
 } from "recharts";
 import ChatPanel, { ChatResult } from "@/components/ChatPanel";
+import LocalSettingsPanel from "@/components/LocalSettingsPanel";
 import MetricSidebar, { SavedMetric } from "@/components/MetricSidebar";
 
 const COLORS = ["#0969da", "#1a7f37", "#9a6700", "#cf222e", "#8250df", "#0550ae", "#bf8700", "#1f6feb"];
@@ -67,10 +68,9 @@ const CHANNEL_STATIC = [
   { name: "Cartão de Débito", orders: 1527 },
 ];
 const SEGMENT_STATIC = [
-  { name: "regular", avg_spend: 161, users: 96096 },
-  { name: "vip", avg_spend: 161, users: 0 },
-  { name: "new", avg_spend: 161, users: 0 },
-  { name: "enterprise", avg_spend: 161, users: 0 },
+  { name: "single_order", avg_spend: 162, users: 93099 },
+  { name: "repeat_2_3", avg_spend: 307, users: 2948 },
+  { name: "repeat_4_plus", avg_spend: 787, users: 49 },
 ];
 const MONTHLY_STATIC = [
   { month: "16-09", revenue: 0 }, { month: "16-12", revenue: 6 }, { month: "17-01", revenue: 14 },
@@ -92,6 +92,7 @@ export default function Home() {
   const [monthlyData, setMonthlyData] = useState(MONTHLY_STATIC);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [mobilePanel, setMobilePanel] = useState<"chat" | "dashboard">("chat");
+  const [settingsRefreshKey, setSettingsRefreshKey] = useState(0);
 
   const toggleTheme = useCallback(() => {
     const next = theme === "light" ? "dark" : "light";
@@ -121,25 +122,26 @@ export default function Home() {
 
   function handleNewResult(result: ChatResult) {
     setHistory((h) => [...h, result]);
+    setSettingsRefreshKey((key) => key + 1);
   }
 
   return (
     <div className="flex min-h-screen flex-col lg:h-screen lg:flex-row" style={{ background: "var(--bg)" }}>
       <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
         {/* Header */}
-        <header className="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between lg:px-6" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+        <header className="sticky top-0 z-20 flex flex-col gap-3 border-b px-4 py-3 backdrop-blur sm:flex-row sm:items-center sm:justify-between lg:static lg:px-6" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--surface) 92%, transparent)" }}>
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #0969da, #8250df)" }}>Q</div>
             <div>
               <h1 className="text-sm font-semibold" style={{ color: "var(--text)" }}>QueryForge</h1>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>受治理的自助式商业分析层</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>跨境电商经营分析工具</p>
             </div>
           </div>
           <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
-            <span className="min-w-0 truncate text-xs sm:hidden" style={{ color: "var(--text-muted)" }}>99K 订单</span>
-            <span className="hidden min-w-0 text-xs sm:inline" style={{ color: "var(--text-muted)" }}>通用商业分析工具 · Olist demo case</span>
+            <span className="min-w-0 truncate text-xs sm:hidden" style={{ color: "var(--text-muted)" }}>Olist 巴西电商案例 · 99K 订单</span>
+            <span className="hidden min-w-0 text-xs sm:inline" style={{ color: "var(--text-muted)" }}>本地模型配置 · 只读 SQL · token 预算</span>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--success-soft)", color: "var(--success)" }}>● 在线</span>
+              <LocalSettingsPanel refreshKey={settingsRefreshKey} />
               <button onClick={toggleTheme} className="flex h-7 w-7 items-center justify-center rounded-lg text-sm transition-default" style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}
                 title={theme === "light" ? "深色模式" : "浅色模式"}>
                 {theme === "light" ? "🌙" : "☀️"}
@@ -149,7 +151,7 @@ export default function Home() {
         </header>
 
         {/* KPI Row */}
-        <div className="no-scrollbar grid grid-flow-col auto-cols-[minmax(168px,1fr)] gap-2 overflow-x-auto border-b px-3 py-2 sm:grid-flow-row sm:grid-cols-4 lg:grid-cols-8 lg:px-4" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
+        <div className="no-scrollbar grid grid-flow-col auto-cols-[minmax(150px,1fr)] gap-2 overflow-x-auto border-b px-3 py-2 sm:grid-flow-row sm:grid-cols-4 lg:grid-cols-8 lg:px-4" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
           <KpiCard label="总营收" value="R$1,601万" icon="💰" sub="99K订单累计" />
           <KpiCard label="客单价" value="R$161" icon="📦" sub="平均每单" />
           <KpiCard label="完成率" value="97%" icon="✅" sub="96,478单完成" />
@@ -157,7 +159,7 @@ export default function Home() {
           <KpiCard label="退款率" value="1.2%" icon="⚠️" sub="1,234单退款" />
           <KpiCard label="活跃用户" value="96,096" icon="👥" sub="覆盖74品类" />
           <KpiCard label="商品数" value="32,951" icon="🛒" sub="5大地区" />
-          <KpiCard label="品类数" value="74" icon="📊" sub="Demo case" />
+          <KpiCard label="品类数" value="74" icon="📊" sub="Olist 案例" />
         </div>
 
         <div className="grid grid-cols-2 gap-1 border-b px-3 py-2 lg:hidden" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
@@ -174,7 +176,7 @@ export default function Home() {
                   color: active ? "#fff" : "var(--text-secondary)",
                 }}
               >
-                {panel === "chat" ? "问数" : "看板"}
+                {panel === "chat" ? "经营问答" : "数据看板"}
               </button>
             );
           })}
@@ -220,7 +222,7 @@ export default function Home() {
 
               {/* Category Pie + Channel Bar side by side */}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <ChartCard title="品类营收占比" bodyClassName="h-56">
+                <ChartCard title="品类营收占比" bodyClassName="h-64 sm:h-56">
                   <div className="flex h-full flex-col">
                     <div className="min-h-0 flex-1">
                       <ResponsiveContainer width="100%" height="100%">
@@ -294,7 +296,7 @@ export default function Home() {
                 </div>
 
                 {/* User Segment */}
-                <ChartCard title="用户分层（人均消费）">
+                <ChartCard title="复购分层（人均消费）">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={SEGMENT_STATIC} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                       <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
