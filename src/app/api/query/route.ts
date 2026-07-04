@@ -1,26 +1,11 @@
 import { NextResponse } from "next/server";
 import { Parser, type AST } from "node-sql-parser";
-import path from "node:path";
+import { getDb } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type SqliteDatabase = {
-  prepare(sql: string): {
-    all(): Record<string, unknown>[];
-  };
-};
-
-type SqliteConstructor = new (filename: string, options?: unknown) => SqliteDatabase;
-
 const parser = new Parser();
-const dbPath = path.join(process.cwd(), "data", "ecommerce.db");
-
-function getDb() {
-  const Database = require("better-sqlite3") as SqliteConstructor;
-
-  return new Database(dbPath, { readonly: true, fileMustExist: true });
-}
 
 function isSelectOnly(sql: string) {
   const ast = parser.astify(sql, { database: "sqlite" });

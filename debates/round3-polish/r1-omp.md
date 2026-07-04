@@ -417,7 +417,7 @@ These 7 packages are never imported in any source file. Removing them:
 
 1. **Create Railway project** (15 min)
    - Connect GitHub repo or deploy from CLI
-   - Set environment: `MIMO_API_KEY=REMOVED_MIMO_API_KEY`
+   - Set environment: `MIMO_API_KEY=<redacted>`
 
 2. **Configure build** (30 min)
    - `railway.toml` or buildpack settings

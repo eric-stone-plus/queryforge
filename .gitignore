@@ -41,6 +41,7 @@ next-env.d.ts
 *.log
 *.db-shm
 *.db-wal
+data/ecommerce.db
 
 # Build artifacts
 *.app
