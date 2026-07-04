@@ -56,8 +56,8 @@ export default function MetricSidebar({ onRunMetric }: { onRunMetric: (m: SavedM
 
   useEffect(() => {
     let stored = readMetrics();
-    // First visit: seed with default metrics
-    if (stored.length === 0) {
+    // Seed with defaults if empty or only has old-format entries
+    if (stored.length === 0 || !stored.some((m) => m.name === "各地区月度销售额趋势")) {
       writeMetrics(DEFAULT_METRICS);
       stored = DEFAULT_METRICS;
     }
