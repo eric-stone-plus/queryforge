@@ -186,5 +186,5 @@ txt(s, M, Inches(4.8), Inches(10), Inches(0.4), "queryforge-production-8d6f.up.r
 txt(s, M, Inches(5.3), Inches(10), Inches(0.4), "github.com/eric-stone-plus/queryforge", Pt(12), SUBTEXT)
 footer(s, "ClawHunt Builder Camp 2026 · Track A")
 
-prs.save("/Users/ericstone/Downloads/data-agent/assets/QueryForge-Pitch.pptx")
+import os; prs.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "QueryForge-Pitch.pptx"))
 print(f"Done: {len(prs.slides)} slides")
