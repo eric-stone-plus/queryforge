@@ -69,8 +69,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const rows = getDb().prepare(sql).all();
-
+    const rows = getDb().prepare(sql + (sql.toUpperCase().includes("LIMIT") ? "" : " LIMIT 500")).all();
     return NextResponse.json({ rows, error: null });
   } catch (error) {
     return NextResponse.json(
