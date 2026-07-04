@@ -30,5 +30,5 @@ for offset in range(3, 0, -1):
 
 d.text((x, y), 'Q', font=font, fill=(255, 255, 255, 255))
 
-img.save('/Users/ericstone/Downloads/data-agent/desktop/icon_1024.png')
+import os; img.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icon_1024.png'))
 print("Icon saved")
