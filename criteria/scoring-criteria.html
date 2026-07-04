@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clawhunt Builder Camp 2026 — 评分标准</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e0;
+    line-height: 1.7;
+    padding: 2rem;
+  }
+  .container { max-width: 800px; margin: 0 auto; }
+  h1 {
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+  .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 2rem; }
+  .total-score {
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    border: 1px solid #4338ca;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .total-score .number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .total-score .label { font-size: 0.85rem; color: #a5b4fc; }
+  .dimension {
+    background: #111118;
+    border: 1px solid #1e1e2e;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+  .dimension:hover { border-color: #4338ca; }
+  .dim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+  .dim-name { font-size: 1.05rem; font-weight: 600; color: #c4b5fd; }
+  .dim-score {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #818cf8;
+    background: #1e1b4b;
+    padding: 0.2rem 0.8rem;
+    border-radius: 8px;
+  }
+  .dim-desc { color: #9ca3af; font-size: 0.9rem; margin-bottom: 0.6rem; }
+  .dim-points { list-style: none; padding: 0; }
+  .dim-points li {
+    position: relative;
+    padding-left: 1.2rem;
+    color: #a1a1aa;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+  }
+  .dim-points li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #6366f1;
+  }
+  .bonus {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #f59e0b;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .bonus .dim-name { color: #fbbf24; }
+  .bonus .dim-score { color: #f59e0b; background: #1c1a00; }
+  .section-title {
+    font-size: 1.2rem;
+    color: #818cf8;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #1e1e2e;
+  }
+  .strategy-item {
+    background: #0f0f17;
+    border-left: 3px solid #6366f1;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.6rem;
+    border-radius: 0 8px 8px 0;
+  }
+  .strategy-item strong { color: #a78bfa; }
+  .strategy-item span { color: #9ca3af; font-size: 0.9rem; }
+  .mechanism {
+    background: #111118;
+    border: 1px solid #1e1e2e;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .mechanism h3 { color: #c4b5fd; font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .mechanism p { color: #9ca3af; font-size: 0.85rem; }
+  .track-info {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .track-badge {
+    background: #1e1b4b;
+    color: #a5b4fc;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    border: 1px solid #312e81;
+  }
+  .progress-bar {
+    height: 4px;
+    background: #1e1e2e;
+    border-radius: 2px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #6366f1, #a78bfa);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Clawhunt Builder Camp 2026</h1>
+<p class="subtitle">评分标准 · Scoring Criteria · Track A: Agents at Work</p>
+
+<div class="track-info">
+  <span class="track-badge">📍 深圳 · 龙华 · 星河先锋科技馆</span>
+  <span class="track-badge">👥 100 人 · ~30 组</span>
+  <span class="track-badge">🏆 ¥20,000 奖金池</span>
+  <span class="track-badge">⏱️ 7/3-7/5</span>
+</div>
+
+<div class="total-score">
+  <div class="number">105</div>
+  <div>
+    <div class="label">满分 = 100 核心分 + 5 加分</div>
+    <div class="label">去极值平均 · 同分比 Demo 单项</div>
+  </div>
+</div>
+
+<div class="section-title">核心评分维度</div>
+
+<div class="dimension">
+  <div class="dim-header">
+    <span class="dim-name">1. Demo 现场可用</span>
+    <span class="dim-score">25</span>
+  </div>
+  <p class="dim-desc">核心功能现场可运行，完整功能闭环，无明显 bug。现场演示优先于截图/描述。</p>
+  <ul class="dim-points">
+    <li>产品能否在现场实时运行</li>
+    <li>功能是否形成完整闭环</li>
+    <li>是否有明显 bug 或崩溃</li>
+    <li>演示是否流畅自然</li>
+  </ul>
+  <div class="progress-bar"><div class="progress-fill" style="width: 25%"></div></div>
+</div>
+
+<div class="dimension">
+  <div class="dim-header">
+    <span class="dim-name">2. 用户价值 / PMF</span>
+    <span class="dim-score">20</span>
+  </div>
+  <p class="dim-desc">是否解决真实痛点；是否展现产品-市场匹配信号；目标用户群是否明确。</p>
+  <ul class="dim-points">
+    <li>痛点是否真实存在</li>
+    <li>解决方案是否有效</li>
+    <li>是否有明确的目标用户群</li>
+    <li>用户是否有持续使用的动机</li>
+  </ul>
+  <div class="progress-bar"><div class="progress-fill" style="width: 45%"></div></div>
+</div>
+
+<div class="dimension">
+  <div class="dim-header">
+    <span class="dim-name">3. 技术实现</span>
+    <span class="dim-score">20</span>
+  </div>
+  <p class="dim-desc">技术难度、工程质量、架构稳定性、AI/Agent 工具使用是否得当有效。</p>
+  <ul class="dim-points">
+    <li>技术方案是否合理</li>
+    <li>代码质量和工程化程度</li>
+    <li>系统架构是否稳定</li>
+    <li>AI/Agent 是否真正发挥作用</li>
+  </ul>
+  <div class="progress-bar"><div class="progress-fill" style="width: 65%"></div></div>
+</div>
+
+<div class="dimension">
+  <div class="dim-header">
+    <span class="dim-name">4. 创新性</span>
+    <span class="dim-score">15</span>
+  </div>
+  <p class="dim-desc">创意概念的新颖程度；是否采用独特、差异化的方法解决问题。</p>
+  <ul class="dim-points">
+    <li>想法是否新颖</li>
+    <li>解决方案是否有差异化</li>
+    <li>是否有独特的技术或产品思路</li>
+  </ul>
+  <div class="progress-bar"><div class="progress-fill" style="width: 80%"></div></div>
+</div>
+
+<div class="dimension">
+  <div class="dim-header">
+    <span class="dim-name">5. 商业潜力</span>
+    <span class="dim-score">10</span>
+  </div>
+  <p class="dim-desc">市场规模、商业模式可行性、未来增长空间。</p>
+  <ul class="dim-points">
+    <li>市场规模是否足够大</li>
+    <li>商业模式是否清晰</li>
+    <li>是否有规模化潜力</li>
+  </ul>
+  <div class="progress-bar"><div class="progress-fill" style="width: 90%"></div></div>
+</div>
+
+<div class="dimension">
+  <div class="dim-header">
+    <span class="dim-name">6. 路演表达</span>
+    <span class="dim-score">10</span>
+  </div>
+  <p class="dim-desc">叙事质量、演示逻辑结构、现场说服力。</p>
+  <ul class="dim-points">
+    <li>故事线是否清晰</li>
+    <li>演示节奏是否合理</li>
+    <li>是否有感染力和说服力</li>
+  </ul>
+  <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+</div>
+
+<div class="bonus">
+  <div class="dim-header">
+    <span class="dim-name">加分项</span>
+    <span class="dim-score">+5</span>
+  </div>
+  <ul class="dim-points">
+    <li>上架 Clawhunt 平台：+3 分</li>
+    <li>参加 D2 游园展示（现场用户体验测试）：+2 分</li>
+  </ul>
+</div>
+
+<div class="section-title">我们的得分策略</div>
+
+<div class="strategy-item">
+  <strong>Demo（25）：</strong>
+  <span>单次 LLM 调用 2-4 秒响应，预填充数据即时查询，流式 UI 展示 agent 思考过程。</span>
+</div>
+<div class="strategy-item">
+  <strong>用户价值（20）：</strong>
+  <span>真实痛点——业务团队等待数天才能拿到自定义报表。目标用户：业务分析师、数据团队。</span>
+</div>
+<div class="strategy-item">
+  <strong>技术实现（20）：</strong>
+  <span>AI agent pipeline + 结构化输出 + SQL 安全校验 + 审计日志。核心流程驱动，非装饰性 AI。</span>
+</div>
+<div class="strategy-item">
+  <strong>创新性（15）：</strong>
+  <span>自然语言 → 指标定义 → SQL → 看板，单次调用完成。确定性图表映射器，不完全依赖 LLM。</span>
+</div>
+<div class="strategy-item">
+  <strong>商业潜力（10）：</strong>
+  <span>企业数据团队市场，SaaS 潜力，可扩展到任意数据源。</span>
+</div>
+<div class="strategy-item">
+  <strong>路演表达（10）：</strong>
+  <span>4 个场景现场演示，清晰叙事弧线："从天到秒"。</span>
+</div>
+
+<div class="section-title">赛程结构</div>
+
+<div class="mechanism">
+  <h3>赛区预选</h3>
+  <p>每组 3 分钟快速路演 + 短 Q&A。每赛区 2 名评委。前 2 名晋级 + 2 名外卡 = 12 组进入 Demo Day。</p>
+</div>
+<div class="mechanism">
+  <h3>Demo Day 总决选</h3>
+  <p>5 分钟 Demo + 3 分钟 Q&A。投资机构 + 嘉宾评委。100 分制决定 Top 3。</p>
+</div>
+<div class="mechanism">
+  <h3>评分机制</h3>
+  <p>100 分制去极值平均。评委 ≥ 5 人时去掉最高最低分。同分先比 Demo 单项。15 分钟申诉窗口。</p>
+</div>
+
+</div>
+</body>
+</html>

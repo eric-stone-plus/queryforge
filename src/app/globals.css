@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #fafbfc;
+  --surface: #ffffff;
+  --surface-hover: #f6f8fa;
+  --border: #e1e4e8;
+  --text: #24292f;
+  --text-secondary: #656d76;
+  --text-muted: #8b949e;
+  --accent: #0969da;
+  --accent-soft: #ddf4ff;
+  --success: #1a7f37;
+  --success-soft: #dafbe1;
+  --warning: #9a6700;
+  --warning-soft: #fff8c5;
+  --error: #cf222e;
+  --error-soft: #ffebe9;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Code blocks */
+pre, code {
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+/* Transitions */
+.transition-default {
+  transition: all 0.15s ease;
+}

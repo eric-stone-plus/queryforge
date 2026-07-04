@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClawHunt Builder Camp 2026 — 完整规则手册</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB',sans-serif;background:#0a0a0f;color:#e0e0e0;line-height:1.7;padding:2rem}
+.container{max-width:860px;margin:0 auto}
+h1{font-size:1.8rem;background:linear-gradient(135deg,#6366f1,#8b5cf6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem}
+.subtitle{color:#888;font-size:.9rem;margin-bottom:2rem}
+h2{font-size:1.15rem;color:#818f88;margin:2rem 0 .8rem;padding-bottom:.4rem;border-bottom:1px solid #1e1e2e}
+h3{font-size:1rem;color:#c4b5fd;margin:1.2rem 0 .5rem}
+.card{background:#111118;border:1px solid #1e1e2e;border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1rem}
+.card:hover{border-color:#4338ca}
+.card-title{font-size:1.05rem;font-weight:600;color:#c4b5fd;margin-bottom:.5rem}
+.card-body{color:#9ca3af;font-size:.9rem}
+.card-body li{margin-bottom:.3rem;padding-left:1rem;position:relative}
+.card-body li::before{content:'▸';position:absolute;left:0;color:#6366f1}
+.badge{display:inline-block;background:#1e1b4b;color:#a5b4fc;padding:.2rem .7rem;border-radius:20px;font-size:.8rem;border:1px solid #312e81;margin:.2rem}
+.highlight{background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #4338ca;border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1rem}
+.highlight .number{font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.score-row{display:flex;align-items:center;gap:.8rem;padding:.6rem 0;border-bottom:1px solid #1a1a2e}
+.score-row:last-child{border-bottom:none}
+.score-pts{font-size:1.3rem;font-weight:800;color:#818cf8;min-width:3rem;text-align:right}
+.score-name{font-weight:600;color:#c4b5fd;min-width:10rem}
+.score-desc{color:#9ca3af;font-size:.85rem;flex:1}
+.bonus-row{display:flex;align-items:center;gap:.8rem;padding:.5rem 0}
+.bonus-pts{font-size:1.1rem;font-weight:700;color:#f59e0b;min-width:3rem;text-align:right}
+.bonus-name{color:#fbbf24;font-weight:600}
+.timeline{border-left:2px solid #312e81;padding-left:1.2rem;margin:.8rem 0}
+.timeline-item{margin-bottom:1rem;position:relative}
+.timeline-item::before{content:'';position:absolute;left:-1.45rem;top:.5rem;width:.6rem;height:.6rem;border-radius:50%;background:#6366f1}
+.timeline-time{font-size:.8rem;color:#818cf8;font-weight:600}
+.timeline-content{color:#9ca3af;font-size:.9rem}
+table{width:100%;border-collapse:collapse;margin:.5rem 0}
+th,td{text-align:left;padding:.5rem .8rem;border-bottom:1px solid #1e1e2e;font-size:.9rem}
+th{color:#c4b5fd;font-weight:600}
+td{color:#9ca3af}
+.tag{display:inline-block;background:#1a2e1a;color:#4ade80;padding:.15rem .5rem;border-radius:4px;font-size:.75rem;margin:.1rem}
+.tag-warn{background:#2e1a1a;color:#f87171}
+.tag-info{background:#1a1a2e;color:#60a5fa}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>ClawHunt Builder Camp 2026</h1>
+<p class="subtitle">完整规则手册 · 72H 百人 AI 黑客松 · 深圳</p>
+
+<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem">
+<span class="badge">📍 深圳龙华 · 星河先锋科技展厅</span>
+<span class="badge">👥 100 名 Builder</span>
+<span class="badge">🏆 ¥20,000 奖金池</span>
+<span class="badge">⏱️ 7/3-7/5</span>
+</div>
+
+<h2>一、赛程安排</h2>
+
+<div class="card">
+<div class="card-title">Day 1（7/3）开营 + 命题发布</div>
+<div class="timeline">
+<div class="timeline-item"><div class="timeline-time">09:00</div><div class="timeline-content">开场签到，嘉宾演讲（Google、腾讯混元、字节、AWS）</div></div>
+<div class="timeline-item"><div class="timeline-time">下午</div><div class="timeline-content">SuperClaw Agent 工具发布</div></div>
+<div class="timeline-item"><div class="timeline-time">18:30</div><div class="timeline-content">命题发布（方向任选、题目自拟）</div></div>
+<div class="timeline-item"><div class="timeline-time">20:00</div><div class="timeline-content">锁队，赛中不可换组</div></div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Day 2（7/4）全天开发 + Workshop</div>
+<div class="timeline">
+<div class="timeline-item"><div class="timeline-time">10:00-12:30</div><div class="timeline-content">早场同步 + 圆桌 + Build Sprint 1</div></div>
+<div class="timeline-item"><div class="timeline-time">14:00-17:00</div><div class="timeline-content">圆桌 + Mentor Office Hours</div></div>
+<div class="timeline-item"><div class="timeline-time">17:00-19:00</div><div class="timeline-content">Build Sprint 2 + 路演彩排</div></div>
+<div class="timeline-item"><div class="timeline-time">21:30</div><div class="timeline-content">PPT 初稿提交截止</div></div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Day 3（7/5）决赛日</div>
+<div class="timeline">
+<div class="timeline-item"><div class="timeline-time">10:30-12:00</div><div class="timeline-content">赛区预选（5 赛区并行，每队 3 分钟快讲）</div></div>
+<div class="timeline-item"><div class="timeline-time">13:00-16:30</div><div class="timeline-content">Demo Day 总决选（12 强，5+3 分钟）</div></div>
+<div class="timeline-item"><div class="timeline-time">16:30-17:10</div><div class="timeline-content">Community Choice 投票</div></div>
+<div class="timeline-item"><div class="timeline-time">17:10-18:00</div><div class="timeline-content">颁奖 + 合影</div></div>
+<div class="timeline-item"><div class="timeline-time">19:00-21:00</div><div class="timeline-content">After Party</div></div>
+</div>
+</div>
+
+<h2>二、赛道方向</h2>
+
+<div class="card">
+<div class="card-title">Track A：让 Agent 干活（Agents at Work）</div>
+<div class="card-body">焦点：<span class="tag">自动化</span> <span class="tag">效率</span><br>示例：客服 Agent、数据监控、多 Agent 协作、交付管线（爬取→清洗→生成→发布）</div>
+</div>
+
+<div class="card">
+<div class="card-title">Track B：玩出花样（Play & Create）</div>
+<div class="card-body">焦点：<span class="tag">创意</span> <span class="tag">内容</span><br>示例：内容引擎、数字人、互动体验、创作工具</div>
+</div>
+
+<div class="card">
+<div class="card-title">Track C：做成生意（Business on AI）</div>
+<div class="card-body">焦点：<span class="tag">商业</span> <span class="tag">增长</span><br>示例：一人 AI 公司、自动获客、垂直 SaaS、商业看板、数据洞察</div>
+</div>
+
+<h2>三、分组与晋级</h2>
+
+<div class="card">
+<div class="card-body">
+<li>100 Builder → 自由组队（3-5 人/队，可单人）→ ~30 支小队</li>
+<li>主办方随机分入 5 大赛区（AI 应用、消费、企业服务、工具效率、开放赛道）</li>
+<li>赛区预选：每区前 2 强 + 全场 2 张外卡 = 12 强晋级 Demo Day</li>
+<li>核心理念：<span class="tag-warn" style="padding:.2rem .5rem;border-radius:4px;font-size:.85rem">能跑的 Demo > PPT</span></li>
+</div>
+</div>
+
+<h2>四、评分标准</h2>
+
+<div class="highlight">
+<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+<div class="number">100</div>
+<div><div style="color:#a5b4fc;font-weight:600">Demo Day 评分</div><div style="color:#888;font-size:.85rem">6 维度 + 加分上限 +5 = 最高 105 分</div></div>
+</div>
+
+<div class="score-row"><div class="score-pts">25</div><div class="score-name">Demo · 现场可用</div><div class="score-desc">核心功能现场跑得通，闭环完整、无明显 Bug；现场演示 > 截图</div></div>
+<div class="score-row"><div class="score-pts">20</div><div class="score-name">用户价值 / PMF</div><div class="score-desc">是否击中真实痛点、有无 PMF 信号、谁会持续用</div></div>
+<div class="score-row"><div class="score-pts">20</div><div class="score-name">技术实现</div><div class="score-desc">技术难度、工程质量、架构稳定性；AI/Agent 用得是否到位</div></div>
+<div class="score-row"><div class="score-pts">15</div><div class="score-name">创新性</div><div class="score-desc">创意新颖度、解决问题角度是否差异化</div></div>
+<div class="score-row"><div class="score-pts">10</div><div class="score-name">商业潜力</div><div class="score-desc">市场规模、商业模式可行性、可持续性想象空间</div></div>
+<div class="score-row"><div class="score-pts">10</div><div class="score-name">路演表达</div><div class="score-desc">故事性、逻辑性、现场说服力</div></div>
+
+<div style="margin-top:1rem;padding-top:.8rem;border-top:1px solid #312e81">
+<div class="bonus-row"><div class="bonus-pts">+3</div><div class="bonus-name">上架 ClawHunt 平台</div></div>
+<div class="bonus-row"><div class="bonus-pts">+2</div><div class="bonus-name">参与游园展示（现场用户体验测试）</div></div>
+</div>
+</div>
+
+<h3>赛区预选评分（4 维度）</h3>
+<div class="card">
+<div class="score-row"><div class="score-pts" style="color:#6366f1">30%</div><div class="score-name">功能完成度</div><div class="score-desc">核心功能是否跑通、用户闭环是否完整</div></div>
+<div class="score-row"><div class="score-pts" style="color:#6366f1">25%</div><div class="score-name">技术实现</div><div class="score-desc">技术难度、工程质量、架构与稳定性</div></div>
+<div class="score-row"><div class="score-pts" style="color:#6366f1">25%</div><div class="score-name">创新性</div><div class="score-desc">创意新颖度、解决问题角度差异化</div></div>
+<div class="score-row"><div class="score-pts" style="color:#6366f1">20%</div><div class="score-name">演示表现</div><div class="score-desc">Demo 清晰度、现场可用性、完成观感</div></div>
+</div>
+
+<h3>最终综合评分（评委 70% + 观众 30%）</h3>
+<div class="card">
+<div class="score-row"><div class="score-pts" style="color:#6366f1">25%</div><div class="score-name">产品综合实力</div></div>
+<div class="score-row"><div class="score-pts" style="color:#6366f1">25%</div><div class="score-name">商业潜力</div></div>
+<div class="score-row"><div class="score-pts" style="color:#6366f1">20%</div><div class="score-name">路演表达</div></div>
+<div class="score-row"><div class="score-pts" style="color:#6366f1">15%</div><div class="score-name">团队执行</div></div>
+<div class="score-row"><div class="score-pts" style="color:#6366f1">15%</div><div class="score-name">愿景与影响力</div></div>
+</div>
+
+<h2>五、评分机制</h2>
+<div class="card">
+<div class="card-body">
+<li>100 分制 · 去极值平均：评委 ≥ 5 名时去掉最高最低各 1 个</li>
+<li>两段独立计分：赛区预选只决定 12 强；Demo Day 决定名次，不累加</li>
+<li>同分处理：先比 Demo 单项分，仍相同由评委长合议</li>
+<li>申诉窗口：分数公布后 15 分钟，组委会+评委长复核，结果为最终裁定</li>
+</div>
+</div>
+
+<h2>六、评委构成</h2>
+<div class="card">
+<div class="card-body">
+<li>赛区评委（技术/产品）：每赛区 2 名，共约 10 名，仅评本赛区</li>
+<li>嘉宾评委：资深从业者/创业者，Demo Day 现场 Review</li>
+<li>投资机构：投资视角研判与对接，Demo Day 现场 Review</li>
+<li>现场观众：Community Choice 投票，决出人气奖</li>
+<li>评委须回避利益关系；评分留痕可追溯</li>
+</div>
+</div>
+
+<h2>七、开发规则</h2>
+<div class="card">
+<div class="card-body">
+<li>所有代码与素材须在训练营期间 <span class="tag-warn" style="padding:.15rem .5rem;border-radius:4px;font-size:.8rem">现场产出</span></li>
+<li>可使用开源库、API、AI 工具，但须声明</li>
+<li>禁止提交往届或预先完成的项目</li>
+<li>允许以半成品方案进场进行开发</li>
+<li>不限制工具，不限制选题方向</li>
+<li>ClawHunt 提供 SuperClaw Agent Runtime（开源，可本地运行）</li>
+<li>模型渠道：https://gate.clawhunt.site/models</li>
+</div>
+</div>
+
+<h2>八、行为规范</h2>
+<div class="card">
+<div class="card-body">
+<li>严格遵守时限，超时将被提示并可能扣分</li>
+<li>演示材料统一提交至组委会大屏</li>
+<li>尊重对手与评委，禁止抄袭、刷票、人身攻击</li>
+<li>违规视情节取消晋级或参赛资格</li>
+</div>
+</div>
+
+<h2>九、关键信息速查</h2>
+<div class="card">
+<div class="card-body">
+<li>ClawHunt 主站：https://clawhunt.store</li>
+<li>中文站：https://clawhunt.site</li>
+<li>模型渠道：https://gate.clawhunt.site/models</li>
+<li>微信公众号：Clawhunt-爪寻AI</li>
+<li>核心理念：能跑的 Demo > PPT</li>
+</div>
+</div>
+
+</div>
+</body>
+</html>
