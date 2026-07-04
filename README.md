@@ -1,10 +1,8 @@
 # QueryForge
 
 <p align="center">
-  <img src="assets/icon_1024.png" alt="QueryForge" width="128">
+  <img src="assets/hero.svg" alt="QueryForge" width="100%">
 </p>
-
-<h3 align="center">让业务部门自助取数，解放数据分析师的重复需求</h3>
 
 <p align="center">
   <a href="https://queryforge-production-8d6f.up.railway.app">在线演示</a> · 
@@ -154,13 +152,14 @@ debates/                    # 审计报告
 
 ## macOS 桌面版
 
-**本地模式** — 桌面版内置本地服务器，无需联网即可使用，数据完全在本地处理，适合对数据安全要求高的场景。
+原生 macOS 窗口，内嵌 WebView 加载网页版，体验与 web 端完全一致。
 
-**云端模式** — 连接云端 API，享受持续更新的 AI 能力，适合需要最新功能和更强算力的用户。
+- 架构：x86_64（Intel Mac），macOS 14.0+
+- 默认暗黑模式
+- 首次打开：右键 → 打开（未签名）
+- 关闭窗口即退出
 
-**设置面板** — 支持配置 API Key、切换本地/云端模式、调整查询参数、查看历史记录等，界面简洁易用。
-
-**下载地址**：[Releases](https://github.com/eric-stone-plus/queryforge/releases)（macOS x86_64，双击即用）
+下载：[Releases](https://github.com/eric-stone-plus/queryforge/releases)
 
 ## License
 
