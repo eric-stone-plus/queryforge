@@ -1,6 +1,6 @@
 # QueryForge — Codebase Codex
 
-> AI 商业数据分析智能体 · Next.js 14 + MiMo v2.5 Pro + SQLite
+> AI 商业数据分析智能体 · Next.js 14 + Kimi K2.7 Code + SQLite
 > Last updated: 2026-07-04
 
 ---
@@ -28,7 +28,7 @@ QueryForge is an AI-powered data analysis platform that converts natural languag
 | Framework | Next.js (App Router) | 14.2.35 |
 | Language | TypeScript (strict) | 5.x |
 | UI | React + Tailwind CSS + Recharts | 18.x / 3.4.x / 3.x |
-| AI | MiMo v2.5 Pro via Vercel AI SDK | ai@7.x |
+| AI | Kimi K2.7 Code via Vercel AI SDK | ai@7.x |
 | Database | SQLite via better-sqlite3 | 12.x |
 | SQL Safety | node-sql-parser (AST validation) | 5.x |
 | Deployment | Railway (cloud) + SwiftUI WebView (desktop) | — |
@@ -88,7 +88,7 @@ data-agent/
 User (natural language, Chinese)
   │
   ▼
-POST /api/chat ──→ runAgent() ──→ MiMo v2.5 Pro
+POST /api/chat ──→ runAgent() ──→ Kimi K2.7 Code
   │                      │              │
   │                      │         JSON: { thinking, intent, sql, chart_config, explanation }
   │                      │              │
@@ -116,7 +116,7 @@ SSE stream: progress → result (or error)
 
 Single-function pipeline `runAgent(query, onProgress?)` → `AgentResult`:
 
-1. **Analyze** — Send query + full DB schema to MiMo LLM (30s timeout)
+1. **Analyze** — Send query + full DB schema to Kimi LLM (30s timeout)
 2. **Parse** — Extract JSON from LLM response (handles markdown fences, bracket-depth tracking)
 3. **Validate** — AST-parse SQL, enforce SELECT-only, auto-append LIMIT 500
 4. **Execute** — Run against SQLite via better-sqlite3
@@ -179,7 +179,7 @@ order_items(id, order_id, product_id, quantity, unit_price, discount)      # ~25
 ### 5.3 AI Integration
 
 - **Vercel AI SDK** (`ai` package) with `generateText()` — NOT `streamText()`
-- **`@ai-sdk/openai-compatible`** provider for MiMo API (OpenAI-compatible endpoint)
+- **`@ai-sdk/openai-compatible`** provider for Kimi API (OpenAI-compatible endpoint)
 - **Structured JSON output** via system prompt instructions (NOT function calling)
 - **30-second timeout** via `AbortSignal.timeout(30000)`
 - **Offline fallback**: 4 pre-cached demo queries in `demo-cache.ts`
@@ -204,13 +204,13 @@ order_items(id, order_id, product_id, quantity, unit_price, discount)      # ~25
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `MIMO_API_KEY` | Yes | — | API key for MiMo v2.5 Pro |
-| `MIMO_BASE_URL` | No | `https://token-plan-cn.xiaomimimo.com/v1` | MiMo API endpoint |
+| `AI_API_KEY` | Yes | — | API key for Kimi K2.7 Code |
+| `AI_BASE_URL` | No | `https://api.kimi.com/coding/v1` | Kimi API endpoint |
 
 Create `.env.local`:
 ```
-MIMO_API_KEY=your-key-here
-MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
+AI_API_KEY=your-key-here
+AI_BASE_URL=https://api.kimi.com/coding/v1
 ```
 
 ---
@@ -235,7 +235,7 @@ npx tsx scripts/seed.ts  # Regenerate database from scratch
 
 Core AI agent. Exports `runAgent(query, onProgress?)` → `AgentResult`.
 
-- **LLM setup**: `createOpenAICompatible` provider for MiMo (lines 6-10)
+- **LLM setup**: `createOpenAICompatible` provider for Kimi (lines 6-10)
 - **System prompt**: Full DB schema + join rules + revenue formula + output format (lines 28-54)
 - **`validateSelectOnly(sql)`**: AST-based SQL safety check (lines 58-68)
 - **`extractJson(text)`**: Robust JSON extraction from LLM responses (lines 70-85)

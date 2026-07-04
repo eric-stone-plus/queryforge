@@ -2,7 +2,7 @@
 
 **Cross-Examiner:** OpenCode (oc)
 **Date:** 2026-07-04
-**Inputs:** r1-audit-cw.md, r1-audit-oc.md, r1-audit-kc.md, r1-audit-mimo.md
+**Inputs:** r1-audit-cw.md, r1-audit-oc.md, r1-audit-kc.md, r1-audit-kimi.md
 
 ---
 
@@ -10,7 +10,7 @@
 
 All four auditors independently identified these issues:
 
-| Finding | CW | OC | KC | MiMo | Confidence |
+| Finding | CW | OC | KC | Kimi | Confidence |
 |---------|----|----|----|----|------------|
 | **MetricSidebar has no save button** — sidebar is dead weight | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
 | **No streaming** — `generateText` blocks, user sees spinner | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
@@ -18,7 +18,7 @@ All four auditors independently identified these issues:
 | **DB connection inconsistency** — singleton vs per-request | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
 | **JSON extraction regex is fragile** — greedy `{[\s\S]*}` | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
 | **No LLM timeout/retry** — API hang kills demo | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
-| **No API fallback** — MiMo down = app dead | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
+| **No API fallback** — Kimi down = app dead | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
 | **Single LLM call, no agent loop** — shallow "agent" | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
 | **Unused dependencies in package.json** | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
 | **chartTitle shared across all history items** | ✅ | ✅ | ✅ | ✅ | **UNANIMOUS** |
@@ -35,7 +35,7 @@ All four auditors independently identified these issues:
 |---------|---------------|-------|
 | CW | 73–83/105 | Highest |
 | OC | 70/100 (≈74/105) | Mid-high |
-| MiMo | 78/105 (post-fix) | Mid |
+| Kimi | 78/105 (post-fix) | Mid |
 | KC | 58–68/100 (pre-fix) | Lowest |
 
 **Analysis:** KC is most pessimistic, CW most optimistic. The spread (58–83) suggests scoring is highly sensitive to demo execution. CW's estimate assumes demo chips work; KC assumes visible bugs during multi-query demo. The truth likely sits at **65–75/105 without fixes, 75–85 with P0+P1 fixes**.
@@ -46,14 +46,14 @@ All four auditors independently identified these issues:
 |---------|-----------------|-----------|
 | CW | 9–11/15 | Acknowledges thin agent but credits chart variety |
 | OC | 10/15 | Pattern is well-known, no unique differentiator |
-| MiMo | 8/15 | "Shallow" agent, metric saving is skeleton |
+| Kimi | 8/15 | "Shallow" agent, metric saving is skeleton |
 | KC | 7–9/15 | Lowest — "differentiation from ask ChatGPT is thin" |
 
-**Verdict:** Innovation is the weakest dimension across all auditors. Text-to-SQL is not novel. KC and MiMo are right that without multi-step reasoning or self-correction, this scores 7–9/15 max. **This is the ceiling-limiter.**
+**Verdict:** Innovation is the weakest dimension across all auditors. Text-to-SQL is not novel. KC and Kimi are right that without multi-step reasoning or self-correction, this scores 7–9/15 max. **This is the ceiling-limiter.**
 
 ### 2.3 Specific Bug Priority
 
-| Issue | CW | OC | KC | MiMo |
+| Issue | CW | OC | KC | Kimi |
 |-------|----|----|----|----|
 | Metric rerun visibility bug (`history.length === 0` guard) | Not found | Found (G4) | Found (P0) | Not found |
 | Metric rerun drops thinking + explanation | Not found | Not found | Found (P0) | Not found |
@@ -64,7 +64,7 @@ All four auditors independently identified these issues:
 | Hardcoded stats bar | Not found | Found | Not found | Not found |
 | `/api/schema` unused by frontend | Found | Found | Found | Found (partial) |
 
-**Verdict:** KC found 2 unique bugs (metric rerun data loss, `require()` ESM issue). MiMo found the missing `LIMIT`. CW caught the `orders.total_amount` divergence. **No single auditor caught everything.** The combined bug list is more complete than any individual audit.
+**Verdict:** KC found 2 unique bugs (metric rerun data loss, `require()` ESM issue). Kimi found the missing `LIMIT`. CW caught the `orders.total_amount` divergence. **No single auditor caught everything.** The combined bug list is more complete than any individual audit.
 
 ---
 
@@ -73,7 +73,7 @@ All four auditors independently identified these issues:
 | Gap | Impact | Why It Matters |
 |-----|--------|----------------|
 | **No error boundary** | React crash kills entire page | If a chart component throws (bad data, malformed config), the whole app white-screens. No `<ErrorBoundary>` wrapper. |
-| **No `LIMIT` in generated SQL** | Chart renders 10K rows | MiMo flagged this but others missed it. Recharts with 25K `order_items` rows = browser freeze. |
+| **No `LIMIT` in generated SQL** | Chart renders 10K rows | Kimi flagged this but others missed it. Recharts with 25K `order_items` rows = browser freeze. |
 | **No data table view** | Judges ask "show raw data" | KC mentioned this; others didn't. Analysts expect tabular fallback. |
 | **No build/deploy verification** | Vercel deploy may fail | Nobody checked if the project actually builds (`next build`). SQLite file path issues, `better-sqlite3` native bindings, and env vars could break deployment. |
 | **Accessibility is zero** | Keyboard nav, screen readers | No `aria` labels, no focus management, no keyboard shortcuts. Not a scoring dimension but signals unprofessionalism. |
@@ -91,7 +91,7 @@ All four auditors independently identified these issues:
 | # | Fix | Effort | Points Saved | Source |
 |---|-----|--------|-------------|--------|
 | 1 | **Add "保存指标" button to ChatPanel** | 15 min | 3–5 pts (Demo + Innovation) | All 4 auditors |
-| 2 | **Pre-cache 4 demo chip results as JSON fallback** | 30 min | 5 pts (Demo safety net) | CW, OC, MiMo |
+| 2 | **Pre-cache 4 demo chip results as JSON fallback** | 30 min | 5 pts (Demo safety net) | CW, OC, Kimi |
 | 3 | **Add 10s timeout to `generateText`** | 5 min | 3 pts (Demo stability) | All 4 |
 | 4 | **Fix chartTitle per-history-item** | 5 min | 2 pts (Demo polish) | All 4 |
 | 5 | **Fix MetricSidebar rerun: remove `history.length === 0` guard** | 5 min | 2 pts (Demo) | OC, KC |
@@ -105,10 +105,10 @@ All four auditors independently identified these issues:
 |---|-----|--------|-------------|--------|
 | 7 | **Fix `extractJson` — use balanced-brace parser** | 15 min | 2 pts (Demo stability) | All 4 |
 | 8 | **Pass thinking + explanation through metric rerun** | 10 min | 1 pt (Demo) | KC |
-| 9 | **Add `LIMIT 500` to generated SQL or queryDb** | 10 min | 2 pts (Stability) | MiMo |
+| 9 | **Add `LIMIT 500` to generated SQL or queryDb** | 10 min | 2 pts (Stability) | Kimi |
 | 10 | **Delete `Dashboard.tsx` dead code** | 2 min | 1 pt (Tech cleanliness) | CW |
 | 11 | **Remove unused deps from package.json** | 5 min | 0 pts (but signals polish) | All 4 |
-| 12 | **Add error feedback in `page.tsx:33` catch block** | 5 min | 1 pt | KC, MiMo |
+| 12 | **Add error feedback in `page.tsx:33` catch block** | 5 min | 1 pt | KC, Kimi |
 
 **Total P1 effort: ~47 min. Score impact: +5–7 pts.**
 

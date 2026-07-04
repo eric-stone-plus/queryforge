@@ -3,10 +3,15 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { Parser } from "node-sql-parser";
 import { getDb, queryDb } from "./db";
 
-const mimo = createOpenAICompatible({
-  name: "mimo",
-  baseURL: process.env.MIMO_BASE_URL || "https://token-plan-cn.xiaomimimo.com/v1",
-  apiKey: process.env.MIMO_API_KEY || "",
+const AI_API_KEY = process.env.KIMI_API_KEY || process.env.AI_API_KEY || "";
+const AI_MODEL = process.env.KIMI_MODEL || process.env.AI_MODEL || "kimi-for-coding";
+const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || "60000");
+const AI_TEMPERATURE = Number(process.env.AI_TEMPERATURE || "1");
+
+const kimi = createOpenAICompatible({
+  name: process.env.AI_PROVIDER_NAME || "kimi",
+  baseURL: process.env.KIMI_BASE_URL || process.env.AI_BASE_URL || "https://api.kimi.com/coding/v1",
+  apiKey: AI_API_KEY,
 });
 
 export type AgentResult = {
@@ -42,6 +47,7 @@ Rules:
 - Revenue = SUM(oi.quantity*oi.unit_price*(1-oi.discount)). NEVER use orders.total_amount.
 - SELECT only. SQLite syntax.
 - Time series: strftime('%Y-%m', date_column).
+- Prefer ASCII column aliases; quote any Chinese aliases with double quotes.
 
 Schema:
 regions(id, name, country)
@@ -100,13 +106,19 @@ export async function runAgent(
 ): Promise<AgentResult> {
   getDb();
 
+  if (!AI_API_KEY) {
+    throw new Error("Kimi API key not configured");
+  }
+
   onProgress?.({ step: "analyzing", message: "AI 正在分析您的问题..." });
 
   const { text } = await generateText({
-    model: mimo("mimo-v2.5-pro"),
+    model: kimi(AI_MODEL),
     system: systemPrompt,
     prompt: query,
-    abortSignal: AbortSignal.timeout(30000),
+    temperature: AI_TEMPERATURE,
+    maxOutputTokens: 2000,
+    abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS),
   });
 
   onProgress?.({ step: "generating_sql", message: "正在解析 SQL 查询..." });
@@ -141,10 +153,12 @@ Error: ${result.error}
 Respond with corrected JSON only:`;
 
   const { text: fixText } = await generateText({
-    model: mimo("mimo-v2.5-pro"),
+    model: kimi(AI_MODEL),
     system: systemPrompt,
     prompt: fixPrompt,
-    abortSignal: AbortSignal.timeout(30000),
+    temperature: AI_TEMPERATURE,
+    maxOutputTokens: 2000,
+    abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS),
   });
 
   const fixObj = extractJson(fixText);

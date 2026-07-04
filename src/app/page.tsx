@@ -13,11 +13,11 @@ const COLORS = ["#0969da", "#1a7f37", "#9a6700", "#cf222e", "#8250df", "#0550ae"
 
 function KpiCard({ label, value, icon, sub }: { label: string; value: string; icon: string; sub?: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border px-4 py-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg text-base" style={{ background: "var(--accent-soft)" }}>{icon}</div>
+    <div className="flex items-center gap-2 rounded-xl border px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-base sm:h-9 sm:w-9" style={{ background: "var(--accent-soft)" }}>{icon}</div>
       <div className="min-w-0 flex-1">
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>{label}</p>
-        <p className="text-sm font-bold" style={{ color: "var(--text)" }}>{value}</p>
+        <p className="whitespace-nowrap text-[13px] font-bold sm:text-sm" style={{ color: "var(--text)" }}>{value}</p>
         {sub && <p className="text-xs" style={{ color: "var(--text-muted)" }}>{sub}</p>}
       </div>
     </div>
@@ -92,6 +92,7 @@ export default function Home() {
   const [history, setHistory] = useState<ChatResult[]>([]);
   const [monthlyData, setMonthlyData] = useState(MONTHLY_STATIC);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [mobilePanel, setMobilePanel] = useState<"chat" | "dashboard">("chat");
 
   const toggleTheme = useCallback(() => {
     const next = theme === "light" ? "dark" : "light";
@@ -124,10 +125,10 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen" style={{ background: "var(--bg)" }}>
-      <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex min-h-screen flex-col lg:h-screen lg:flex-row" style={{ background: "var(--bg)" }}>
+      <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between border-b px-6 py-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+        <header className="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between lg:px-6" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #0969da, #8250df)" }}>Q</div>
             <div>
@@ -135,18 +136,21 @@ export default function Home() {
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>AI 商业数据分析平台 · 自然语言驱动</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>MiMo v2.5 Pro · 10,000 订单 · 8 地区 · 20 品类</span>
-            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--success-soft)", color: "var(--success)" }}>● 在线</span>
-            <button onClick={toggleTheme} className="flex h-7 w-7 items-center justify-center rounded-lg text-sm transition-default" style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}
-              title={theme === "light" ? "深色模式" : "浅色模式"}>
-              {theme === "light" ? "🌙" : "☀️"}
-            </button>
+          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+            <span className="min-w-0 truncate text-xs sm:hidden" style={{ color: "var(--text-muted)" }}>Kimi K2.7 Code · 10K 订单</span>
+            <span className="hidden min-w-0 text-xs sm:inline" style={{ color: "var(--text-muted)" }}>Kimi K2.7 Code · 10,000 订单 · 8 地区 · 20 品类</span>
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--success-soft)", color: "var(--success)" }}>● 在线</span>
+              <button onClick={toggleTheme} className="flex h-7 w-7 items-center justify-center rounded-lg text-sm transition-default" style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}
+                title={theme === "light" ? "深色模式" : "浅色模式"}>
+                {theme === "light" ? "🌙" : "☀️"}
+              </button>
+            </div>
           </div>
         </header>
 
         {/* KPI Row */}
-        <div className="grid grid-cols-8 gap-2 border-b px-4 py-2" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
+        <div className="no-scrollbar grid grid-flow-col auto-cols-[minmax(168px,1fr)] gap-2 overflow-x-auto border-b px-3 py-2 sm:grid-flow-row sm:grid-cols-4 lg:grid-cols-8 lg:px-4" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
           <KpiCard label="总营收" value="¥23,256万" icon="💰" sub="30个月累计" />
           <KpiCard label="客单价" value="¥23,256" icon="📦" sub="平均每单" />
           <KpiCard label="毛利率" value="46.7%" icon="📈" sub="全品类均值" />
@@ -157,12 +161,34 @@ export default function Home() {
           <KpiCard label="活跃买家" value="1,000" icon="👥" sub="覆盖20品类" />
         </div>
 
+        <div className="grid grid-cols-2 gap-1 border-b px-3 py-2 lg:hidden" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          {(["chat", "dashboard"] as const).map((panel) => {
+            const active = mobilePanel === panel;
+            return (
+              <button
+                key={panel}
+                type="button"
+                onClick={() => setMobilePanel(panel)}
+                className="h-9 rounded-lg text-sm font-medium transition-default"
+                style={{
+                  background: active ? "var(--accent)" : "var(--surface-hover)",
+                  color: active ? "#fff" : "var(--text-secondary)",
+                }}
+              >
+                {panel === "chat" ? "问数" : "看板"}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Main: Chat + Dashboard */}
-        <div className="flex flex-1 overflow-hidden">
-          <ChatPanel onResult={handleNewResult} externalResult={rerunResult} className="flex-1" />
+        <div className="flex min-h-0 flex-1 flex-col lg:flex-row lg:overflow-hidden">
+          <div className={`${mobilePanel === "chat" ? "flex" : "hidden"} min-h-0 flex-1 lg:flex`}>
+            <ChatPanel onResult={handleNewResult} externalResult={rerunResult} className="w-full" />
+          </div>
 
           {/* Right Dashboard - always visible with real data */}
-          <div className="w-[460px] overflow-y-auto border-l" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
+          <div key={`dashboard-${mobilePanel}`} className={`${mobilePanel === "dashboard" ? "block" : "hidden"} w-full border-t lg:block lg:w-[460px] lg:overflow-y-auto lg:border-l lg:border-t-0`} style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
             <div className="p-3 space-y-3">
 
               {/* Business Health Indicators */}
@@ -194,7 +220,7 @@ export default function Home() {
               </ChartCard>
 
               {/* Category Pie + Channel Bar side by side */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <ChartCard title="品类营收占比">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -233,7 +259,7 @@ export default function Home() {
               </ChartCard>
 
               {/* Top Products + Segment side by side */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {/* Top Products Table */}
                 <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                   <h3 className="mb-2 text-xs font-semibold" style={{ color: "var(--text)" }}>Top 5 畅销商品</h3>

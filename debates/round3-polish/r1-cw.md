@@ -50,7 +50,7 @@ The scoring rubric weights Demo (25) and Tech (20) most heavily, with Innovation
 | 3 | Build "self-correction" demo scenario — one query where the agent shows SQL debugging | +3-4 (Innovation) | 3h | Innovation |
 | 4 | Replace hardcoded STATS with real DB counts | +1-2 (Demo, Tech) | 30 min | Demo/Tech |
 | 5 | Remove dead dependencies (7 packages) | +1 (Tech) | 10 min | Tech |
-| 6 | Move API key to `process.env.MIMO_API_KEY` | +1 (Tech) | 5 min | Tech |
+| 6 | Move API key to `process.env.KIMI_API_KEY` | +1 (Tech) | 5 min | Tech |
 | 7 | Add React ErrorBoundary around chart components | +1 (Demo safety) | 15 min | Demo |
 | 8 | Build 5-minute demo script with narrative arc | +2-3 (Pitch) | 2h | Pitch |
 | 9 | Rehearse demo 5× with stopwatch | +2-3 (Demo, Pitch) | 3h | Demo/Pitch |
@@ -127,7 +127,7 @@ This requires zero code changes and can push Innovation from 8-10 to 10-12 purel
 ### Risk Factors
 - Self-correction loop adds 5-15s latency per retry — demo feel suffers if it triggers live
 - Pre-caching the "self-healing" result means it's not actually live — judges might ask to see it happen organically
-- The thinking trace quality depends on MiMo's output — might be generic/verbose
+- The thinking trace quality depends on Kimi's output — might be generic/verbose
 
 ### Confidence: MEDIUM
 
@@ -223,7 +223,7 @@ Both KC and OMP address this. OMP's narrative arc ("I'm an ecommerce manager, he
 | 1:15-1:50 | **Type live**: "复购率最高的用户是谁？" | Free-form query works | "自由提问，不需要懂 SQL。AI 理解'复购'这个业务概念。" |
 | 1:50-2:20 | **Click "保存指标"** → sidebar updates | Workflow feature | "分析师的工作流——保存、复用、一键重新查询。" |
 | 2:20-2:50 | **Click saved metric** → re-runs | Persistence + live data | "保存的指标随时可以重新查询，数据是实时的。" |
-| 2:50-3:00 | **Close** | Professional summary | "Next.js + SQLite + MiMo 大模型。可部署的 SaaS，不是 demo 玩具。" |
+| 2:50-3:00 | **Close** | Professional summary | "Next.js + SQLite + Kimi 大模型。可部署的 SaaS，不是 demo 玩具。" |
 
 **Key principle:** Chips first (guaranteed to work), typed query last (risky but shows NL capability). If the typed query takes >10s, immediately pivot to a pre-cached result.
 
@@ -245,14 +245,14 @@ Both KC and OMP address this. OMP's narrative arc ("I'm an ecommerce manager, he
 | 4:20-4:40 | **Show data table** (if implemented) | "原始数据可查、可导出。" |
 | 4:40-5:00 | **Close + vision** | "下一步：接入企业真实数据库，支持多轮对话，团队协作看板。" |
 
-### Fallback Plan (MiMo API Down)
+### Fallback Plan (Kimi API Down)
 
 1. **Detection:** If first query takes >10s, immediately switch to cached mode
 2. **Cached results:** All 4 chip queries have pre-cached data in `demo-cache.ts`. These return instantly from SQLite.
 3. **Narrative pivot:** "我们的 AI 引擎在后台运行，但为了演示流畅性，我先展示预缓存的结果。"
 4. **Never apologize.** If the API is slow, don't mention it. Just use the cache and move on.
 5. **Pre-warm:** 30 seconds before demo, hit `/api/chat` with a trivial query to warm up the model.
-6. **Phone hotspot:** If venue WiFi fails, tether to phone. Localhost demo doesn't need internet (except for MiMo API).
+6. **Phone hotspot:** If venue WiFi fails, tether to phone. Localhost demo doesn't need internet (except for Kimi API).
 
 ### Critical Demo Rules
 
@@ -275,8 +275,8 @@ Both KC and OMP address this. OMP's narrative arc ("I'm an ecommerce manager, he
 |---|-------|----------|-----|--------|
 | 1 | **`/api/query` creates new DB per request** | `query/route.ts:19-23` — `new Database()` every call, not using singleton from `db.ts` | Import `getDb` from `@/lib/db` | 5 min |
 | 2 | **Timeout 30s too long** | `agent.ts:72` — `AbortSignal.timeout(30000)` | Reduce to `15000` (15s) | 2 min |
-| 3 | **API key hardcoded** | `agent.ts:9` — full key visible in source | Move to `process.env.MIMO_API_KEY` (verify `.env.local` works first — PROJECT-MEMO notes this was an issue before) | 5 min |
-| 4 | **`extractJson` greedy regex** | `agent.ts:64` — `/{[\s\S]*\}/` matches outermost braces. If MiMo returns markdown fences or extra JSON-like text, parse fails silently | Use non-greedy or balanced-brace extraction | 10 min |
+| 3 | **API key hardcoded** | `agent.ts:9` — full key visible in source | Move to `process.env.KIMI_API_KEY` (verify `.env.local` works first — PROJECT-MEMO notes this was an issue before) | 5 min |
+| 4 | **`extractJson` greedy regex** | `agent.ts:64` — `/{[\s\S]*\}/` matches outermost braces. If Kimi returns markdown fences or extra JSON-like text, parse fails silently | Use non-greedy or balanced-brace extraction | 10 min |
 | 5 | **No React ErrorBoundary** | Chart render crash → white screen | Add `<ErrorBoundary>` around `ChartResult` | 15 min |
 
 **Total: ~37 minutes. Non-negotiable.**
@@ -323,7 +323,7 @@ Previous QUINTE concluded Railway. Both KC and OMP agree. The question is whethe
 **Plan A: Localhost `npm run dev`**
 - Zero setup time (already working)
 - Full control over environment
-- No cold start, no network dependency for the demo itself (only MiMo API needs internet)
+- No cold start, no network dependency for the demo itself (only Kimi API needs internet)
 - Can debug instantly
 - **Risk:** Looks less professional, judges can't test independently
 
@@ -348,7 +348,7 @@ Previous QUINTE concluded Railway. Both KC and OMP agree. The question is whethe
    CMD ["npm", "start"]
    ```
 2. Push to GitHub (10 min)
-3. Deploy on Railway (20 min) — connect repo, set `MIMO_API_KEY` env var
+3. Deploy on Railway (20 min) — connect repo, set `KIMI_API_KEY` env var
 4. Test all 4 cached queries on Railway URL (30 min)
 5. **Do not touch it again.** If it breaks on demo day, fall back to localhost.
 

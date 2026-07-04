@@ -4,7 +4,7 @@ Files:
 - r1-audit-cw.md (Participant A)
 - r1-audit-oc.md (Participant B)
 - r1-audit-kc.md (Participant C)
-- r1-audit-mimo.md (Participant D)
+- r1-audit-kimi.md (Participant D)
 
 Focus on:
 1. AGREEMENTS — which findings are unanimous?

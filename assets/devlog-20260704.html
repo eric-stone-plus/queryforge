@@ -60,7 +60,7 @@ a:hover { text-decoration: underline; }
     <div class="timeline-time">中午</div>
     <div class="timeline-content">
       <strong>QUINTE 调度修复</strong><br>
-      五方智能体全部闪退。逐个排查发现 3 个 CLI 调用错误：OpenCode 的 --dir flag 破坏解析、MiMo Code 的 provider ID 错误、OMP 的 -p flag 导致挂起。修复 SOUL.md + 全部 agent skill + memory。教训写入源头文件，不只改 memory。
+      五方智能体全部闪退。逐个排查发现 3 个 CLI 调用错误：OpenCode 的 --dir flag 破坏解析、模型 provider ID 错误、OMP 的 -p flag 导致挂起。修复 SOUL.md + 全部 agent skill + memory。教训写入源头文件，不只改 memory。
     </div>
   </div>
   <div class="timeline-item">
@@ -106,7 +106,7 @@ a:hover { text-decoration: underline; }
   <div class="card-title">关键架构选择</div>
   <ul>
     <li><strong>SQLite 而非 PostgreSQL</strong> — 零配置，黑客松速度优先</li>
-    <li><strong>MiMo v2.5 Pro 而非 OpenAI</strong> — 成本低 10x，中文理解好</li>
+    <li><strong>Kimi K2.7 而非 OpenAI</strong> — 中文理解好，ClawHunt/LLMgate 兼容 OpenAI 接口，便于快速接入</li>
     <li><strong>Next.js 全栈</strong> — 前后端同仓库，部署简单</li>
     <li><strong>SSE 而非 WebSocket</strong> — 单向推送够用，实现简单</li>
     <li><strong>自纠正循环</strong> — SQL 报错 → 错误反馈给 AI → 修正 → 重试</li>
@@ -173,7 +173,7 @@ a:hover { text-decoration: underline; }
   <div class="card-title">QUINTE 调度踩坑</div>
   <ul>
     <li>OpenCode <code>--dir</code> flag 破坏 background 模式解析 → 用 <code>cd</code> 代替</li>
-    <li>MiMo Code provider ID 是 <code>xiaomi</code> 不是 <code>xiaomi-token-plan-cn</code></li>
+    <li>模型 provider ID 和模型 ID 必须分别验证，不能只按控制台显示名猜测</li>
     <li>OMP <code>-p</code> flag 导致 30 秒挂起 → 永远不用</li>
     <li>教训必须写进 memory + skill + 源头文件（SOUL.md, agent SKILL.md），不能只改 memory</li>
     <li>5 party 同时挂 = 策略 bug，不是单个 agent 故障</li>

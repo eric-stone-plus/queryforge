@@ -6,7 +6,7 @@ The R1 files are at:
 - r1-direction-cw.md (Participant A)
 - r1-direction-oc.md (Participant B)
 - r1-direction-kc.md (Participant C)
-- r1-direction-mimo.md (Participant D)
+- r1-direction-kimi.md (Participant D)
 - r1-direction-omp.md (Participant E, may be missing)
 
 Key context: We must build a complete, polished, business-style (not geeky) product in 12 hours. The UI must look professional and visually appealing.

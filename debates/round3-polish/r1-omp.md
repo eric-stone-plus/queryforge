@@ -1,6 +1,6 @@
 # QueryForge — Final Polish Audit (R1-OMP)
 
-**Auditor:** OMP (mimo-v2.5-pro)
+**Auditor:** OMP (kimi-v2.5-pro)
 **Date:** 2026-07-04
 **Scope:** 10 core source files (~700 lines) + scoring criteria + hackathon rules + prior audit history + PROJECT-MEMO + demo-script
 **Deadline:** ~30 hours (7/5 20:00)
@@ -123,7 +123,7 @@ The current "innovation" claims in the scoring criteria document are weak:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ Header: QueryForge logo + "MiMo v2.5 Pro · 10K 订单"    │
+│ Header: QueryForge logo + "Kimi v2.5 Pro · 10K 订单"    │
 ├─────────────────────────────────────────────────────────┤
 │ Stats bar: 📊 10,000+ | 📦 500 | 🌍 8个 | 👕 1,000    │
 ├────────────────────────────────────────┬────────────────┤
@@ -313,10 +313,10 @@ QueryForge 让业务团队自己问数据。"
 
 | Scenario | Response | Risk |
 |----------|----------|------|
-| **MiMo API slow (>10s)** | Cached results trigger automatically. "离线演示" badge appears. Frame as "engineering foresight." | Low |
-| **MiMo API down** | All 4 demo queries cached in demo-cache.ts. Demo works fully offline. | None |
+| **Kimi API slow (>10s)** | Cached results trigger automatically. "离线演示" badge appears. Frame as "engineering foresight." | Low |
+| **Kimi API down** | All 4 demo queries cached in demo-cache.ts. Demo works fully offline. | None |
 | **Browser crash** | Restart dev server (`npx next dev -p 3456`), reload. Keep backup tab ready. | Medium — 30s recovery |
-| **Network issues** | App runs localhost:3456. No external deps except MiMo API (has fallback). | Low |
+| **Network issues** | App runs localhost:3456. No external deps except Kimi API (has fallback). | Low |
 | **Chart rendering fails** | Error boundary catches it (after Q3 fix). Shows fallback message. | Low (after fix) |
 | **Judge asks unexpected query** | If API works → real result. If API fails → "Let me show you a pre-computed example" → use cached result. | Medium |
 
@@ -333,7 +333,7 @@ QueryForge 让业务团队自己问数据。"
   - "怎么保证 SQL 正确?" → "AST 校验 + 只允许 SELECT + 自动 LIMIT。"
   - "支持哪些数据库?" → "目前 SQLite，架构支持扩展到 MySQL/PostgreSQL。"
 
-**Confidence:** High — the 4 demo queries are well-chosen, the fallback is solid, and the demo script covers the narrative arc. Main risk: MiMo API latency (15–30s per PROJECT-MEMO), mitigated by cached results.
+**Confidence:** High — the 4 demo queries are well-chosen, the fallback is solid, and the demo script covers the narrative arc. Main risk: Kimi API latency (15–30s per PROJECT-MEMO), mitigated by cached results.
 
 ---
 
@@ -354,7 +354,7 @@ QueryForge 让业务团队自己问数据。"
 | Issue | Risk | Fix | Effort |
 |-------|------|-----|--------|
 | **Dead dependencies** | `package.json` lists 7 unused packages: `@ai-sdk/openai`, `openai`, `sql.js`, `@faker-js/faker`, `clsx`, `lucide-react`, `zod`. A technical judge glancing at `package.json` will notice. | `npm uninstall @ai-sdk/openai openai sql.js @faker-js/faker clsx lucide-react zod` | 15 min |
-| **API key hardcoded in agent.ts** | L9: `apiKey: "REMOVED_MIMO_API_KEY"`. Security risk, but not a demo blocker. | Move to `process.env.MIMO_API_KEY` with fallback to hardcoded | 15 min |
+| **API key hardcoded in agent.ts** | L9: `apiKey: "REMOVED_KIMI_API_KEY"`. Security risk, but not a demo blocker. | Move to `process.env.KIMI_API_KEY` with fallback to hardcoded | 15 min |
 | **`extractJson` greedy regex** | L65: `/\{[\s\S]*\}/` matches first `{` to last `}`. Breaks if LLM emits multiple JSON objects or text before/after. | Use balanced-brace extraction or `generateObject()` with Zod | 15 min |
 | **`chartConfig` vs `chart_config` naming** | LLM prompt says `chart_config`, TypeScript uses `chartConfig`. ChatPanel checks both (L110, L228). Works but is a code smell. | Pick one (camelCase) and normalize in `extractJson` | 15 min |
 | **Stats bar hardcoded** | "10,000+", "500", "8 个", "1,000" are static strings in page.tsx L7–12. If judge asks "is this real data?" → awkward. | Make dynamic or remove | 1h to make dynamic |
@@ -396,7 +396,7 @@ These 7 packages are never imported in any source file. Removing them:
 |--------|---------|---------------------|
 | **ClawHunt 上架 (+3)** | ✅ Stable URL for registration | ❌ URL changes on restart |
 | **Professional impression** | ✅ `queryforge.up.railway.app` | ❌ `loca.lt/random-string` |
-| **Demo reliability** | ⚠️ Depends on Railway uptime + network | ✅ Local = always works (except MiMo API) |
+| **Demo reliability** | ⚠️ Depends on Railway uptime + network | ✅ Local = always works (except Kimi API) |
 | **Setup effort** | 2–3h (buildpack, env vars, testing) | 0h (already working) |
 | **Debugging** | Harder (remote logs) | Easier (local console) |
 | **better-sqlite3** | ✅ Railway supports native modules | ✅ Already works |
@@ -417,7 +417,7 @@ These 7 packages are never imported in any source file. Removing them:
 
 1. **Create Railway project** (15 min)
    - Connect GitHub repo or deploy from CLI
-   - Set environment: `MIMO_API_KEY=<redacted>`
+   - Set environment: `KIMI_API_KEY=<redacted>`
 
 2. **Configure build** (30 min)
    - `railway.toml` or buildpack settings

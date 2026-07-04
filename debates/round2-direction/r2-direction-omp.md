@@ -2,7 +2,7 @@
 
 **Author:** OMP (cross-examiner)
 **Date:** 2026-07-04
-**Reviewed:** CW, OC, KC, MIMO
+**Reviewed:** CW, OC, KC, KIMI
 
 ---
 
@@ -16,14 +16,14 @@ All four recommend staying with Next.js. Scoring rationale converges:
 |-------------|-------------|-------------------|-----|
 | CW          | 76–88       | 62–75             | +14–13 |
 | KC          | (implied ~85+) | (implied ~65)  | ~+20 |
-| MIMO        | 83–90       | 66                | +17–24 |
+| KIMI        | 83–90       | 66                | +17–24 |
 | OMP         | 86          | 62                | +24 |
 
 **I strongly agree.** The Tech+Innovation scoring gap (30+ pts vs ~13 pts) is decisive. The colleague's single-HTML approach occupies a lane we should not enter.
 
 ### Name collision is blocking
 
-All four flag the identical "DataPilot 数据分析智能体" name. CW suggests 4 alternatives, KC says rename, MIMO says rename, OMP picks "DataForge 数据锻造." **I agree this is P0 — 5 minutes, zero risk, high impact.**
+All four flag the identical "DataPilot 数据分析智能体" name. CW suggests 4 alternatives, KC says rename, KIMI says rename, OMP picks "DataForge 数据锻造." **I agree this is P0 — 5 minutes, zero risk, high impact.**
 
 ### Pre-seed demo queries
 
@@ -31,7 +31,7 @@ All four recommend 3–4 canned queries. The specific queries differ slightly bu
 
 ### No new features
 
-CW, MIMO, and OMP explicitly say don't add auth/export/save. KC says don't add chart types. **I agree — polish the happy path, don't expand scope.**
+CW, KIMI, and OMP explicitly say don't add auth/export/save. KC says don't add chart types. **I agree — polish the happy path, don't expand scope.**
 
 ---
 
@@ -43,7 +43,7 @@ CW, MIMO, and OMP explicitly say don't add auth/export/save. KC says don't add c
 
 **Evidence:** `better-sqlite3` requires `node-gyp` compilation and native `.node` binaries. Vercel's serverless functions run on AWS Lambda with a read-only filesystem and Alpine Linux. The compiled binary for macOS won't work there, and Vercel's build pipeline does not run `node-gyp` for user dependencies. KC's claim that "SQLite file gets bundled with the serverless function" conflates bundling the `.db` file (possible) with bundling the native addon (not possible without special config).
 
-**Verdict:** KC is wrong on this specific claim. CW and OMP are right — Railway is safer. MIMO also says Vercel but doesn't address the native addon issue. **Deploy to Railway first. Fall back to localhost. Do NOT bet on Vercel without testing `better-sqlite3` there first.**
+**Verdict:** KC is wrong on this specific claim. CW and OMP are right — Railway is safer. KIMI also says Vercel but doesn't address the native addon issue. **Deploy to Railway first. Fall back to localhost. Do NOT bet on Vercel without testing `better-sqlite3` there first.**
 
 ### Disagreement 2: Build an HTML fallback or not
 
@@ -64,7 +64,7 @@ CW, MIMO, and OMP explicitly say don't add auth/export/save. KC says don't add c
 | KC          | Multi-step agent reasoning (sub-queries) | 30 min |
 | KC          | Natural language insight summary (second LLM call) | 30 min |
 | CW          | SQL transparency (show generated SQL) | 5 min |
-| MIMO        | Multi-turn conversation | (already exists?) |
+| KIMI        | Multi-turn conversation | (already exists?) |
 | OMP         | SQL transparency + structured output validation | (already exists?) |
 
 **KC's suggestions are scope creep disguised as innovation.** Adding a second LLM call or sub-query decomposition in the final hours introduces new failure modes (API latency, prompt drift, UI complexity) with no testing runway.
@@ -100,7 +100,7 @@ The task says: "The UI must look professional and visually appealing." **None of
 ### Gap 2: Demo flow for judges who walk up cold
 
 All four describe what queries to run. None describe the **judge experience**:
-- Does the page load with a result already showing? (MIMO mentions a default query — good, but nobody else does)
+- Does the page load with a result already showing? (KIMI mentions a default query — good, but nobody else does)
 - Is there a one-click "Try this" button or must the judge type?
 - What happens in the first 3 seconds? Blank page with a chat box = judge confusion.
 - How long does a query take from click to chart? If >3 seconds, what's the loading state?

@@ -2,7 +2,7 @@
 
 **Role:** R2 Cross-Examiner  
 **Date:** 2026-07-04  
-**Inputs:** r1-audit-cw.md (A), r1-audit-oc.md (B), r1-audit-kc.md (C), r1-audit-mimo.md (D)
+**Inputs:** r1-audit-cw.md (A), r1-audit-oc.md (B), r1-audit-kc.md (C), r1-audit-kimi.md (D)
 
 ---
 
@@ -10,7 +10,7 @@
 
 Every auditor flagged these. High confidence they are real.
 
-| Finding | A (CW) | B (OC) | C (KC) | D (MiMo) | Verdict |
+| Finding | A (CW) | B (OC) | C (KC) | D (Kimi) | Verdict |
 |---------|--------|--------|--------|-----------|---------|
 | **No "save metric" button — sidebar is dead weight** | ✅ §2.2 | ✅ G1 | ✅ §1 Critical | ✅ #4 | **UNANIMOUS.** The most obvious broken feature. MetricSidebar reads localStorage; nothing writes to it. ~15 lines to fix. |
 | **DB connection pattern mismatch** (`db.ts` singleton vs `query/route.ts` new instance per request) | ✅ §3 Conflict #3 | ✅ C1 | ✅ §2 | ✅ Conflict #2 | **UNANIMOUS.** Wastes file descriptors, inconsistent architecture. 5-line fix. |
@@ -22,7 +22,7 @@ Every auditor flagged these. High confidence they are real.
 | **Unused dependencies** (`@faker-js/faker`, `sql.js`, `openai`, etc.) | ✅ §9 | ✅ §6 #7 | ✅ §2 | ✅ #7 | **UNANIMOUS.** Dead weight. Signals rushed assembly. |
 | **Schema defined in two places** (`agent.ts` hardcoded + `schema/route.ts`) | ✅ §2.3 | ✅ G2 | ✅ §2 | ✅ #6 | **UNANIMOUS.** Drift risk. `/api/schema` is dead code — never consumed by frontend. |
 
-**Consensus score range (unfixed):** 58–70/100 (CW: 68–78, OC: 70, KC: 58–68, MiMo: 65 pre-fix). The spread reflects different generosity in scoring, not different findings.
+**Consensus score range (unfixed):** 58–70/100 (CW: 68–78, OC: 70, KC: 58–68, Kimi: 65 pre-fix). The spread reflects different generosity in scoring, not different findings.
 
 ---
 
@@ -32,7 +32,7 @@ Every auditor flagged these. High confidence they are real.
 |-------|-----------|------------|
 | **`extractJson` regex behavior** | CW (§1.3): "matches first `{` to last `}`" — greedy. OC (§4): "greedy match — if LLM returns `{"a":1} text {"b":2}`, matches outermost braces incorrectly." | **Both are saying the same thing differently.** The regex IS greedy. CW's description is more precise. OC's example is useful. No real conflict — just different emphasis. |
 | **`orders.total_amount` divergence risk** | CW (§1.4): Flagged as a warning — LLM might use `total_amount` instead of computing from line items, producing subtly wrong results. KC/D: Did not flag. | **CW is right to flag this.** The system prompt explicitly says "NEVER use orders.total_amount" but there's no post-query validation. If the LLM ignores the instruction during an ad-hoc judge question, results will be close but wrong. Low probability, high consequence. |
-| **`node-sql-parser` reliability** | CW (§1.5): "Low for demo queries, medium for ad-hoc." OC (§4): "Some SQLite syntax may not parse." KC (§4): "catches parse errors." MiMo: Noted as ✅ good. | **CW and OC are cautious; KC and MiMo are optimistic.** Truth: the parser works for the 4 demo queries. Risk is real for freeform judge questions. Mitigation: pre-test the 4 demo queries, add a friendlier error message for parse failures. |
+| **`node-sql-parser` reliability** | CW (§1.5): "Low for demo queries, medium for ad-hoc." OC (§4): "Some SQLite syntax may not parse." KC (§4): "catches parse errors." Kimi: Noted as ✅ good. | **CW and OC are cautious; KC and Kimi are optimistic.** Truth: the parser works for the 4 demo queries. Risk is real for freeform judge questions. Mitigation: pre-test the 4 demo queries, add a friendlier error message for parse failures. |
 | **Mobile sidebar visibility** | OC (G4): Flagged `hidden lg:flex` — sidebar vanishes below 1024px. Others: Did not flag. | **OC is correct but low priority.** Demo is on a large screen. If the demo laptop has a small screen, this matters. Quick fix: add a toggle button. |
 | **Hardcoded stats bar** | OC (G7): "10,000+ 订单", "500 商品" are hardcoded strings, not derived from DB. Others: Did not flag. | **OC is right.** If judges verify, stats will be wrong if seed data changes. Low risk for demo (stats match current seed), but sloppy. |
 | **`Dashboard.tsx` dead code** | CW (§2.2, §3 #1): Flagged as dead code — never imported. Others: Did not flag. | **CW is correct.** `Dashboard.tsx` exists but is unused. Should be deleted to avoid reviewer confusion. |
@@ -63,7 +63,7 @@ Every auditor flagged these. High confidence they are real.
 | # | Fix | Impact | Effort | Source |
 |---|-----|--------|--------|--------|
 | 1 | **Add "save metric" button in ChatPanel** | Unlocks the entire MetricSidebar feature. Without it, 15% of the UI is dead weight. | 20 min | All 4 auditors |
-| 2 | **Pre-cache 4 demo chip results as JSON fallback** | If MiMo API is slow/down, demo still works. This is the single highest-ROI fix. | 30 min | CW, KC, MiMo |
+| 2 | **Pre-cache 4 demo chip results as JSON fallback** | If Kimi API is slow/down, demo still works. This is the single highest-ROI fix. | 30 min | CW, KC, Kimi |
 | 3 | **Add LLM timeout (10-15s)** | Prevents indefinite spinner. Shows "taking longer" message. | 5 min | All 4 auditors |
 | 4 | **Fix chartTitle per-history-item** | Visible bug — all history charts show same title. | 3 min | All 4 auditors |
 | 5 | **Fix metric rerun visibility** (remove `history.length === 0` guard) | Metric sidebar reruns invisible after first chat. | 5 min | KC |

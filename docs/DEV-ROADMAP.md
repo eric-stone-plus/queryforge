@@ -49,7 +49,7 @@
 ## 架构决策记录
 
 1. **SQLite 而非 PostgreSQL**：黑客松速度优先，SQLite 零配置。生产环境需迁移。
-2. **MiMo 而非 OpenAI**：成本低 10x，中文理解好。API 兼容 OpenAI 格式，可无缝切换。
+2. **Kimi K2.7 而非 OpenAI**：中文理解好，ClawHunt/LLMgate API 兼容 OpenAI 格式，可无缝切换。
 3. **Next.js 全栈**：前后端同仓库，部署简单。API Routes 够用，不需要独立后端。
 4. **SSE 而非 WebSocket**：单向推送够用，实现简单，HTTP 兼容性好。
 5. **QUINTE 对抗审查**：5 个 AI 互相挑刺，消除单点盲区。成本约 ¥5/次。

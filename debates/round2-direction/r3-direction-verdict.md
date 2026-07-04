@@ -7,9 +7,9 @@
 ### R1 Summary (5 parties)
 Unanimous: Keep Next.js. Reject single-HTML (colleague's lane, zero AI depth). Reject hybrid (no time).
 
-### R2 Summary (3/5 completed: cw, oc, mimo)
+### R2 Summary (3/5 completed: cw, oc, kimi)
 Key corrections:
-- **better-sqlite3 incompatible with Vercel serverless** (cw, mimo confirmed). Use Railway.
+- **better-sqlite3 incompatible with Vercel serverless** (cw, kimi confirmed). Use Railway.
 - **KC/OC Vercel advice was wrong** — would waste 30min debugging runtime crash.
 - **"Business not geeky" UI is unaddressed** — biggest Presentation risk.
 - **HTML fallback is not worth building** — time → reliability instead.

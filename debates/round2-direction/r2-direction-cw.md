@@ -2,7 +2,7 @@
 
 **Author:** CW (Codewhale)
 **Date:** 2026-07-04
-**Inputs reviewed:** r1-direction-kc.md, r1-direction-oc.md, r1-direction-mimo.md, r1-direction-omp.md
+**Inputs reviewed:** r1-direction-kc.md, r1-direction-oc.md, r1-direction-kimi.md, r1-direction-omp.md
 
 ---
 
@@ -39,11 +39,11 @@ Both are wrong. `better-sqlite3` requires native Node.js addons (C++ compilation
 
 **Impact:** If someone follows KC/OC's advice and deploys to Vercel first, they'll burn 30+ minutes debugging a runtime crash before pivoting to Railway. That's time we don't have.
 
-### DISAGREE: MIMO on "trimmed Next.js" scoring 90
+### DISAGREE: KIMI on "trimmed Next.js" scoring 90
 
-MIMO estimates a "trimmed Next.js" at 90/100 — higher than any other reviewer's estimate for any option. The individual scores (Demo 23, Tech 19, Innovation 13, PMF 18, Business 8, Presentation 9) are each at or near the top of the range other reviewers give. This feels optimistic, especially Presentation at 9/10 when the UI is functional but not polished.
+KIMI estimates a "trimmed Next.js" at 90/100 — higher than any other reviewer's estimate for any option. The individual scores (Demo 23, Tech 19, Innovation 13, PMF 18, Business 8, Presentation 9) are each at or near the top of the range other reviewers give. This feels optimistic, especially Presentation at 9/10 when the UI is functional but not polished.
 
-The other reviewers cluster around 76-88 for Next.js. MIMO's 90 is an outlier that could breed overconfidence. A more honest estimate is 80-88.
+The other reviewers cluster around 76-88 for Next.js. KIMI's 90 is an outlier that could breed overconfidence. A more honest estimate is 80-88.
 
 ### DISAGREE: CW (me) on HTML fallback priority
 

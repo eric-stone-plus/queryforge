@@ -5,7 +5,7 @@
 ### A. Universal consensus: Keep Next.js, do not pivot
 All five R1 analyses agree. This is correct and non-negotiable. The 1510-line codebase with real AI agent infrastructure (generateObject + Zod + SQL AST validation + better-sqlite3) is the scoring advantage. Pivoting to single-HTML would be catastrophic.
 
-### B. Name collision is a real blocker (CW, OC, OMP, MIMO)
+### B. Name collision is a real blocker (CW, OC, OMP, KIMI)
 All four other participants flagged "DataPilot" as a naming conflict. CW and OMP both independently suggested "DataForge 数据锻造" — strong convergence. This is a 5-minute fix with high scoring impact. No disagreement here.
 
 ### C. Deployment is the critical path
@@ -42,7 +42,7 @@ I agree with OMP. The 45-minute estimate is optimistic — Chart.js integration,
 
 ### D3. The "agent insight" differentiator is P1, not P0 — OMP's sequencing is better
 
-My R1 proposed adding a second LLM call for "natural language insight summary" as a differentiator. MIMO also suggests multi-turn conversation and SQL explanation. But OMP's action plan correctly sequences blockers first:
+My R1 proposed adding a second LLM call for "natural language insight summary" as a differentiator. KIMI also suggests multi-turn conversation and SQL explanation. But OMP's action plan correctly sequences blockers first:
 
 1. Rename (5 min)
 2. Deploy (30 min)
@@ -93,7 +93,7 @@ Four demo queries were suggested by multiple participants, but no one discussed:
 
 ### G4. Multi-turn conversation as differentiator is mentioned but never specified
 
-KC and MIMO both mention "multi-turn conversation" as a differentiator, but:
+KC and KIMI both mention "multi-turn conversation" as a differentiator, but:
 - Does the current codebase support it? (Chat history, context carry-forward)
 - If not, how much work to add?
 - Is it worth the risk of adding a new feature hours before the deadline?
@@ -135,7 +135,7 @@ All five R1s list the same ~4 demo queries with Chinese text. No one has verifie
 - CW: ~2.5 hours (P0 only) + 45 min fallback
 - KC: 2.5 hours + 30 min insight step
 - OC: ~2.5 hours
-- MIMO: Not specified
+- KIMI: Not specified
 
 The time estimates converge around 2.5-3 hours. With a 12-hour deadline, this leaves 9 hours of buffer — which is suspicious. Either the estimates are optimistic, or we're in good shape. The risk is that "fix flaky queries" (estimated 30 min) could eat 2+ hours if the AI agent has fundamental issues.
 

@@ -1,6 +1,6 @@
-# R2 Cross-Examination — Project Direction (MiMo)
+# R2 Cross-Examination — Project Direction (Kimi)
 
-**Author:** MiMo (Participant D)
+**Author:** Kimi (Participant D)
 **Date:** 2026-07-04
 **Reviewed:** CW, OC, KC, OMP (all four R1 submissions)
 

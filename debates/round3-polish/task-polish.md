@@ -1,7 +1,7 @@
 # QUINTE Audit: QueryForge Final Polish for Demo Day
 
 ## Project
-QueryForge — AI data analysis agent. Next.js 14 + Tailwind + shadcn/ui + Recharts + better-sqlite3 + MiMo v2.5 Pro.
+QueryForge — AI data analysis agent. Next.js 14 + Tailwind + shadcn/ui + Recharts + better-sqlite3 + Kimi v2.5 Pro.
 
 Natural language → SQL → chart. 4 demo queries cached. MetricSidebar saves/replays queries.
 
@@ -59,7 +59,7 @@ Text2SQL is not novel. What specific narrative, feature twist, or demo framing c
 The UI is "thin" — just chat + single chart. Dashboard.tsx (multi-chart grid) exists but isn't wired. What specific UI changes would make this look like a "business SaaS product" rather than a "demo hack"? List exact components to add/modify with effort estimates.
 
 ### Q4: Demo Flow Design
-Design the optimal 3-minute demo flow for the 赛区预选 and 5-minute flow for Demo Day. What query sequence creates the best narrative arc? What fallback plan if MiMo API is slow or down?
+Design the optimal 3-minute demo flow for the 赛区预选 and 5-minute flow for Demo Day. What query sequence creates the best narrative arc? What fallback plan if Kimi API is slow or down?
 
 ### Q5: Technical Debt Triage
 Which technical debts MUST be fixed before demo (would cause live failure), which SHOULD be fixed (visible quality signal), and which can be ignored? Consider: dead deps, hardcoded keys, missing error boundaries, single-turn limitation, streaming.

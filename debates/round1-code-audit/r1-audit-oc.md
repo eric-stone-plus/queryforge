@@ -7,7 +7,7 @@ Date: 2026-07-04
 
 ## Summary
 
-QueryForge is a well-structured Next.js data analysis agent that converts natural language to SQL queries with chart visualization. The core loop works: user asks a question → MiMo generates SQL → SQL executes against SQLite → results render as Recharts. Architecture is clean (~1500 lines across 10 files). However, several features are half-built or missing, creating real risk for live demo scoring.
+QueryForge is a well-structured Next.js data analysis agent that converts natural language to SQL queries with chart visualization. The core loop works: user asks a question → Kimi generates SQL → SQL executes against SQLite → results render as Recharts. Architecture is clean (~1500 lines across 10 files). However, several features are half-built or missing, creating real risk for live demo scoring.
 
 **Overall readiness: 70/100 — functional core, incomplete polish.**
 
@@ -77,7 +77,7 @@ QueryForge is a well-structured Next.js data analysis agent that converts natura
 ### 路演表达 (10 pts) — Est: 7/10
 
 **Strengths:** Clean UI with professional color scheme. Demo chips provide guided flow.
-**Weaknesses:** No fallback plan if MiMo API is down. No prepared demo script visible in code.
+**Weaknesses:** No fallback plan if Kimi API is down. No prepared demo script visible in code.
 
 **Estimated Total: 70/100** (before bonus)
 
@@ -87,7 +87,7 @@ QueryForge is a well-structured Next.js data analysis agent that converts natura
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| **MiMo API unavailable or slow** | HIGH | No fallback. Consider caching 4 pre-computed demo results as JSON fallback. |
+| **Kimi API unavailable or slow** | HIGH | No fallback. Consider caching 4 pre-computed demo results as JSON fallback. |
 | **LLM returns malformed JSON** | MEDIUM | `extractJson` uses regex `/{[\s\S]*}/` — greedy match. If LLM returns `{"a":1} some text {"b":2}`, it matches the outermost braces incorrectly. Add try/catch + retry. |
 | **node-sql-parser fails on valid SQL** | MEDIUM | Some SQLite syntax (e.g., window functions, CTEs) may not parse. Parser throws uncaught in `query/route.ts:26`. |
 | **Chart renders empty for edge cases** | LOW | 1-row results, NULL values, or non-numeric y_keys could produce blank charts. `getChartKeys` fallback logic is decent but not bulletproof. |

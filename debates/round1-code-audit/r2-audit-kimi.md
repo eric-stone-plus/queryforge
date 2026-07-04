@@ -1,8 +1,8 @@
 # QueryForge — R2 Cross-Examination Audit
 
-**Cross-examiner:** MiMo Agent
+**Cross-examiner:** Kimi Agent
 **Date:** 2026-07-04
-**Inputs:** R1 audits from CodeWhale (cw), OpenCode (oc), Kilo Code (kc), MiMo (mimo)
+**Inputs:** R1 audits from CodeWhale (cw), OpenCode (oc), Kilo Code (kc), Kimi (kimi)
 **Method:** Independent code verification against all R1 claims + gap analysis
 
 ---
@@ -37,7 +37,7 @@ These findings are **confirmed by all auditors** and verified against source cod
 | **cw** | ❌ Flags as dead code — "never imported anywhere in the app" |
 | oc | Does not mention |
 | kc | Does not mention |
-| mimo | Does not mention |
+| kimi | Does not mention |
 
 **Verdict: CW is correct.** I verified: `Dashboard.tsx` exports `Dashboard` but no file imports it. It's 214 lines of dead code with a different color scheme (`#2563eb` vs `#0969da`) and different chart logic. Should be deleted before demo — it confuses reviewers who browse the codebase.
 
@@ -48,7 +48,7 @@ These findings are **confirmed by all auditors** and verified against source cod
 | **kc** | Flags that `handleRunMetric` drops `thinking` and `explanation` — rerun results show blank explanation |
 | **oc** | Flags empty `.catch(() => {})` silently swallowing errors |
 | cw | Does not emphasize |
-| mimo | Does not emphasize |
+| kimi | Does not emphasize |
 
 **Verdict: KC is correct on both counts.** `page.tsx:26-30` constructs `rerunResult` with only `sql`, `data`, `chartConfig` — no `thinking` or `explanation`. And `page.tsx:33` has `.catch(() => {})` which silently eats errors. Combined: metric reruns are both data-incomplete and error-invisible.
 
@@ -59,7 +59,7 @@ These findings are **confirmed by all auditors** and verified against source cod
 | **kc** | Flags `displayResult && history.length === 0` guard at `ChatPanel.tsx:242` — metric sidebar reruns invisible once user has sent any chat |
 | **cw** | Also notes this in conflicts table |
 | oc | Does not flag |
-| mimo | Does not flag |
+| kimi | Does not flag |
 
 **Verdict: KC and CW are correct.** Line 242: `{displayResult && history.length === 0 && (` — once `history` has entries, the external result block never renders. Metric reruns only work on a fresh page.
 
@@ -79,9 +79,9 @@ These findings are **confirmed by all auditors** and verified against source cod
 | cw | 73–83/105 | — |
 | oc | 70/100 | — |
 | kc | 58–68/100 | 78–88/100 |
-| mimo | — | 78/105 |
+| kimi | — | 78/105 |
 
-**Analysis:** Estimates cluster around **65-75/105 without fixes** and **75-85/105 with fixes**. The 10-point spread reflects different assumptions about judge leniency on innovation and business potential. KC is the most pessimistic; CW and mimo are closest to consensus.
+**Analysis:** Estimates cluster around **65-75/105 without fixes** and **75-85/105 with fixes**. The 10-point spread reflects different assumptions about judge leniency on innovation and business potential. KC is the most pessimistic; CW and kimi are closest to consensus.
 
 ---
 
@@ -132,7 +132,7 @@ KC flagged this partially, but the full severity is worse: combined with G1, eve
 
 The system prompt says "SELECT only" but never instructs the LLM to add `LIMIT`. `queryDb()` returns all rows. If the LLM generates `SELECT * FROM order_items` (25,000 rows), Recharts will attempt to render 25,000 bars — the browser will freeze.
 
-MiMo's R1 mentioned this but the other 3 missed it entirely. The seed has ~10,000 orders × ~2.5 items = ~25,000 order_items rows.
+Kimi's R1 mentioned this but the other 3 missed it entirely. The seed has ~10,000 orders × ~2.5 items = ~25,000 order_items rows.
 
 **Fix:** Add "Always add LIMIT 200 unless specifically asked for totals" to the system prompt. Also cap in `queryDb`: `return getDb().prepare(sql.includes('LIMIT') ? sql : sql + ' LIMIT 1000').all()`.
 
@@ -284,7 +284,7 @@ OC flagged this. The stats ("10,000+ 订单", "500 商品") are hardcoded string
 | **CodeWhale (cw)** | ★★★★★ | ★★★★★ | Dashboard.tsx dead code, orders.total_amount divergence, unused deps detail | G1 feedback loop |
 | **OpenCode (oc)** | ★★★★ | ★★★★ | Mobile sidebar hidden, hardcoded stats, API response shape mismatch | G1, G2 severity |
 | **Kilo Code (kc)** | ★★★★★ | ★★★★★ | Metric rerun data loss, external result guard, `require()` ESM issue | G1 feedback loop |
-| **MiMo (mimo)** | ★★★★ | ★★★★ | Row limit risk, `@ai-sdk/openai` unused | G1, G2 |
+| **Kimi (kimi)** | ★★★★ | ★★★★ | Row limit risk, `@ai-sdk/openai` unused | G1, G2 |
 
 **Best overall audit:** CW and KC (tied). CW caught the most file-level issues; KC caught the most behavioral bugs.
 

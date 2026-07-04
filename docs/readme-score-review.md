@@ -75,7 +75,7 @@ Yes. This is the README's strongest dimension. It explains the stack, data flow,
 What is strong:
 
 - The architecture is understandable at a glance.
-- The stack table is specific and credible: Next.js, TypeScript, Vercel AI SDK, MiMo v2.5 Pro, SQLite, better-sqlite3, node-sql-parser, Recharts, SSE, Railway.
+- The stack table is specific and credible: Next.js, TypeScript, Vercel AI SDK, Kimi K2.7 Code, SQLite, better-sqlite3, node-sql-parser, Recharts, SSE, Railway.
 - The safety model is directly relevant to the product: read-only SELECT queries, parsing, single-statement validation, LIMIT enforcement, read-only access.
 - The SQL self-correction loop is a real agentic behavior, not just a chat interface.
 - The README mentions quality work through the QUINTE protocol, including independent AI review agents and P0 bug discovery.

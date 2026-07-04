@@ -191,14 +191,14 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
   };
 
   return (
-    <div className={`flex flex-1 flex-col overflow-hidden ${className}`}>
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+    <div className={`flex min-h-[calc(100svh-224px)] flex-1 flex-col lg:min-h-0 lg:overflow-hidden ${className}`}>
+      <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-6">
         {history.length === 0 && !displayResult && !isLoading && (
-          <div className="mx-auto flex max-w-2xl flex-col items-center justify-center py-20">
-            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold text-white" style={{ background: "linear-gradient(135deg, #0969da, #8250df)" }}>QF</div>
-            <h2 className="mb-2 text-xl font-semibold" style={{ color: "var(--text)" }}>你好，我是 QueryForge</h2>
-            <p className="mb-8 text-center text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>AI 商业数据分析智能体。用自然语言提问，自动生成 SQL 查询并可视化结果。</p>
-            <div className="flex flex-wrap justify-center gap-2">
+          <div className="mx-auto flex max-w-2xl flex-col items-center justify-center py-6 sm:py-20">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white sm:mb-5 sm:h-16 sm:w-16 sm:text-2xl" style={{ background: "linear-gradient(135deg, #0969da, #8250df)" }}>QF</div>
+            <h2 className="mb-2 text-lg font-semibold sm:text-xl" style={{ color: "var(--text)" }}>你好，我是 QueryForge</h2>
+            <p className="mb-5 text-center text-sm leading-relaxed sm:mb-8" style={{ color: "var(--text-secondary)" }}>AI 商业数据分析智能体。用自然语言提问，自动生成 SQL 查询并可视化结果。</p>
+            <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
               {DEMO_CHIPS.map((chip) => (
                 <button key={chip} onClick={() => handleChipClick(chip)} className="rounded-full px-4 py-2 text-sm font-medium transition-default" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; }}
@@ -214,7 +214,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
           {history.map((item, i) => (
             <div key={i} className="space-y-4">
               <div className="flex justify-end">
-                <div className="max-w-[80%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm" style={{ background: "var(--accent)", color: "#fff" }}>{item.q}</div>
+                <div className="max-w-[92%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm sm:max-w-[80%]" style={{ background: "var(--accent)", color: "#fff" }}>{item.q}</div>
               </div>
               <div className="space-y-3">
                 {item.r.corrected && item.r.correctionNote && (
@@ -321,8 +321,8 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
         </div>
       </div>
 
-      <div className="border-t px-6 py-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="mx-auto flex max-w-3xl items-end gap-3">
+      <div className="border-t px-3 py-3 sm:px-6 sm:py-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="mx-auto flex max-w-3xl items-end gap-2 sm:gap-3">
           <textarea ref={textareaRef} value={message} onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
             placeholder="用自然语言描述你的数据分析需求..." rows={1}
@@ -331,7 +331,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
             onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(9,105,218,0.12)"; }}
             onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.boxShadow = "none"; }}
             disabled={isLoading} />
-          <button type="submit" disabled={isLoading || !message.trim()} className="inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-medium text-white transition-default disabled:opacity-40" style={{ background: "var(--accent)" }}>
+          <button type="submit" disabled={isLoading || !message.trim()} className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl px-4 text-sm font-medium text-white transition-default disabled:opacity-40 sm:px-5" style={{ background: isLoading || !message.trim() ? "var(--text-muted)" : "var(--accent)" }}>
             {isLoading ? "分析中..." : "发送"}
           </button>
         </form>

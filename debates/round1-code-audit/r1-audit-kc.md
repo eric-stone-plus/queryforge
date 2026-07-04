@@ -59,7 +59,7 @@ QueryForge is a well-structured Next.js 14 text-to-SQL agent with chart visualiz
 - Metric sidebar is completely non-functional (no save action)
 - Metric rerun breaks after first chat (history guard)
 - chartTitle bug affects multi-query demos
-- No fallback if MiMo API is slow/down
+- No fallback if Kimi API is slow/down
 
 ### 3.2 用户价值/PMF (20分) — Estimated: 12-14/20
 
@@ -120,7 +120,7 @@ QueryForge is a well-structured Next.js 14 text-to-SQL agent with chart visualiz
 
 | Risk | Trigger | Mitigation |
 |------|---------|------------|
-| **MiMo API down or slow** | Network issues, rate limits, provider outage | Zero fallback. No retry. No cached results. Demo dies. **Add:** pre-cached results for the 4 demo chips as hardcoded fallback. |
+| **Kimi API down or slow** | Network issues, rate limits, provider outage | Zero fallback. No retry. No cached results. Demo dies. **Add:** pre-cached results for the 4 demo chips as hardcoded fallback. |
 | **API key expired** | `.env.local` key invalid | No key rotation mechanism. Entire app becomes non-functional. |
 | **LLM returns non-JSON** | Model hallucination, temperature issues | `extractJson` at `agent.ts:59-63` will throw. User sees generic error. **Add:** retry with stricter prompt. |
 | **LLM returns invalid SQL** | Schema confusion, syntax errors | `validateSelectOnly` at `agent.ts:51-57` catches parse errors, but `queryDb` at line 77 could still fail on runtime SQL errors. Error is caught by API but user sees raw SQLite error. |
@@ -165,7 +165,7 @@ QueryForge is a well-structured Next.js 14 text-to-SQL agent with chart visualiz
 
 2. **[P0] Fix metric rerun visibility** — Remove `history.length === 0` guard from the external result display block at `ChatPanel.tsx:242`, or better: append external results to history. ~5 lines.
 
-3. **[P0] Pre-cache demo chip results** — Hardcode fallback results for the 4 demo queries in case MiMo API is slow/unavailable during demo. ~30 lines.
+3. **[P0] Pre-cache demo chip results** — Hardcode fallback results for the 4 demo queries in case Kimi API is slow/unavailable during demo. ~30 lines.
 
 4. **[P1] Fix chartTitle per-item** — Move chartTitle computation inside the history map, deriving from each item's own `chart_config`. ~3 lines.
 

@@ -7,7 +7,7 @@ You are reviewing the R1 audit outputs from 5 independent auditors. Each auditor
 1. r1-cw.md (Participant A)
 2. r1-oc.md (Participant B)
 3. r1-kc.md (Participant C)
-4. r1-mimo.md (Participant D)
+4. r1-kimi.md (Participant D)
 5. r1-omp.md (Participant E)
 
 ## Task File

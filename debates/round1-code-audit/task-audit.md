@@ -3,12 +3,12 @@
 You are auditing a hackathon project for Clawhunt Builder Camp 2026. The project is a "Data Analysis Automation Agent" called QueryForge.
 
 ## Project Status
-- Tech stack: Next.js 14.2.x + Tailwind + shadcn/ui + Recharts + better-sqlite3 + Vercel AI SDK + MiMo v2.5 Pro
+- Tech stack: Next.js 14.2.x + Tailwind + shadcn/ui + Recharts + better-sqlite3 + Vercel AI SDK + Kimi v2.5 Pro
 - 10 source files, ~1500 lines
 - Seed data: 10K orders, 25K order items, 500 products, 1000 users, 8 regions, 20 categories
 - API: 4 demo queries all working (line/bar charts, 1-240 rows)
 - UI: Business-style design with chat interface, chart rendering, metric sidebar
-- LLM: MiMo v2.5 Pro via OpenAI-compatible API (not OpenAI gpt-4o)
+- LLM: Kimi v2.5 Pro via OpenAI-compatible API (not OpenAI gpt-4o)
 
 ## Scoring Criteria (100 + 5 bonus)
 1. Demo 现场可用 (25) — Core functions run on-site, complete loop, no bugs

@@ -2,7 +2,7 @@
 
 **Agent:** CodeWhale (cw)
 **Date:** 2026-07-04
-**Inputs:** task-r2-polish.md, r1-cw.md, r1-oc.md, r1-kc.md, r1-mimo.md, r1-omp.md
+**Inputs:** task-r2-polish.md, r1-cw.md, r1-oc.md, r1-kc.md, r1-kimi.md, r1-omp.md
 
 ---
 
@@ -32,14 +32,14 @@ Read all 5 R1 artifacts line-by-line. For each of the 6 questions, identified:
 
 | Disagreement | Positions | Who's Right |
 |---|---|---|
-| **Current state score** | CW: 62-72, OC: 75-85, KC: 64-74, MiMo: 75-85, OMP: 57-71 | **CW and KC are closer.** Both independently verified the DB singleton is incomplete in `query/route.ts`. OC and MiMo listed it as "DONE" without checking. OMP's lower range (57) seems too pessimistic — the core pipeline works. **Realistic range: 65-75.** |
+| **Current state score** | CW: 62-72, OC: 75-85, KC: 64-74, Kimi: 75-85, OMP: 57-71 | **CW and KC are closer.** Both independently verified the DB singleton is incomplete in `query/route.ts`. OC and Kimi listed it as "DONE" without checking. OMP's lower range (57) seems too pessimistic — the core pipeline works. **Realistic range: 65-75.** |
 | **Timeout severity** | CW: MUST reduce to 15s, Others: 30s is acceptable | **CW is right.** 30s is catastrophic for live demo — a judge staring at a spinner for 25 seconds. R3 verdict specified 15s. The PROJECT-MEMO listed "30s" as done, but the original requirement was 15s. This is a 15-minute fix with outsized demo impact. |
-| **Dead deps priority** | MiMo: #3 priority, Others: lower priority | **Others are right.** Dead deps are a "SHOULD fix" — judges won't inspect package.json during a 3-minute demo. 5 minutes of work, but don't let it block higher-impact items. |
-| **AI Insight layer** | OC: highest-ROI innovation item, Others: secondary | **OC makes a strong case.** A second LLM call for business insight adds 3-5 pts to the weakest dimension (创新性) for 3h of work. But self-correction (which KC and MiMo also propose) may be more impressive live. **Both are good; pick one and execute well.** |
+| **Dead deps priority** | Kimi: #3 priority, Others: lower priority | **Others are right.** Dead deps are a "SHOULD fix" — judges won't inspect package.json during a 3-minute demo. 5 minutes of work, but don't let it block higher-impact items. |
+| **AI Insight layer** | OC: highest-ROI innovation item, Others: secondary | **OC makes a strong case.** A second LLM call for business insight adds 3-5 pts to the weakest dimension (创新性) for 3h of work. But self-correction (which KC and Kimi also propose) may be more impressive live. **Both are good; pick one and execute well.** |
 
 ### Gaps All Auditors Missed
 
-1. **No one verified whether `extractJson` regex actually fails in practice.** CW flagged it as fragile (greedy `/{[\s\S]*\}/`) but didn't test it against MiMo's actual output format. If MiMo consistently returns clean JSON, this is a non-issue. If it wraps in markdown fences, it's demo-breaking. **Action: Test 5 queries and verify JSON parsing works.**
+1. **No one verified whether `extractJson` regex actually fails in practice.** CW flagged it as fragile (greedy `/{[\s\S]*\}/`) but didn't test it against Kimi's actual output format. If Kimi consistently returns clean JSON, this is a non-issue. If it wraps in markdown fences, it's demo-breaking. **Action: Test 5 queries and verify JSON parsing works.**
 
 2. **No one mentioned the `/api/schema` unused endpoint as a Q&A risk.** If a judge asks "what does this endpoint do?" and the answer is "nothing, it's dead code," that's a bad signal. **Action: Delete it or wire it in.**
 
@@ -72,7 +72,7 @@ Read all 5 R1 artifacts line-by-line. For each of the 6 questions, identified:
 
 1. **Text2SQL is commodity.** Every auditor independently stated this. 创新性 is the weakest dimension at 8-10/15. The gap to 12-14/15 is the difference between scoring 80 and scoring 90.
 
-2. **Self-correction loop is the most technically impressive innovation to demo.** CW, KC, and MiMo all propose this. When SQL execution fails, the agent catches the error, feeds it back to MiMo, and generates corrected SQL — visible to the audience. "Watch it debug its own SQL in real time."
+2. **Self-correction loop is the most technically impressive innovation to demo.** CW, KC, and Kimi all propose this. When SQL execution fails, the agent catches the error, feeds it back to Kimi, and generates corrected SQL — visible to the audience. "Watch it debug its own SQL in real time."
 
 3. **The thinking chain (reasoning panel) already exists but isn't emphasized.** All agree this should be highlighted during demo, not hidden behind an expandable panel.
 
@@ -86,7 +86,7 @@ Read all 5 R1 artifacts line-by-line. For each of the 6 questions, identified:
 
 ### Gaps All Auditors Missed
 
-1. **No one proposed a backup innovation demo if self-correction doesn't trigger.** Self-correction requires a query that reliably fails first attempt. What if MiMo's first SQL is correct? **Action: Pre-test 3-5 queries that reliably produce incorrect SQL, and cache the self-correction flow as a backup demo scenario.**
+1. **No one proposed a backup innovation demo if self-correction doesn't trigger.** Self-correction requires a query that reliably fails first attempt. What if Kimi's first SQL is correct? **Action: Pre-test 3-5 queries that reliably produce incorrect SQL, and cache the self-correction flow as a backup demo scenario.**
 
 2. **No one discussed the "指标即代码" concept as a competitive differentiator in Q&A.** If a judge asks "how is this different from ChatGPT Data Analyst?", the answer "our queries become reusable metric definitions that form a knowledge base" is much stronger than "we have self-correction." **Action: Prepare this Q&A answer.**
 
@@ -94,7 +94,7 @@ Read all 5 R1 artifacts line-by-line. For each of the 6 questions, identified:
 
 ### Recommended Innovation Strategy
 
-**Primary:** "指标即代码" narrative (OMP) + self-correction wow moment (CW/KC/MiMo)
+**Primary:** "指标即代码" narrative (OMP) + self-correction wow moment (CW/KC/Kimi)
 - Narrative: "Every query becomes a reusable metric definition. Analysts build a knowledge base, not just run queries."
 - Wow moment: Type a query that triggers SQL error → agent self-corrects → "Watch it debug itself."
 - Backup: If self-correction doesn't trigger, show the AST validation as technical depth.
@@ -122,7 +122,7 @@ Read all 5 R1 artifacts line-by-line. For each of the 6 questions, identified:
 | Disagreement | Positions | Who's Right |
 |---|---|---|
 | **Tab navigation vs landing dashboard** | KC: Chat/Dashboard/Metrics tabs, Others: dashboard as landing with chat below | **KC's tab approach is better for demo.** A landing dashboard with 4 charts is impressive, but if the demo flow starts with a chip query, the judge needs to find the chat input. Tabs solve this: Dashboard tab for first impression, Chat tab for live demo. **But only if there's time to implement tabs. Otherwise, dashboard-as-landing is fine.** |
-| **Loading skeleton priority** | CW: Tier 2, OC: Phase 2, KC: item 6, MiMo: item 7 | **Low priority.** The demo uses cached results which load instantly. Loading skeletons only matter for live API calls. **Skip unless there's time after items 1-4.** |
+| **Loading skeleton priority** | CW: Tier 2, OC: Phase 2, KC: item 6, Kimi: item 7 | **Low priority.** The demo uses cached results which load instantly. Loading skeletons only matter for live API calls. **Skip unless there's time after items 1-4.** |
 | **Chart type toggle** | CW: Tier 2, OMP: item 6, Others: lower priority | **Nice-to-have, not essential.** The demo shows one chart type per query. A toggle adds interactivity but also complexity. **Skip unless there's time after items 1-5.** |
 
 ### Gaps All Auditors Missed
@@ -166,9 +166,9 @@ Read all 5 R1 artifacts line-by-line. For each of the 6 questions, identified:
 
 | Disagreement | Positions | Who's Right |
 |---|---|---|
-| **Typed query choice** | CW: "复购率最高的用户", KC: "哪个品类利润率最高？", MiMo: "复购率最高的用户" | **CW and MiMo are right.** "复购率" (repurchase rate) requires understanding the business concept of repeat purchases — it's not a simple SQL translation. "利润率" (profit margin) is impressive for its revenue formula but is more straightforward. **Use "复购率" for the typed query to show NL understanding depth.** |
+| **Typed query choice** | CW: "复购率最高的用户", KC: "哪个品类利润率最高？", Kimi: "复购率最高的用户" | **CW and Kimi are right.** "复购率" (repurchase rate) requires understanding the business concept of repeat purchases — it's not a simple SQL translation. "利润率" (profit margin) is impressive for its revenue formula but is more straightforward. **Use "复购率" for the typed query to show NL understanding depth.** |
 | **Dashboard as Demo 1** | OMP: show dashboard first, Others: show chip query first | **Others are right.** The dashboard is a "wow" visual, but the core value prop is "natural language → SQL → chart." Starting with a dashboard makes it look like a BI tool, not an AI agent. **Start with a chip query to establish the AI narrative, then switch to dashboard for the "and it's not just one chart" moment.** |
-| **5-minute flow structure** | OC: include SQL security demo, KC: include judge-picked live query, MiMo: include self-correction demo | **KC's approach is riskiest but most impressive.** Asking a judge to pick a query live shows confidence and generalization. But it's also the most likely to fail. **Use KC's approach only if the API has been reliable all day. Otherwise, use a pre-rehearsed typed query.** |
+| **5-minute flow structure** | OC: include SQL security demo, KC: include judge-picked live query, Kimi: include self-correction demo | **KC's approach is riskiest but most impressive.** Asking a judge to pick a query live shows confidence and generalization. But it's also the most likely to fail. **Use KC's approach only if the API has been reliable all day. Otherwise, use a pre-rehearsed typed query.** |
 
 ### Gaps All Auditors Missed
 
@@ -190,7 +190,7 @@ Read all 5 R1 artifacts line-by-line. For each of the 6 questions, identified:
 | 1:15-1:45 | Type: 复购率最高的用户 | "自由提问，不需要懂SQL。AI理解'复购'这个业务概念。" |
 | 1:45-2:20 | 保存指标 → 侧边栏 | "分析师的工作流——保存、复用、一键重新查询。" |
 | 2:20-2:50 | 点击保存的指标 → 重新查询 | "保存的指标随时可以重新查询，数据是实时的。" |
-| 2:50-3:00 | Close | "Next.js + SQLite + MiMo。可部署的SaaS，不是demo玩具。" |
+| 2:50-3:00 | Close | "Next.js + SQLite + Kimi。可部署的SaaS，不是demo玩具。" |
 
 #### 5-Minute Demo Day (add to 3-minute flow)
 
@@ -212,26 +212,26 @@ Read all 5 R1 artifacts line-by-line. For each of the 6 questions, identified:
 | Issue | File:Line | Effort | Why MUST |
 |---|---|---|---|
 | `/api/query` creates new DB per request | `query/route.ts:19-23` | 10 min | SQLite WAL lock under repeated demo clicks. CW and KC independently verified. |
-| Metric rerun invisible when `history.length > 0` | `ChatPanel.tsx:262` | 15 min | Demo step 3 (save → rerun) is broken. KC, MiMo, OC caught this. |
+| Metric rerun invisible when `history.length > 0` | `ChatPanel.tsx:262` | 15 min | Demo step 3 (save → rerun) is broken. KC, Kimi, OC caught this. |
 
 ### 4/5 Agree MUST Fix
 
 | Issue | File:Line | Effort | Who Disagrees |
 |---|---|---|---|
 | API key hardcoded | `agent.ts:9` | 10 min | CW doesn't list as MUST (but agrees it should be fixed). Security red flag if judges read code. |
-| LLM timeout too long (30s → 15s) | `agent.ts:72` | 5 min | OC, KC, MiMo, OMP accept 30s. CW is right — 30s is too long for live demo. |
+| LLM timeout too long (30s → 15s) | `agent.ts:72` | 5 min | OC, KC, Kimi, OMP accept 30s. CW is right — 30s is too long for live demo. |
 
 ### Key Disagreements
 
 | Disagreement | Positions | Who's Right |
 |---|---|---|
-| **`extractJson` greedy regex** | OC: MUST fix, Others: SHOULD or don't mention | **OC is probably overcautious.** The regex `/{[\s\S]*\}/` matches the outermost braces, which works if MiMo returns a single JSON object. If MiMo returns markdown fences, it breaks. **Test it live; if it works, don't touch it.** |
+| **`extractJson` greedy regex** | OC: MUST fix, Others: SHOULD or don't mention | **OC is probably overcautious.** The regex `/{[\s\S]*\}/` matches the outermost braces, which works if Kimi returns a single JSON object. If Kimi returns markdown fences, it breaks. **Test it live; if it works, don't touch it.** |
 | **Metric rerun data passthrough** | KC: demo-breaking, Others: visible but not blocking | **KC is right that it's visible** (thinking/explanation lost on rerun), but it's not demo-breaking — the chart still renders. **Fix if time permits after MUST items.** |
-| **Dead dependencies** | MiMo: fix in 20min, Others: lower priority | **All agree it's quick, but none rate it as MUST.** 5 minutes of work, but don't let it block higher items. **Do it during a natural break.** |
+| **Dead dependencies** | Kimi: fix in 20min, Others: lower priority | **All agree it's quick, but none rate it as MUST.** 5 minutes of work, but don't let it block higher items. **Do it during a natural break.** |
 
 ### Gaps All Auditors Missed
 
-1. **No one tested whether the demo script's Zod claim is still in the code.** MiMo flagged it ("demo-script claims Zod but it's not used") but didn't verify the current demo-script.md. **Action: Read demo-script.md and remove any Zod references.**
+1. **No one tested whether the demo script's Zod claim is still in the code.** Kimi flagged it ("demo-script claims Zod but it's not used") but didn't verify the current demo-script.md. **Action: Read demo-script.md and remove any Zod references.**
 
 2. **No one mentioned the `chart_config` vs `chartConfig` dual-key pattern as a runtime risk.** OC flagged it as "SHOULD fix" but didn't test whether it actually causes bugs. If every access checks both keys, it's ugly but functional. **Action: Verify 5 random chart renders work correctly; if they do, leave it.**
 
@@ -264,7 +264,7 @@ Read all 5 R1 artifacts line-by-line. For each of the 6 questions, identified:
 |---|---|---|
 | **Time-boxing** | CW: 90-minute hard cutoff, Others: more flexible | **CW is right.** If Railway isn't working after 90 minutes, the `better-sqlite3` build issue is likely a rabbit hole. Abandon and focus on demo quality. The 1.5h saved is worth more than debugging native module compilation. |
 | **ClawHunt URL requirements** | OMP: depends on whether localtunnel URLs are accepted, Others: assume stable URL required | **OMP raises a valid question.** No one verified ClawHunt's actual requirements. **Action: Check clawhunt.store registration requirements TODAY. If localtunnel URLs are accepted, skip Railway entirely.** |
-| **Vercel + Turso as fallback** | MiMo: viable alternative, CW: too risky | **CW is right.** Migrating from `better-sqlite3` to `@libsql/client` touches every DB interaction. 4-6h of work with high risk of breakage. Not worth it for a hackathon. |
+| **Vercel + Turso as fallback** | Kimi: viable alternative, CW: too risky | **CW is right.** Migrating from `better-sqlite3` to `@libsql/client` touches every DB interaction. 4-6h of work with high risk of breakage. Not worth it for a hackathon. |
 
 ### Gaps All Auditors Missed
 

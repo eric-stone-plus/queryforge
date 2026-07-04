@@ -1,6 +1,6 @@
-# QueryForge R1 Audit — MiMo v2.5 Pro Agent
+# QueryForge R1 Audit — Kimi v2.5 Pro Agent
 
-**Auditor**: MiMo Code Agent
+**Auditor**: Kimi Code Agent
 **Date**: 2026-07-04
 **Files reviewed**: 10 source files + package.json, globals.css, layout.tsx, tailwind.config.ts
 
@@ -33,7 +33,7 @@
 
 | Item | Status | Detail |
 |------|--------|--------|
-| LLM integration | ✅ Real | MiMo v2.5 Pro via OpenAI-compatible SDK |
+| LLM integration | ✅ Real | Kimi v2.5 Pro via OpenAI-compatible SDK |
 | SQL safety | ✅ Good | `node-sql-parser` AST validation in both `agent.ts:51-57` and `query/route.ts:25-30` |
 | Schema endpoint | ✅ Present | `schema/route.ts` — but hardcoded, not dynamic |
 | Streaming | ❌ Missing | `generateText` not `streamText`; user waits with no feedback |
@@ -77,7 +77,7 @@
 
 ### Critical (Demo-breaking)
 
-1. **JSON extraction is fragile** (`agent.ts:60-63`): The regex `/{[\s\S]*\}/` greedily matches the first `{` to the last `}`. If MiMo returns markdown fences, extra braces in thinking text, or malformed output, parsing fails silently. **Fix**: Use a structured output mode or parse with `JSON.parse` after stripping markdown fences, with fallback.
+1. **JSON extraction is fragile** (`agent.ts:60-63`): The regex `/{[\s\S]*\}/` greedily matches the first `{` to the last `}`. If Kimi returns markdown fences, extra braces in thinking text, or malformed output, parsing fails silently. **Fix**: Use a structured output mode or parse with `JSON.parse` after stripping markdown fences, with fallback.
 
 2. **No LLM timeout**: `generateText` at `agent.ts:68-72` has no `maxTokens`, no `abortSignal`, no timeout. A slow or hung response blocks the entire demo. **Fix**: Add `maxTokens: 2048` and wrap with `AbortSignal.timeout(30_000)`.
 
@@ -118,8 +118,8 @@
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| MiMo returns non-JSON | **High** | Add JSON parse fallback + retry once with "respond with JSON only" |
-| MiMo slow/hung | **High** | Add 30s timeout; show "taking longer than expected" |
+| Kimi returns non-JSON | **High** | Add JSON parse fallback + retry once with "respond with JSON only" |
+| Kimi slow/hung | **High** | Add 30s timeout; show "taking longer than expected" |
 | LLM generates bad SQL | **Medium** | Already validated by parser; add error message with suggestion |
 | `LIMIT` missing → chart crash | **Medium** | Cap at 500 rows in `queryDb` |
 | Browser localStorage cleared | **Low** | Metric sidebar empty; not critical for demo |

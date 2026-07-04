@@ -1,7 +1,7 @@
 # R2 Cross-Examination — Project Direction (OpenCode)
 
 **Role:** R2 Cross-Examiner
-**Reviewing:** CW, KC, MIMO, OMP (4 R1 analyses)
+**Reviewing:** CW, KC, KIMI, OMP (4 R1 analyses)
 
 ---
 
@@ -14,7 +14,7 @@ Specific agreements I endorse:
 - **CW's scoring tables** are the most rigorous. The Option 1 vs Option 2 delta (76-88 vs 62-75) is consistent with KC's and OMP's independent estimates. The numbers converge — this is a robust finding, not groupthink.
 - **OMP's blocker list** (deployment, rename, API key) is the right triage. These are P0 because they're binary: if any fails, the demo fails.
 - **KC's "agent insight" idea** (second LLM call for natural language summary) is the highest-ROI differentiator mentioned by anyone. 30 minutes of work, scores Innovation points, and creates a "wow" moment the colleague can't match.
-- **CW's single-HTML fallback is bad advice.** MIMO, KC, and OMP all explicitly reject it. I agree — 45 minutes building a demo prop is 45 minutes not spent making the real app bulletproof.
+- **CW's single-HTML fallback is bad advice.** KIMI, KC, and OMP all explicitly reject it. I agree — 45 minutes building a demo prop is 45 minutes not spent making the real app bulletproof.
 
 ---
 
@@ -31,7 +31,7 @@ CW recommends building a 30KB single-HTML fallback page as "insurance." OMP corr
 | OC (R1) | Vercel first, Railway backup |
 | CW | Railway first |
 | KC | Vercel |
-| MIMO | Vercel |
+| KIMI | Vercel |
 | OMP | Railway first |
 
 CW and OMP correctly flag that `better-sqlite3` is a native C++ addon and **does not work on Vercel serverless**. KC says "SQLite file gets bundled with the serverless function" — this is wrong. Vercel serverless functions run on AWS Lambda with a read-only filesystem. Native addons require a custom Dockerfile or a different platform.
@@ -42,9 +42,9 @@ CW and OMP correctly flag that `better-sqlite3` is a native C++ addon and **does
 
 KC says "hit the deployed URL once before presenting" to warm the function. This doesn't account for: (a) the function may scale down between the warm-up and the demo, (b) each API call is a separate invocation with its own cold start, (c) the first query after a cold start can take 10-15 seconds with GPT-4o. **OMP's approach (Railway with persistent process) avoids this entirely.**
 
-### Disagreement 4: MIMO's "multi-turn conversation" is overscoped
+### Disagreement 4: KIMI's "multi-turn conversation" is overscoped
 
-MIMO suggests adding multi-turn context ("now break it down by region") as a differentiator. This requires: maintaining conversation state, modifying the agent prompt to accept prior context, and testing a new interaction pattern. In a 12-hour sprint with 3 blockers, this is P2 at best. KC's "second LLM call for insight summary" achieves a similar wow-factor with 10x less work.
+KIMI suggests adding multi-turn context ("now break it down by region") as a differentiator. This requires: maintaining conversation state, modifying the agent prompt to accept prior context, and testing a new interaction pattern. In a 12-hour sprint with 3 blockers, this is P2 at best. KC's "second LLM call for insight summary" achieves a similar wow-factor with 10x less work.
 
 ---
 
@@ -89,7 +89,7 @@ If we're at hour 8 and deployment still isn't working, what do we cut? All analy
 
 **CHANGED: "Build an HTML fallback" BECAUSE OMP's argument is compelling — time spent on a fallback is time not spent on reliability, and the fallback undermines the product narrative.** CW's fallback plan optimizes for a failure mode we should be preventing, not accommodating.
 
-**CHANGED: "Multi-turn conversation as differentiator" BECAUSE KC's "AI insight summary" achieves 80% of the wow-factor with 10% of the implementation cost.** MIMO's multi-turn suggestion requires conversation state management that's too risky for tonight.
+**CHANGED: "Multi-turn conversation as differentiator" BECAUSE KC's "AI insight summary" achieves 80% of the wow-factor with 10% of the implementation cost.** KIMI's multi-turn suggestion requires conversation state management that's too risky for tonight.
 
 ---
 

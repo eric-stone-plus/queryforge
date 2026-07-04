@@ -6,7 +6,7 @@
 - r1-audit-cw.md (Auditor A — CodeWhale)
 - r1-audit-oc.md (Auditor B — OpenCode)
 - r1-audit-kc.md (Auditor C — Kilo Code)
-- r1-audit-mimo.md (Auditor D — MiMo)
+- r1-audit-kimi.md (Auditor D — Kimi)
 - r1-audit.md (Auditor E — unnamed)
 
 ---
@@ -24,34 +24,34 @@ Every auditor independently discovered that `MetricSidebar.tsx` reads from local
 | CW | "No 'save' button in ChatPanel or anywhere else. Dead feature." |
 | OC | "No 'Save Metric' button in UI. Users cannot persist queries." |
 | KC | "No 'save metric' button anywhere — sidebar will permanently show '暂无保存的指标'." |
-| MiMo | "MetricSidebar save is broken — no save trigger anywhere." |
+| Kimi | "MetricSidebar save is broken — no save trigger anywhere." |
 | E | "The sidebar exists but nothing populates it." |
 
 **Verdict:** This is the single most agreed-upon bug. ~15 lines of code to fix. Add a "保存指标" button in `ChatPanel.tsx` that writes `{ name, sql, chartConfig }` to localStorage after a successful query.
 
 ### 1.2 🔴 No LLM timeout (5/5)
 
-All auditors flagged that `generateText()` in `agent.ts` has no timeout. If MiMo hangs, the UI spins indefinitely.
+All auditors flagged that `generateText()` in `agent.ts` has no timeout. If Kimi hangs, the UI spins indefinitely.
 
 | Auditor | Severity |
 |---------|----------|
 | CW | CRITICAL — "Could kill the 3-minute demo window" |
 | OC | HIGH — "No fallback. Consider caching pre-computed results" |
 | KC | HIGH — "One bad response = user sees error" |
-| MiMo | HIGH — "No maxTokens, no abortSignal, no timeout" |
+| Kimi | HIGH — "No maxTokens, no abortSignal, no timeout" |
 | E | 🔴 High — "A 30s+ hang during live demo = dead screen" |
 
 **Verdict:** Add `maxDuration: 15` or `AbortSignal.timeout(15_000)` to the `generateText()` call. Return a user-friendly "分析超时，请重试" message.
 
 ### 1.3 🔴 No demo/offline fallback (5/5)
 
-All auditors agree: if MiMo API is down, the entire app is non-functional. This is a single point of failure in a live demo environment.
+All auditors agree: if Kimi API is down, the entire app is non-functional. This is a single point of failure in a live demo environment.
 
 **Verdict:** Pre-cache the 4 demo chip responses as static JSON. If API fails within 3 seconds, serve cached data with a "离线演示" badge. This is insurance — costs nothing if the API works, saves the demo if it doesn't.
 
 ### 1.4 🟡 Greedy `extractJson` regex is fragile (5/5)
 
-The pattern `/{[\s\S]*\}/` matches from the first `{` to the last `}` in the entire LLM response. If MiMo wraps JSON in markdown fences, adds commentary, or emits multiple JSON objects, parsing breaks.
+The pattern `/{[\s\S]*\}/` matches from the first `{` to the last `}` in the entire LLM response. If Kimi wraps JSON in markdown fences, adds commentary, or emits multiple JSON objects, parsing breaks.
 
 **Verdict:** Use balanced-brace extraction or `generateObject()` with Zod schema (eliminates JSON parsing entirely).
 
@@ -73,25 +73,25 @@ All auditors flagged unused packages: `@faker-js/faker`, `sql.js`, `openai`, `@a
 
 ### 2.1 No streaming response (4/5)
 
-CW, OC, KC, MiMo all noted `generateText` blocks until completion. User sees a spinner with no feedback for 3-10 seconds.
+CW, OC, KC, Kimi all noted `generateText` blocks until completion. User sees a spinner with no feedback for 3-10 seconds.
 
 **Verdict:** Switch to `streamText` from Vercel AI SDK. Shows thinking in real-time — both a technical upgrade and a demo impression boost. ~30 lines of change.
 
 ### 2.2 Chart title bug in history items (3/5)
 
-KC, MiMo, and OC independently found that `chartTitle` (line 109-112 in `ChatPanel.tsx`) is a single `useMemo` derived from `displayResult`, but rendered inside every history item loop. All history charts show the *latest* title, not their own.
+KC, Kimi, and OC independently found that `chartTitle` (line 109-112 in `ChatPanel.tsx`) is a single `useMemo` derived from `displayResult`, but rendered inside every history item loop. All history charts show the *latest* title, not their own.
 
 **Verdict:** Move title computation inside the history `map()`, deriving from each item's own `chartConfig`. ~3 lines of code.
 
 ### 2.3 Metric rerun breaks after first chat (3/5)
 
-KC found `displayResult && history.length === 0` guard at line 242 hides the external result once the user sends any chat message. MiMo confirmed `.catch(() => {})` at `page.tsx:33` silently swallows errors. E also flagged the empty catch.
+KC found `displayResult && history.length === 0` guard at line 242 hides the external result once the user sends any chat message. Kimi confirmed `.catch(() => {})` at `page.tsx:33` silently swallows errors. E also flagged the empty catch.
 
 **Verdict:** Remove the `history.length === 0` guard or append external results to history. Add error toast in the catch block.
 
 ### 2.4 Metric rerun loses thinking + explanation (2/5)
 
-KC and MiMo noted `handleRunMetric` constructs a `ChatResult` with only `sql`, `data`, `chartConfig` — drops `thinking` and `explanation`. Rerun results display blank explanation text.
+KC and Kimi noted `handleRunMetric` constructs a `ChatResult` with only `sql`, `data`, `chartConfig` — drops `thinking` and `explanation`. Rerun results display blank explanation text.
 
 **Verdict:** Store `thinking` and `explanation` in the saved metric, or re-fetch from the original query on rerun.
 
@@ -103,13 +103,13 @@ OC, KC, and E all flagged the LLM returns `chart_config` (snake_case) while Type
 
 ### 2.6 Schema duplicated in two places (3/5)
 
-CW, OC, and MiMo noted the DB schema is hardcoded in both `agent.ts:39-47` and `api/schema/route.ts`. If tables change, both must be updated. The `/api/schema` endpoint is unused by any frontend component.
+CW, OC, and Kimi noted the DB schema is hardcoded in both `agent.ts:39-47` and `api/schema/route.ts`. If tables change, both must be updated. The `/api/schema` endpoint is unused by any frontend component.
 
 **Verdict:** Either (a) delete `/api/schema` as dead code, or (b) make `agent.ts` fetch from it. For a hackathon, option (a) is simpler.
 
 ### 2.7 No conversation memory (3/5)
 
-OC, KC, and MiMo noted each query is stateless — the LLM has no memory of prior questions. Users can't say "now break that down by region."
+OC, KC, and Kimi noted each query is stateless — the LLM has no memory of prior questions. Users can't say "now break that down by region."
 
 **Verdict:** This is a design limitation, not a bug fix. For the demo, the 4 chips cover the use case. If time permits, send last 2-3 exchanges as conversation history.
 
@@ -122,11 +122,11 @@ These were flagged by only one auditor. Some are real; some are overcautious.
 | Finding | Auditor | Assessment |
 |---------|---------|------------|
 | `orders.total_amount` vs computed revenue divergence | CW | **Valid concern.** The instruction says "NEVER use orders.total_amount" but the LLM might comply. A post-query check would catch it. Low risk for 4 demo queries. |
-| `node-sql-parser` rejects valid SQLite (CTEs, window functions) | CW, MiMo | **Valid for ad-hoc queries.** Low risk for rehearsed demo chips. Could bite if judges go off-script. |
+| `node-sql-parser` rejects valid SQLite (CTEs, window functions) | CW, Kimi | **Valid for ad-hoc queries.** Low risk for rehearsed demo chips. Could bite if judges go off-script. |
 | No input sanitization / length limit | CW, E | **Valid.** Truncate to 500 chars client-side. 5-minute fix. |
 | Mobile sidebar visibility (`hidden lg:flex`) | OC | **Depends on demo screen.** If demo machine is ≥1024px, not an issue. If using a tablet, sidebar vanishes. |
 | Hardcoded stats bar ("10,000+ 订单") | OC | **Valid but low-risk.** Judges unlikely to verify exact numbers. If seed data changes, stats lie. |
-| `@ai-sdk/openai` installed but unused | MiMo | **Correct.** Part of the dead-deps finding. |
+| `@ai-sdk/openai` installed but unused | Kimi | **Correct.** Part of the dead-deps finding. |
 | Pie chart with 50+ slices | KC | **Edge case.** Unlikely with demo chips. Add `LIMIT 20` hint in system prompt for safety. |
 | Large result set (240 rows) performance | KC | **Low risk.** Recharts handles 240 bars fine. |
 | `api/schema/route.ts` uses `require()` not ESM | KC | **Correct.** Minor, but `require()` in a Next.js route is non-standard. |
@@ -142,10 +142,10 @@ These were flagged by only one auditor. Some are real; some are overcautious.
 | CW | 78–88 / 105 | Before presentation polish |
 | OC | 70 / 100 | "Functional core, incomplete polish" |
 | KC | 58–68 / 100 (unfixed) → 78–88 / 100 (all fixes) | Largest range |
-| MiMo | 78 / 105 | After P0+P1 fixes |
+| Kimi | 78 / 105 | After P0+P1 fixes |
 | E | 57–71 / 100 (unfixed) → 75–85 / 105 | After improvements |
 
-**Analysis:** The spread (57–88) reflects different assumptions. CW and MiMo assume fixes will be applied; OC and E score the current state. KC provides both. **The consensus "after fixes" ceiling is ~78–85/105.** The consensus "as-is" floor is ~57–70/100.
+**Analysis:** The spread (57–88) reflects different assumptions. CW and Kimi assume fixes will be applied; OC and E score the current state. KC provides both. **The consensus "after fixes" ceiling is ~78–85/105.** The consensus "as-is" floor is ~57–70/100.
 
 ### 4.2 What's the biggest risk?
 
@@ -154,14 +154,14 @@ These were flagged by only one auditor. Some are real; some are overcautious.
 | CW | No API timeout — "Could kill the demo window" |
 | OC | No offline fallback — "Demo dies" |
 | KC | Missing save metric — "Sidebar is dead weight" |
-| MiMo | JSON fragility — "Parsing fails silently" |
+| Kimi | JSON fragility — "Parsing fails silently" |
 | E | No timeout + no fallback — "Dead screen" |
 
 **Resolution:** These are all real and all related. The *most visible* risk is the dead sidebar (judges will notice). The *most catastrophic* risk is API failure with no fallback (demo dies). The *most likely* risk is JSON parsing failure (nondeterministic LLM). Fix all three — they're each under 30 minutes of work.
 
 ### 4.3 Streaming: must-have or nice-to-have?
 
-CW and OC list it as P1 (should-do). KC and MiMo list it as P2 (nice-to-have). E lists it as should-do.
+CW and OC list it as P1 (should-do). KC and Kimi list it as P2 (nice-to-have). E lists it as should-do.
 
 **Verdict:** It's a **demo impression** upgrade, not a stability fix. If you have 1 hour left after fixing P0 items, do it. If not, skip it. The 4 demo chips already work without streaming.
 

@@ -25,7 +25,7 @@
 |-------|-----------|----------|
 | Metric rerun invisible after first chat | `ChatPanel.tsx:262` — `history.length === 0` guard | **Demo-breaking** |
 | Metric rerun drops thinking/explanation | `page.tsx:26-30` — only passes sql, data, chartConfig | **Visible** |
-| API key hardcoded in source | `agent.ts:9` — `apiKey: "REMOVED_MIMO_API_KEY"` | **Security** |
+| API key hardcoded in source | `agent.ts:9` — `apiKey: "REMOVED_KIMI_API_KEY"` | **Security** |
 | DB connection not unified | `query/route.ts:19-23` — `new Database()` per request vs `db.ts` singleton | **Architecture** |
 | Dashboard.tsx unused | 214 lines, never imported in `page.tsx` | **Dead code** |
 | /api/schema unused | `schema/route.ts` — 72 lines, never consumed by frontend | **Dead code** |
@@ -145,7 +145,7 @@ try {
 - If the LLM can't fix the SQL, the demo looks worse than without the feature.
 - Judges may not notice the innovation unless explicitly narrated.
 
-### Confidence: **MEDIUM** — Strategy A is technically feasible but depends on MiMo's ability to fix SQL errors reliably. Strategy B is free but requires strong narration.
+### Confidence: **MEDIUM** — Strategy A is technically feasible but depends on Kimi's ability to fix SQL errors reliably. Strategy B is free but requires strong narration.
 
 ---
 
@@ -229,7 +229,7 @@ The current UI is functional but "thin" — it's a chat panel with a single char
 | 4:00-4:30 | **Business value:** "可部署的SaaS。企业数据团队市场。已上线，欢迎测试。" | Business potential |
 | 4:30-5:00 | **Close:** Show deployed URL, QR code if available. "谢谢。" | Call to action |
 
-### Fallback Plan (MiMo API Slow/Down)
+### Fallback Plan (Kimi API Slow/Down)
 
 | Scenario | Response |
 |----------|----------|
@@ -265,7 +265,7 @@ The current UI is functional but "thin" — it's a chat panel with a single char
 |---|-------|------|-----|--------|
 | 1 | **Metric rerun invisible after first chat** (`ChatPanel.tsx:262`) | User clicks metric sidebar after chatting → nothing happens. Demo flow breaks. | Remove `history.length === 0` guard. Append external results to history array instead. | 15 min |
 | 2 | **Metric rerun drops thinking/explanation** (`page.tsx:26-30`) | Rerun shows blank explanation text. Looks broken. | Add `thinking` and `explanation` to `SavedMetric` type and pass through in `handleRunMetric`. | 15 min |
-| 3 | **API key hardcoded in source** (`agent.ts:9`) | If source is reviewed, key is exposed. If key rotates, code must change. | Move to `process.env.MIMO_API_KEY` with `.env.local` fallback. | 10 min |
+| 3 | **API key hardcoded in source** (`agent.ts:9`) | If source is reviewed, key is exposed. If key rotates, code must change. | Move to `process.env.KIMI_API_KEY` with `.env.local` fallback. | 10 min |
 
 ### SHOULD Fix (Visible Quality Signal)
 
@@ -347,7 +347,7 @@ The previous QUINTE rounds converged on Railway (not Vercel, due to better-sqlit
 1. `npm install -g @railway/cli` (5 min)
 2. `railway login` (2 min)
 3. `railway init` → `railway up` (10 min)
-4. Set `MIMO_API_KEY` env var in Railway dashboard (5 min)
+4. Set `KIMI_API_KEY` env var in Railway dashboard (5 min)
 5. Verify `data/ecommerce.db` is included in deploy (check `.gitignore` — it's NOT in `.gitignore`, so it should be included)
 6. Test all 4 demo queries on Railway URL (15 min)
 7. If native module fails: add `nixpacks.toml` with build deps or use Dockerfile (30 min contingency)

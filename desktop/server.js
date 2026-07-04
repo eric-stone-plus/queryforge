@@ -50,12 +50,15 @@ function validateSQL(sql) {
 }
 
 // AI agent
-const BASE_URL = process.env.MIMO_BASE_URL || 'https://token-plan-cn.xiaomimimo.com/v1';
-const API_KEY = process.env.MIMO_API_KEY || '';
+const BASE_URL = process.env.KIMI_BASE_URL || process.env.AI_BASE_URL || 'https://api.kimi.com/coding/v1';
+const API_KEY = process.env.KIMI_API_KEY || process.env.AI_API_KEY || '';
+const AI_MODEL = process.env.KIMI_MODEL || process.env.AI_MODEL || 'kimi-for-coding';
+const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || '60000');
+const AI_TEMPERATURE = Number(process.env.AI_TEMPERATURE || '1');
 
 const SYSTEM_PROMPT = `You are a data analyst agent for a SQLite ecommerce database. Respond with a single valid JSON object only. No markdown.
 JSON fields: {"thinking":"reasoning","intent":"what user wants","sql":"single valid SQLite SELECT","chart_config":{"type":"bar|line|pie|area","x_key":"column","y_key":"column","title":"Chinese title"},"explanation":"brief Chinese explanation"}
-Rules: Revenue = SUM(oi.quantity*oi.unit_price*(1-oi.discount)). NEVER use orders.total_amount. SELECT only. SQLite syntax.`;
+Rules: Revenue = SUM(oi.quantity*oi.unit_price*(1-oi.discount)). NEVER use orders.total_amount. SELECT only. SQLite syntax. Prefer ASCII column aliases; quote any Chinese aliases with double quotes.`;
 
 async function callLLM(query) {
   if (!API_KEY) throw new Error('API key not configured');
@@ -64,14 +67,15 @@ async function callLLM(query) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
     body: JSON.stringify({
-      model: 'mimo-v2.5-pro',
+      model: AI_MODEL,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: query }
       ],
+      temperature: AI_TEMPERATURE,
       max_tokens: 2000,
     }),
-    signal: AbortSignal.timeout(30000),
+    signal: AbortSignal.timeout(AI_TIMEOUT_MS),
   });
 
   if (!resp.ok) throw new Error(`LLM error: ${resp.status}`);

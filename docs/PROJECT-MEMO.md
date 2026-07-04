@@ -7,9 +7,9 @@
 - QUINTE 审计：3 轮完成（代码审计 + 方向决策 + 打磨策略）
 
 ## 已完成
-- Next.js 14 + Tailwind + shadcn/ui + Recharts + better-sqlite3 + MiMo v2.5 Pro
+- Next.js 14 + Tailwind + shadcn/ui + Recharts + better-sqlite3 + Kimi K2.7
 - 10 个源文件，698 行核心代码
-- 4 个 demo 查询全部跑通（真实 MiMo API，15-30 秒响应）
+- 4 个 demo 查询全部跑通（Kimi K2.7 / ClawHunt API，带缓存兜底）
 - 离线 fallback（4 个查询预缓存，API 挂了自动用缓存）
 - MetricSidebar 保存/复用功能
 - LLM 30 秒超时 + auto LIMIT + SQL 安全校验
@@ -48,7 +48,7 @@
 - 现实预期：85-93/105
 
 ## QUINTE 方法论
-见 QUINTE-METHODOLOGY.md — 包含工具清单、成本分析（全部用小米 MiMo token plan，单次审查约 ¥2-5）、审查轮次和实际成果。
+见 QUINTE-METHODOLOGY.md — 包含工具清单、成本分析、审查轮次和实际成果。
 
 ## 评分标准速查
 1. Demo 现场可用 25 — 核心功能跑通，无 bug
@@ -61,8 +61,8 @@
 
 ## Rules 已同步
 - Codex: --sandbox danger-full-access，英文 prompt，默认规则
-- QUINTE: 五方 codewhale/opencode/kilocode/mimocode+omp，artifact contract
-- OMP: xiaomi-token-plan-cn/mimo-v2.5-pro（无 -p flag）
-- MiMo Code: provider=xiaomi, model=xiaomi/mimo-v2.5-pro（非 xiaomi-token-plan-cn）
+- QUINTE: 五方 codewhale/opencode/kilocode/kimicode+omp，artifact contract
+- OMP: 模型 provider/model ID 需单独验证（无 -p flag）
+- Model agents: provider ID 与 model ID 不能按控制台显示名猜测
 - OpenCode: 用 cd 切目录，不用 --dir 或 -- 分隔符
 - HIGHBALL: interrupt-tolerant dispatch

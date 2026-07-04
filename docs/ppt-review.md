@@ -70,7 +70,7 @@ Current gap: the deck does not show enough of the real engineering that exists i
 
 Use these concrete product facts:
 
-- MiMo v2.5 Pro generates structured JSON with intent, SQL, chart config, and explanation.
+- Kimi K2.7 Code generates structured JSON with intent, SQL, chart config, and explanation.
 - SQL is parsed and restricted to a single `SELECT`.
 - Queries auto-add `LIMIT 500`.
 - Database access is read-only.
@@ -145,7 +145,7 @@ Current content:
 
 - "QueryForge"
 - "Natural-language business data queries with charts on demand."
-- Live context: built in 72 hours, ClawHunt, MiMo v2.5 Pro, demo data scope.
+- Live context: built in 72 hours, ClawHunt, Kimi K2.7 Code, demo data scope.
 - URL.
 
 What is missing:
@@ -162,7 +162,7 @@ What would raise scores:
 |---|---|
 | Demo | Add a visible "Live deployed demo" QR/URL and a small strip: "Ask -> SQL-safe query -> chart -> save metric." |
 | PMF | Name the user immediately: "For operations teams waiting on analyst queues." |
-| Tech | Keep MiMo and dataset scope, but add "SQL-safe agent" or "SELECT-only read-only DB" as a credibility marker. |
+| Tech | Keep Kimi and dataset scope, but add "SQL-safe agent" or "SELECT-only read-only DB" as a credibility marker. |
 | Innovation | Replace generic Text2SQL framing with "governed self-service analytics." |
 | Business | Add "team workspace for recurring business metrics" so it feels like a SaaS product, not a demo utility. |
 | Presentation | Use a claim headline: "QueryForge turns analyst ticket queues into self-service business answers." |
@@ -172,7 +172,7 @@ Recommended rewrite:
 - Title: `QueryForge`
 - Claim: `Analysts define the truth. Business teams move on it.`
 - Subhead: `A governed AI data agent that turns natural-language business questions into SQL-safe charts and reusable metrics.`
-- Proof strip: `Live Railway demo | MiMo v2.5 Pro | 10K orders | 8 KPI cards | 6 dashboard panels | Saved metric library`
+- Proof strip: `Live Railway demo | Kimi K2.7 Code | 10K orders | 8 KPI cards | 6 dashboard panels | Saved metric library`
 - Footer/QR: live URL and GitHub/ClawHunt listing if available.
 
 Presenter goal: in 15 seconds, judges should understand the product category, target user, and why it is not just ChatGPT.
@@ -394,7 +394,7 @@ Recommended rebuild:
 - Title: `The agent is constrained enough for business use.`
 - Main pipeline:
   1. `Natural-language question`
-  2. `MiMo structured output: intent + SQL + chart config + explanation`
+  2. `Kimi structured output: intent + SQL + chart config + explanation`
   3. `SQL parser: single SELECT only`
   4. `Read-only database + LIMIT 500`
   5. `Chart/KPI/table output`
@@ -507,7 +507,7 @@ Current content:
 - QueryForge.
 - "Let business teams ask for data directly while analysts own the reusable metrics."
 - Live demo URL and GitHub.
-- Built at ClawHunt in 72 hours with MiMo v2.5 Pro.
+- Built at ClawHunt in 72 hours with Kimi K2.7 Code.
 
 What is missing:
 
@@ -548,7 +548,7 @@ Recommended rewrite:
 The deck should use facts already visible in the codebase and docs:
 
 - Hosted demo: `queryforge-production-8d6f.up.railway.app`
-- Model: MiMo v2.5 Pro
+- Model: Kimi K2.7 Code
 - Demo data: 10K orders, 25K order items, 500 products, 1,000 users, 8 regions, 20 categories
 - Product UI: KPI row, dashboard panels, chat/query surface, metric sidebar
 - Demo prompts:

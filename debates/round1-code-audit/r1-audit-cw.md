@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-QueryForge is a well-structured Next.js 14 + SQLite + MiMo v2.5 Pro data analysis agent with a clean UI, solid seed data, and a real AI pipeline. The core loop (natural language → SQL → chart) works. However, there are concrete stability risks for live demo, some dead code, and a few architectural shortcuts that would lose points under close technical review.
+QueryForge is a well-structured Next.js 14 + SQLite + Kimi v2.5 Pro data analysis agent with a clean UI, solid seed data, and a real AI pipeline. The core loop (natural language → SQL → chart) works. However, there are concrete stability risks for live demo, some dead code, and a few architectural shortcuts that would lose points under close technical review.
 
 **Estimated Score Ceiling:** ~78–88 / 105 (before presentation polish)
 
@@ -19,11 +19,11 @@ QueryForge is a well-structured Next.js 14 + SQLite + MiMo v2.5 Pro data analysi
 
 ### 🔴 CRITICAL
 
-**1.1 No API timeout or retry.** `agent.ts` calls `generateText()` with no timeout. If the MiMo API hangs or returns slowly, the UI spins indefinitely with no user feedback beyond "AI 正在分析数据...". A single slow response could kill the 3-minute demo window.
+**1.1 No API timeout or retry.** `agent.ts` calls `generateText()` with no timeout. If the Kimi API hangs or returns slowly, the UI spins indefinitely with no user feedback beyond "AI 正在分析数据...". A single slow response could kill the 3-minute demo window.
 
 - **Fix:** Add `maxDuration` or `abortSignal` with a 10-second timeout. Return a user-friendly timeout error.
 
-**1.2 No demo/offline fallback.** The entire app depends on a live MiMo API call (`https://token-plan-cn.xiaomimimo.com/v1`). If the API is down, rate-limited, or the network blinks during the demo, the app is completely non-functional.
+**1.2 No demo/offline fallback.** The entire app depends on a live Kimi API call (`https://api.kimi.com/coding/v1`). If the API is down, rate-limited, or the network blinks during the demo, the app is completely non-functional.
 
 - **Fix:** Cache the 4 demo query results as static JSON. If the API call fails within 3 seconds, fall back to pre-cached results with a "离线演示" badge. Judges will see a working product regardless.
 
@@ -121,7 +121,7 @@ This is presentation-dependent. The code supports 4 demo scenarios via chips. Th
 - Real SQLite with 10K+ rows — not a toy dataset
 - SQL injection protection via AST parsing — serious security posture
 - Recharts visualization with 4 chart types — visual polish
-- MiMo v2.5 Pro integration with structured output — real AI usage
+- Kimi v2.5 Pro integration with structured output — real AI usage
 - MetricSidebar concept (if completed) enables reusable analysis
 
 **Risks:**

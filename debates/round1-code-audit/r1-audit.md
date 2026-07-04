@@ -2,7 +2,7 @@
 
 **Project:** QueryForge · AI 数据分析智能体  
 **Track:** Track C — Business on AI (商业看板 / 数据洞察)  
-**Stack:** Next.js 14.2 · Tailwind · shadcn/ui · Recharts · better-sqlite3 · Vercel AI SDK · MiMo v2.5 Pro  
+**Stack:** Next.js 14.2 · Tailwind · shadcn/ui · Recharts · better-sqlite3 · Vercel AI SDK · Kimi v2.5 Pro  
 **Codebase:** ~10 source files, ~1500 lines  
 
 ---
@@ -26,8 +26,8 @@ QueryForge is a clean, narrowly-scoped NL→SQL→Chart pipeline for an ecommerc
 
 | # | Issue | Severity | Detail |
 |---|-------|----------|--------|
-| D1 | **No timeout / abort on LLM call** | 🔴 High | `runAgent()` calls `generateText()` with no timeout. MiMo API latency is unpredictable on a hackathon Wi-Fi. A 30s+ hang during live demo = dead screen. No AbortController, no client-side timeout, no retry. |
-| D2 | **No graceful LLM failure mode** | 🔴 High | If MiMo returns malformed JSON (no `{`, extra text), `extractJson()` throws → 500 error → red box. No retry, no fallback prompt. LLMs are nondeterministic; this *will* happen once in 10 demo runs. |
+| D1 | **No timeout / abort on LLM call** | 🔴 High | `runAgent()` calls `generateText()` with no timeout. Kimi API latency is unpredictable on a hackathon Wi-Fi. A 30s+ hang during live demo = dead screen. No AbortController, no client-side timeout, no retry. |
+| D2 | **No graceful LLM failure mode** | 🔴 High | If Kimi returns malformed JSON (no `{`, extra text), `extractJson()` throws → 500 error → red box. No retry, no fallback prompt. LLMs are nondeterministic; this *will* happen once in 10 demo runs. |
 | D3 | **`getDb()` opens new connection per request in query route** | 🟡 Medium | `/api/query/route.ts` line 20: `require("better-sqlite3")` creates a **new** `Database()` instance every request. The `agent.ts` singleton is not shared. Under load or rapid re-runs, WAL locking could cause `SQLITE_BUSY`. Not a single-user demo blocker, but fragile. |
 | D4 | **Client `.catch(() => {})` swallows metric rerun errors** | 🟡 Medium | `page.tsx:33` — if the query API fails when clicking a saved metric, the error is silently swallowed. User sees no feedback. |
 | D5 | **No input sanitization feedback** | 🟢 Low | Empty string is blocked, but there's no character limit. A very long prompt could hit token limits silently. |
@@ -88,7 +88,7 @@ QueryForge is a clean, narrowly-scoped NL→SQL→Chart pipeline for an ecommerc
 ### 1.4 创新性 (15 pts) — **Est. 8–10/15**
 
 **Strengths:**
-- Using MiMo v2.5 Pro (not OpenAI) shows model diversity awareness.
+- Using Kimi v2.5 Pro (not OpenAI) shows model diversity awareness.
 - The thinking/reasoning display (collapsible) is a nice touch — shows the agent's "brain."
 - Chinese-native UX for a Chinese hackathon audience.
 
@@ -155,7 +155,7 @@ QueryForge is a clean, narrowly-scoped NL→SQL→Chart pipeline for an ecommerc
 
 | # | Risk | Likelihood | Impact | Mitigation |
 |---|------|-----------|--------|------------|
-| S1 | **MiMo API timeout / 502** | Medium | 🔴 Demo hangs | Add 15s timeout + retry + friendly error |
+| S1 | **Kimi API timeout / 502** | Medium | 🔴 Demo hangs | Add 15s timeout + retry + friendly error |
 | S2 | **LLM returns invalid JSON** | Medium | 🔴 Red error box | Add retry or use `generateObject()` |
 | S3 | **Wi-Fi drops at venue** | Medium | 🔴 No LLM, no demo | Have a **local fallback**: pre-cache the 4 demo chip responses as JSON. If the API fails, serve the cached response with a note "使用缓存数据演示." |
 | S4 | **SQLite WAL lock** | Low | 🟡 Query error | Share the singleton `getDb()` across routes |

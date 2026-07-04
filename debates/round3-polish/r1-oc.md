@@ -26,7 +26,7 @@ The scoring rubric weights:
 | Priority | Action | Effort | Score Impact | Dimension |
 |----------|--------|--------|-------------|-----------|
 | 1 | **Wire Dashboard.tsx into page.tsx** — multi-chart grid showing 2-3 pre-loaded KPI charts on page load | 2h | +4-6 pts | Demo (25) + PMF (20) |
-| 2 | **"AI Insight" second LLM call** — after SQL executes, call MiMo again to generate a natural-language business insight summary. Shows multi-step reasoning | 3h | +3-5 pts | 创新性 (15) + 技术 (20) |
+| 2 | **"AI Insight" second LLM call** — after SQL executes, call Kimi again to generate a natural-language business insight summary. Shows multi-step reasoning | 3h | +3-5 pts | 创新性 (15) + 技术 (20) |
 | 3 | **Dynamic stats bar** — query real counts from DB instead of hardcoded strings | 30min | +1-2 pts | Demo (25) |
 | 4 | **UI polish sprint** — loading skeletons, smooth transitions, data table below chart, CSV export button | 3h | +2-3 pts | Demo (25) + PMF (20) |
 | 5 | **Deploy to Railway + ClawHunt listing** | 2h | +3-5 pts | Bonus (+5) |
@@ -49,7 +49,7 @@ The scoring rubric weights:
 
 ### Assessment
 
-All prior auditors agree: **创新性 is the ceiling-limiter at 7-10/15.** Text2SQL is a well-known pattern (ChatGPT, DataGPT, Julius AI, etc.). The current implementation is a single LLM call → SQL → chart. No agent loop, no self-correction, no multi-step reasoning. KC and MiMo correctly identified this as "shallow."
+All prior auditors agree: **创新性 is the ceiling-limiter at 7-10/15.** Text2SQL is a well-known pattern (ChatGPT, DataGPT, Julius AI, etc.). The current implementation is a single LLM call → SQL → chart. No agent loop, no self-correction, no multi-step reasoning. KC and Kimi correctly identified this as "shallow."
 
 ### Specific Narrative Strategies to Reach 12-14/15
 
@@ -180,16 +180,16 @@ Add to the 3-minute flow:
 | 3:00-3:30 | **SQL Security demo** — show the SQL query, explain AST validation, SELECT-only enforcement |
 | 3:30-4:00 | **AI Insight deep dive** — expand the insight panel, show how AI interprets business meaning |
 | 4:00-4:30 | **Metric replay** — show multiple saved metrics, demonstrate the analyst workflow |
-| 4:30-5:00 | **Architecture + commercial pitch** — "Next.js + SQLite + MiMo, 单次 API 调用, 2-4 秒响应, SaaS 模式" |
+| 4:30-5:00 | **Architecture + commercial pitch** — "Next.js + SQLite + Kimi, 单次 API 调用, 2-4 秒响应, SaaS 模式" |
 
 ### Fallback Plan
 
-**If MiMo API is slow (>10s):**
+**If Kimi API is slow (>10s):**
 1. First line: pre-cached results (already implemented, 4 chips)
 2. Second line: pre-open the page with a dashboard already loaded before demo starts
 3. Third line: have the demo script.md open on a second screen with talking points to fill time
 
-**If MiMo API is completely down:**
+**If Kimi API is completely down:**
 1. Use cached results exclusively — show "离线演示" badge (already implemented)
 2. Pivot narrative: "今天的网络环境展示了我们的离线能力——即使 API 不可用，预缓存的结果依然完整。"
 3. Focus demo on the UI features: save metrics, metric replay, chart exploration
@@ -219,10 +219,10 @@ Add to the 3-minute flow:
 
 | # | Issue | Why It's Blocking | Fix | Effort |
 |---|-------|-------------------|-----|--------|
-| 1 | **API key hardcoded in agent.ts:9** | If key is revoked or rate-limited during demo, app dies. Also a security red flag for judges. | Move to `process.env.MIMO_API_KEY` (already in .env.local per PROJECT-MEMO) | 5min |
+| 1 | **API key hardcoded in agent.ts:9** | If key is revoked or rate-limited during demo, app dies. Also a security red flag for judges. | Move to `process.env.KIMI_API_KEY` (already in .env.local per PROJECT-MEMO) | 5min |
 | 2 | **`/api/query/route.ts` creates new DB per request** | File descriptor exhaustion under repeated demo clicks. Confirmed by all 4 prior auditors. | Import `queryDb` from `@/lib/db` | 5min |
 | 3 | **Empty catch in page.tsx:33** | Metric rerun failures are invisible. If the query endpoint errors, user sees nothing. | Add error state display | 5min |
-| 4 | **`extractJson` greedy regex** | If MiMo returns markdown fences or multiple JSON blocks, parsing breaks. Nondeterministic. | Use balanced-brace extraction | 15min |
+| 4 | **`extractJson` greedy regex** | If Kimi returns markdown fences or multiple JSON blocks, parsing breaks. Nondeterministic. | Use balanced-brace extraction | 15min |
 
 **Total MUST fix effort: 30min. These are non-negotiable.**
 
@@ -267,7 +267,7 @@ Add to the 3-minute flow:
 
 ### Assessment
 
-Previous QUINTE verdict: Railway (not Vercel) because `better-sqlite3` is a native C++ addon incompatible with Vercel serverless. This is correct and confirmed by CW, OMP, and MiMo.
+Previous QUINTE verdict: Railway (not Vercel) because `better-sqlite3` is a native C++ addon incompatible with Vercel serverless. This is correct and confirmed by CW, OMP, and Kimi.
 
 Current state per PROJECT-MEMO: "未部署到 Clawhunt / Vercel / Railway." Server runs on localhost:3456.
 
@@ -309,7 +309,7 @@ Current state per PROJECT-MEMO: "未部署到 Clawhunt / Vercel / Railway." Serv
 **Deployment Checklist:**
 1. Create Railway account + project
 2. `railway up` from the data-agent directory
-3. Set `MIMO_API_KEY` env var in Railway dashboard
+3. Set `KIMI_API_KEY` env var in Railway dashboard
 4. Verify SQLite file is bundled (check `data/ecommerce.db` path)
 5. Test all 4 demo chips on the Railway URL
 6. Submit to ClawHunt with the public URL
@@ -338,7 +338,7 @@ Current state per PROJECT-MEMO: "未部署到 Clawhunt / Vercel / Railway." Serv
 
 ### Expected Final Score: **85-95/105** (including +3-5 bonus)
 
-The ceiling is ~90-95 if everything goes smoothly. The floor is ~82-85 if deployment fails and AI Insight isn't implemented. The biggest single-variable risk is the MiMo API reliability during the live demo — mitigated by the 4 cached results.
+The ceiling is ~90-95 if everything goes smoothly. The floor is ~82-85 if deployment fails and AI Insight isn't implemented. The biggest single-variable risk is the Kimi API reliability during the live demo — mitigated by the 4 cached results.
 
 ### Key Insight for Maximum Score
 

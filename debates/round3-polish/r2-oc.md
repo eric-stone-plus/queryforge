@@ -2,7 +2,7 @@
 
 **Reviewer:** OpenCode (oc)
 **Date:** 2026-07-04
-**R1 Artifacts Reviewed:** r1-cw.md, r1-oc.md (self), r1-kc.md, r1-mimo.md, r1-omp.md
+**R1 Artifacts Reviewed:** r1-cw.md, r1-oc.md (self), r1-kc.md, r1-kimi.md, r1-omp.md
 
 ---
 
@@ -24,7 +24,7 @@
 | CW | 62-72 |
 | OC (me) | 75-85 |
 | KC | 64-74 |
-| MiMo | 65-75 |
+| Kimi | 65-75 |
 | OMP | 57-71 |
 
 CW found two P0 items the rest of us missed:
@@ -39,7 +39,7 @@ CW found two P0 items the rest of us missed:
 |---------|--------------------------------|
 | OC (me) | AI Insight layer (second LLM call) — 3h |
 | KC | Self-healing SQL agent — 2h |
-| MiMo | Self-correction + multi-view — 2h |
+| Kimi | Self-correction + multi-view — 2h |
 | OMP | "Metrics-as-Code" framing (0h code, 2h narrative) |
 | CW | "推理过程可视化 + 错误自愈" — 3h or 0h (narrative only) |
 
@@ -50,7 +50,7 @@ I initially recommended the AI Insight layer (second LLM call for business analy
 
 OMP's "Metrics-as-Code" framing is strong as a **narrative overlay** but weak as a code change — the MetricSidebar already exists, so the "innovation" is reframing existing work, not building something new. This is fine for Pitch points but won't move the Innovation needle much on its own.
 
-**CHANGED: My recommended innovation approach from AI Insight layer BECAUSE KC and MiMo both argue for self-correction with better point-per-hour reasoning.** However, I still think the AI Insight layer is worth doing *in addition* if time permits (total: 5h for both).
+**CHANGED: My recommended innovation approach from AI Insight layer BECAUSE KC and Kimi both argue for self-correction with better point-per-hour reasoning.** However, I still think the AI Insight layer is worth doing *in addition* if time permits (total: 5h for both).
 
 **3. Deployment Strategy — CW's "Plan B" framing is wrong.**
 
@@ -65,7 +65,7 @@ CW's Dockerfile advice is valuable — I'll include it in the action plan.
 
 ### Gaps All Auditors Missed
 
-1. **The `.env.local` issue is unresolved.** PROJECT-MEMO notes "apiKey 无法从 .env.local 读取." No auditor verified whether this was fixed in Next.js 14.2.x. If it's still broken, moving the API key to env vars will break the app. **Action: Test `process.env.MIMO_API_KEY` locally before removing the hardcoded key.**
+1. **The `.env.local` issue is unresolved.** PROJECT-MEMO notes "apiKey 无法从 .env.local 读取." No auditor verified whether this was fixed in Next.js 14.2.x. If it's still broken, moving the API key to env vars will break the app. **Action: Test `process.env.KIMI_API_KEY` locally before removing the hardcoded key.**
 
 2. **No one stress-tested the demo chip queries.** All 4 cached queries in `demo-cache.ts` are assumed to work. Did anyone verify the SQL actually returns meaningful data from the seed database? If "复购率最高的用户" returns 0 rows because the seed data has no repeat buyers, the demo fails silently.
 
@@ -81,7 +81,7 @@ CW's Dockerfile advice is valuable — I'll include it in the action plan.
 |---|--------|--------|--------|--------|
 | 1 | Fix remaining P0: DB singleton in query/route.ts + timeout 30→15s | +2-3 (Demo) | 15 min | CW verification |
 | 2 | Wire Dashboard.tsx as landing view with 3-4 pre-loaded charts | +4-6 (Demo+PMF) | 2.5h | 5/5 consensus |
-| 3 | Self-healing SQL retry loop | +3-5 (Innovation) | 2h | KC+MiMo |
+| 3 | Self-healing SQL retry loop | +3-5 (Innovation) | 2h | KC+Kimi |
 | 4 | ClawHunt 上架 + 游园展示 | +3-5 (Bonus) | 30 min | OMP (guaranteed points) |
 | 5 | Rehearse demo 5× with stopwatch | +3-4 (Pitch+Demo) | 4h | CW (most underrated) |
 | 6 | Dynamic KPI stats from DB | +1-2 (Demo) | 30 min | 4/5 consensus |
@@ -107,9 +107,9 @@ CW's Dockerfile advice is valuable — I'll include it in the action plan.
 **1. Primary innovation mechanism — KC wins.**
 
 The options cluster into three camps:
-- **Technical feature:** Self-healing SQL (KC, MiMo Option A, CW partial) — adds agent behavior
+- **Technical feature:** Self-healing SQL (KC, Kimi Option A, CW partial) — adds agent behavior
 - **Product framing:** "Metrics-as-Code" (OMP) — reframes existing MetricSidebar
-- **UX layer:** AI Insight second call (OC) + multi-view (MiMo Option C)
+- **UX layer:** AI Insight second call (OC) + multi-view (Kimi Option C)
 
 KC's self-healing SQL is the strongest because:
 - It's **visible** in a 3-minute demo (type a tricky query → see error → see fix)
@@ -119,17 +119,17 @@ KC's self-healing SQL is the strongest because:
 
 OMP's "Metrics-as-Code" is a good **pitch line** but not a good **demo feature** — the MetricSidebar already works, so the "innovation" is narration, not code. Use it in the 5-minute demo Day pitch, not as the primary Innovation differentiator.
 
-**2. Live demo of self-correction — MiMo is right about the risk.**
+**2. Live demo of self-correction — Kimi is right about the risk.**
 
-MiMo notes: "Self-correction demo needs a query that reliably fails first attempt — fragile." This is correct. If the self-correction triggers on every query, the demo is slow. If it never triggers, the feature is invisible.
+Kimi notes: "Self-correction demo needs a query that reliably fails first attempt — fragile." This is correct. If the self-correction triggers on every query, the demo is slow. If it never triggers, the feature is invisible.
 
 **Solution:** Pre-cache a self-correction result in `demo-cache.ts`. For the 3-minute flow, show the cached "error → fix" sequence. For the 5-minute Demo Day flow, attempt it live as a bonus moment — if it works, great; if not, use the cached version.
 
 ### Gaps All Auditors Missed
 
-1. **No one analyzed whether MiMo's output format is reliable enough for the self-correction loop.** If MiMo returns inconsistent JSON when given an error context, the retry will also fail. Need to test this with actual MiMo API calls.
+1. **No one analyzed whether Kimi's output format is reliable enough for the self-correction loop.** If Kimi returns inconsistent JSON when given an error context, the retry will also fail. Need to test this with actual Kimi API calls.
 
-2. **The "wow moment" depends on the thinking chain quality.** No auditor read a sample thinking chain output. If MiMo's reasoning is generic ("I will write a SQL query to answer this question"), the demo loses its punch. **Action: Read a cached thinking chain and evaluate whether it's demo-worthy.**
+2. **The "wow moment" depends on the thinking chain quality.** No auditor read a sample thinking chain output. If Kimi's reasoning is generic ("I will write a SQL query to answer this question"), the demo loses its punch. **Action: Read a cached thinking chain and evaluate whether it's demo-worthy.**
 
 3. **No one considered the "ChatGPT objection."** A judge will ask "why not just use ChatGPT?" The best answer isn't about self-correction — it's about **database connectivity** (QueryForge connects to your DB, ChatGPT doesn't) and **SQL safety** (AST validation, SELECT-only enforcement). These are existing features that need better narration, not new code.
 
@@ -158,13 +158,13 @@ MiMo notes: "Self-correction demo needs a query that reliably fails first attemp
 
 **1. KPI cards vs. dynamic stats — both are good, KPI cards are better.**
 
-CW and KC recommend replacing the hardcoded `STATS` array with real DB counts. MiMo and OMP recommend KPI cards with real data. These are essentially the same thing, but KPI cards are visually more impressive. The stats bar is a thin strip; KPI cards are prominent visual elements.
+CW and KC recommend replacing the hardcoded `STATS` array with real DB counts. Kimi and OMP recommend KPI cards with real data. These are essentially the same thing, but KPI cards are visually more impressive. The stats bar is a thin strip; KPI cards are prominent visual elements.
 
 **Recommendation:** Replace the stats bar with 4 KPI cards (total orders, total revenue, avg order value, top region). Query from DB on mount. This addresses both the "hardcoded" problem and the "thin UI" problem simultaneously.
 
 **2. Tab navigation vs. dashboard-as-landing — dashboard-as-landing is simpler.**
 
-KC recommends tab navigation (Chat / Dashboard / Metrics). OC, MiMo, OMP recommend showing the dashboard on load with chat below or as a toggle. Tab navigation adds complexity (new component, routing logic) for marginal benefit. In a 3-minute demo, you don't want to explain tabs.
+KC recommends tab navigation (Chat / Dashboard / Metrics). OC, Kimi, OMP recommend showing the dashboard on load with chat below or as a toggle. Tab navigation adds complexity (new component, routing logic) for marginal benefit. In a 3-minute demo, you don't want to explain tabs.
 
 **Recommendation:** Dashboard on load, chat input below the dashboard charts. When user submits a query, scroll to the chat section. Simple, no new routing.
 
@@ -194,7 +194,7 @@ KC recommends tab navigation (Chat / Dashboard / Metrics). OC, MiMo, OMP recomme
 ### Unanimous Findings (5/5 agree)
 
 1. **Chips first, typed query last.** Chips are cached and guaranteed. Typed queries are risky.
-2. **Have a fallback plan for MiMo API failure.** 4 cached results in `demo-cache.ts`.
+2. **Have a fallback plan for Kimi API failure.** 4 cached results in `demo-cache.ts`.
 3. **Rehearse with a stopwatch.** The difference between a good demo and a bad demo is rehearsal, not features.
 4. **Show the thinking chain.** The expandable `<details>` with "查看推理过程" is the closest thing to a "wow moment."
 
@@ -202,13 +202,13 @@ KC recommends tab navigation (Chat / Dashboard / Metrics). OC, MiMo, OMP recomme
 
 **1. 3-minute flow: live freeform query — CW is right to be cautious.**
 
-KC and MiMo include a live typed query in the 3-minute flow. CW warns: "If the typed query takes >10s, immediately pivot to a pre-cached result." CW is right. In a 3-minute flow with 2 judges, you cannot afford a 15-second dead zone.
+KC and Kimi include a live typed query in the 3-minute flow. CW warns: "If the typed query takes >10s, immediately pivot to a pre-cached result." CW is right. In a 3-minute flow with 2 judges, you cannot afford a 15-second dead zone.
 
 **Recommendation:** For 赛区预选 (3 min), use chips only. Type a freeform query only if time permits and API is confirmed responsive. For Demo Day (5 min), include a typed query as the 3rd demo — but have a cached fallback ready.
 
-**2. Self-correction demo timing — MiMo's 5-min flow placement is best.**
+**2. Self-correction demo timing — Kimi's 5-min flow placement is best.**
 
-CW puts the self-correction in the 5-min flow as optional. MiMo puts it at 2:00-2:40 as a dedicated segment. MiMo's placement is better because:
+CW puts the self-correction in the 5-min flow as optional. Kimi puts it at 2:00-2:40 as a dedicated segment. Kimi's placement is better because:
 - By minute 2, the audience is warmed up
 - It's a distinct "wow" moment that breaks the query-chart-query-chart monotony
 - It needs its own narrative beat: "Watch what happens when the AI makes a mistake"
@@ -254,7 +254,7 @@ KC's assessment is correct. The demo flow includes "save metric → click to rer
 
 **2. `extractJson` greedy regex — CW is right to flag it, but KC is right to deprioritize it.**
 
-CW lists the `extractJson` greedy regex as MUST fix. KC lists it as CAN IGNORE. The truth is in between: it's a real bug that could bite during live demo (if MiMo returns markdown fences), but it works for all 4 cached queries. **Action: Fix it if time permits (10 min), but don't block on it.** The demo cache covers the failure mode.
+CW lists the `extractJson` greedy regex as MUST fix. KC lists it as CAN IGNORE. The truth is in between: it's a real bug that could bite during live demo (if Kimi returns markdown fences), but it works for all 4 cached queries. **Action: Fix it if time permits (10 min), but don't block on it.** The demo cache covers the failure mode.
 
 **3. Timeout — CW is right, the rest of us missed it.**
 
@@ -296,7 +296,7 @@ CW found that the timeout is 30s, not 15s as specified in the R3 verdict. 30s is
 
 **1. Deploy as Plan A or Plan B — everyone except CW says Plan A.**
 
-CW recommends "Deploy as Plan B, demo locally as Plan A." KC, MiMo, OMP, and I all recommend deploying as the primary plan with localhost as backup. CW's reasoning (avoid deployment debugging) is sound, but the framing is wrong. The ClawHunt bonus is +3 points for ~1.5h of work. That's the best ROI in the entire project.
+CW recommends "Deploy as Plan B, demo locally as Plan A." KC, Kimi, OMP, and I all recommend deploying as the primary plan with localhost as backup. CW's reasoning (avoid deployment debugging) is sound, but the framing is wrong. The ClawHunt bonus is +3 points for ~1.5h of work. That's the best ROI in the entire project.
 
 **Recommendation:** Deploy to Railway as Plan A, night before. If it fails, localhost is Plan B. CW's Dockerfile advice is valuable — include it in the deployment plan.
 
@@ -318,7 +318,7 @@ KC's sequencing is best because: deployment should happen after the UI is polish
 
 2. **No one planned for Railway cold starts.** Free tier Railway apps sleep after inactivity. First request takes 30-60s. **Action: Hit the Railway URL 2 minutes before the demo to wake it up.**
 
-3. **No one considered the MiMo API key on Railway.** The hardcoded key in `agent.ts` will work on Railway, but if we move it to `.env.local` (as recommended), we need to set it in Railway's environment variables too. **Action: Set `MIMO_API_KEY` in Railway dashboard.**
+3. **No one considered the Kimi API key on Railway.** The hardcoded key in `agent.ts` will work on Railway, but if we move it to `.env.local` (as recommended), we need to set it in Railway's environment variables too. **Action: Set `KIMI_API_KEY` in Railway dashboard.**
 
 4. **No one mentioned the SQLite write concern on Railway.** Railway containers have ephemeral storage. If the app writes to `data/ecommerce.db` (e.g., saving metrics to localStorage is fine, but if the app writes to the DB file), changes will be lost on redeploy. **Action: Verify the app only reads from the DB file, never writes to it during runtime.**
 
@@ -328,7 +328,7 @@ KC's sequencing is best because: deployment should happen after the UI is polish
 |---|--------|--------|
 | 1 | Create Railway account + project (do TODAY) | 15 min |
 | 2 | Check .gitignore — ensure data/ecommerce.db is included | 5 min |
-| 3 | Deploy to Railway + set MIMO_API_KEY env var | 1h |
+| 3 | Deploy to Railway + set KIMI_API_KEY env var | 1h |
 | 4 | Test all 4 demo chips on Railway URL | 30 min |
 | 5 | Pre-warm Railway URL 2 min before demo | 0 min (during demo) |
 | 6 | Register on ClawHunt with public URL | 15 min |
@@ -342,7 +342,7 @@ KC's sequencing is best because: deployment should happen after the UI is polish
 | Change | Reason |
 |--------|--------|
 | Lowered baseline score estimate from 75-85 to 65-75 | CW verified code: DB singleton fix incomplete, timeout not reduced |
-| Switched innovation recommendation from AI Insight to self-healing SQL | KC and MiMo both argue better point-per-hour ratio |
+| Switched innovation recommendation from AI Insight to self-healing SQL | KC and Kimi both argue better point-per-hour ratio |
 | Upgraded metric rerun bugs from SHOULD to MUST fix | KC correctly identifies demo flow breakage |
 
 ### Highest-Confidence Recommendations (all 5 auditors agree)
@@ -355,12 +355,12 @@ KC's sequencing is best because: deployment should happen after the UI is polish
 
 ### Most Controversial Recommendation
 
-**Self-healing SQL vs. AI Insight layer.** KC and MiMo favor self-healing (2h, +3-5 Innovation). I initially favored AI Insight (3h, +3-5 Innovation). After cross-examination, self-healing is better because it's cheaper and more technically impressive. However, the two are not mutually exclusive — if time permits (5h total), both can be done.
+**Self-healing SQL vs. AI Insight layer.** KC and Kimi favor self-healing (2h, +3-5 Innovation). I initially favored AI Insight (3h, +3-5 Innovation). After cross-examination, self-healing is better because it's cheaper and more technically impressive. However, the two are not mutually exclusive — if time permits (5h total), both can be done.
 
 ### Blind Spots Across All R1 Audits
 
 1. **Seed data quality** — no one verified the demo queries return compelling data
-2. **MiMo API reliability** — no one tested whether the thinking chain is demo-worthy
+2. **Kimi API reliability** — no one tested whether the thinking chain is demo-worthy
 3. **`.env.local` issue** — PROJECT-MEMO flags it but no auditor verified it's resolved
 4. **`node-sql-parser` compatibility** — no one checked if cached SQL passes validation
 5. **Projector resolution** — UI uses `hidden lg:flex`, may hide sidebar at 1280×720

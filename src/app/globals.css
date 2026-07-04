@@ -85,3 +85,21 @@ pre, code {
 .transition-default {
   transition: all 0.15s ease;
 }
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  pre, code {
+    font-size: 12px;
+  }
+}

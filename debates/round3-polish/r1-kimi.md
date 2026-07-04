@@ -1,4 +1,4 @@
-# R1 MiMo Audit: QueryForge Final Polish
+# R1 Kimi Audit: QueryForge Final Polish
 
 ## Q1: Score Maximization Strategy
 
@@ -46,7 +46,7 @@ Text2SQL is commodity in 2024-2026. Every hackathon has one. The 创新性 dimen
 ### Three Viable Innovation Framings
 
 **Option A: "Analyst-in-the-Loop" (Self-Correction Agent)**
-- When SQL execution fails or returns empty results, the agent catches the error, feeds it back to MiMo, and generates a corrected SQL — in a visible loop
+- When SQL execution fails or returns empty results, the agent catches the error, feeds it back to Kimi, and generates a corrected SQL — in a visible loop
 - Show the audience: "Watch it debug its own SQL in real time"
 - Implementation: wrap execute in try/catch, on error → second LLM call with error message → re-execute. ~2h work
 - Wow moment: user sees "SQL 错误 → 正在修正 → 修正完成" in the UI
@@ -153,12 +153,12 @@ Recommend quick approach given 30h deadline.
 
 ### Fallback Plan
 
-**If MiMo API is slow (>15s):**
+**If Kimi API is slow (>15s):**
 - Pre-cache all 5 demo queries (currently only 4 are cached)
 - Show the loading state as a feature: "AI 正在深度分析 10,000 条订单数据..."
 - Have the thinking chain expand during wait to show "work is happening"
 
-**If MiMo API is down:**
+**If Kimi API is down:**
 - All cached queries trigger automatically via `_cached: true` fallback
 - The UI shows "离线演示" badge — acknowledge it openly: "API 暂时不可用，但所有结果都是真实的预计算数据"
 - Do NOT try to hide it — judges will notice lag absence
@@ -253,7 +253,7 @@ Previous QUINTE decided Railway. The question is whether 30 hours is enough time
 **Risks:**
 - `better-sqlite3` is a native C++ module — may need Railway's Nixpacks buildpack configuration
 - SQLite on Railway is ephemeral (file resets on redeploy) — need to seed on every deploy or use a volume
-- MiMo API latency from Railway servers vs localhost (same region should be fine)
+- Kimi API latency from Railway servers vs localhost (same region should be fine)
 - Debugging deployment issues eats into the 30h budget
 
 ### Alternative: Local + localtunnel

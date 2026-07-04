@@ -3,7 +3,7 @@
 ## R3: hm + Auditor B
 
 **Date:** 2026-07-04
-**Evidence:** 5 R1 artifacts (CW/OC/KC/MiMo/OMP), 5 R2 cross-examinations
+**Evidence:** 5 R1 artifacts (CW/OC/KC/Kimi/OMP), 5 R2 cross-examinations
 **Verdict:** PASS — Execute action plan below
 
 ---
@@ -146,11 +146,11 @@
       "severity": "MEDIUM",
       "type": "drift",
       "finding": "API key hardcoded in agent.ts",
-      "source": "R1-KC, R1-MIMO",
+      "source": "R1-KC, R1-KIMI",
       "disposition": "verified",
       "required_closure": "edit",
       "closure_state": "open",
-      "scope": "Move to process.env.MIMO_API_KEY"
+      "scope": "Move to process.env.KIMI_API_KEY"
     },
     {
       "id": "RC-P007",
@@ -182,7 +182,7 @@
 
 ## Unresolved / Escalated
 
-- **RC-P005 (Innovation)**: Self-correction loop is the highest-risk highest-reward feature. If MiMo doesn't reliably produce correction SQL on error, it could backfire. Recommend: implement but have a fallback (show error gracefully, don't demo the correction if it fails).
+- **RC-P005 (Innovation)**: Self-correction loop is the highest-risk highest-reward feature. If Kimi doesn't reliably produce correction SQL on error, it could backfire. Recommend: implement but have a fallback (show error gracefully, don't demo the correction if it fails).
 - **Deployment risk**: better-sqlite3 native module may have issues on Railway build. Test early, have localhost + localtunnel as backup.
 
 ---

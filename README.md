@@ -53,7 +53,7 @@ AI 理解意图，识别指标、时间范围、筛选条件
 若查询出错 → 自动诊断错误原因 → 修正 SQL → 重试查询
 ```
 
-核心技术：MiMo v2.5 Pro 大模型负责语义理解，Vercel AI SDK 实现流式响应，better-sqlite3 提供安全的数据库访问，智能纠错机制确保查询成功率。
+核心技术：Kimi K2.7 Code 大模型负责语义理解，Vercel AI SDK 实现流式响应，better-sqlite3 提供安全的数据库访问，智能纠错机制确保查询成功率。
 
 ## QUINTE 对抗审查
 
@@ -71,7 +71,7 @@ AI 理解意图，识别指标、时间范围、筛选条件
 |---|---|
 | 前端 | Next.js 14 · Tailwind · Recharts · 深色/浅色主题 |
 | 后端 | Next.js API Routes · 流式进度推送 |
-| AI | MiMo v2.5 Pro · Vercel AI SDK · 智能纠错 |
+| AI | Kimi K2.7 Code · Vercel AI SDK · 智能纠错 |
 | 数据 | better-sqlite3 · SQL 安全校验 · 自动限制 |
 | 部署 | Railway 云端 24/7 · macOS 桌面版（SwiftUI） |
 | 质量 | [QUINTE](https://github.com/eric-stone-plus/QUINTE) 对抗审查协议 |
@@ -82,8 +82,9 @@ AI 理解意图，识别指标、时间范围、筛选条件
 git clone https://github.com/eric-stone-plus/queryforge.git
 cd queryforge && npm install
 
-echo "MIMO_API_KEY=your_key" > .env.local
-echo "MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1" >> .env.local
+echo "AI_API_KEY=your_key" > .env.local
+echo "AI_BASE_URL=https://api.kimi.com/coding/v1" >> .env.local
+echo "AI_MODEL=kimi-for-coding" >> .env.local
 
 npm run dev
 # 访问 http://localhost:3000
