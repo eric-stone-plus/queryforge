@@ -32,6 +32,7 @@ logs/
 
 # local env files
 .env*.local
+.env
 
 # vercel
 .vercel
@@ -39,7 +40,8 @@ logs/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-*.log
+
+# SQLite WAL/SHM
 *.db-shm
 *.db-wal
 
@@ -52,3 +54,15 @@ outputs/
 .venv/
 venv/
 __pycache__/
+
+# Raw data downloads (not in repo)
+data/olist/
+
+# Session notes (internal, not for upload)
+docs/PROJECT-MEMO.md
+docs/SESSION-NOTES-*.md
+
+# QUINTE dispatch scripts (generated, not source)
+debates/*/run-r*.sh
+debates/*/prompt-r*.md
+debates/*/stale-*/

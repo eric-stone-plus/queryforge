@@ -9,23 +9,23 @@ export type SavedMetric = { name: string; sql: string; chartConfig: unknown };
 const DEFAULT_METRICS: SavedMetric[] = [
   {
     name: "各地区月度销售额趋势",
-    sql: `SELECT r.name AS region, strftime('%Y-%m', o.order_date) AS month, ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) / 10000, 0) AS revenue FROM orders o JOIN regions r ON o.region_id = r.id JOIN order_items oi ON oi.order_id = o.id GROUP BY r.name, strftime('%Y-%m', o.order_date) ORDER BY r.name, month LIMIT 500`,
+    sql: `SELECT r.name AS region, strftime('%Y-%m', o.order_date) AS month, ROUND(SUM(o.total_amount), 0) AS revenue FROM orders o JOIN regions r ON o.region_id = r.id GROUP BY r.name, strftime('%Y-%m', o.order_date) ORDER BY r.name, month LIMIT 500`,
     chartConfig: { type: "line", x_key: "month", y_key: "revenue", title: "各地区月度销售额趋势" },
   },
   {
     name: "品类利润率对比",
-    sql: `SELECT c.name AS category, ROUND(AVG((p.unit_price - p.unit_cost) / p.unit_price) * 100, 2) AS margin_pct FROM products p JOIN categories c ON p.category_id = c.id GROUP BY c.name ORDER BY margin_pct DESC LIMIT 20`,
+    sql: `SELECT c.name AS category, ROUND(AVG((p.unit_price - p.unit_cost) / p.unit_price) * 100, 2) AS margin_pct FROM products p JOIN categories c ON p.category_id = c.id GROUP BY c.name ORDER BY margin_pct DESC LIMIT 15`,
     chartConfig: { type: "bar", x_key: "category", y_key: "margin_pct", title: "品类利润率对比" },
   },
   {
-    name: "Top 10 畅销商品",
-    sql: `SELECT p.name AS product, ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) / 10000, 2) AS revenue FROM order_items oi JOIN products p ON oi.product_id = p.id GROUP BY p.name ORDER BY revenue DESC LIMIT 10`,
-    chartConfig: { type: "bar", x_key: "product", y_key: "revenue", title: "Top 10 畅销商品（万元）" },
+    name: "Top 10 营收品类",
+    sql: `SELECT c.name AS category, ROUND(SUM(oi.unit_price), 0) AS revenue FROM order_items oi JOIN products p ON oi.product_id = p.id JOIN categories c ON p.category_id = c.id GROUP BY c.name ORDER BY revenue DESC LIMIT 10`,
+    chartConfig: { type: "bar", x_key: "category", y_key: "revenue", title: "Top 10 营收品类" },
   },
   {
     name: "渠道营收对比",
-    sql: `SELECT o.channel AS channel, ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) / 10000, 0) AS revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id GROUP BY o.channel ORDER BY revenue DESC`,
-    chartConfig: { type: "bar", x_key: "channel", y_key: "revenue", title: "渠道营收对比（万元）" },
+    sql: `SELECT o.channel AS channel, ROUND(SUM(o.total_amount), 0) AS revenue, COUNT(*) AS orders FROM orders o GROUP BY o.channel ORDER BY revenue DESC`,
+    chartConfig: { type: "bar", x_key: "channel", y_key: "revenue", title: "渠道营收对比" },
   },
   {
     name: "月度订单量趋势",
@@ -33,9 +33,9 @@ const DEFAULT_METRICS: SavedMetric[] = [
     chartConfig: { type: "area", x_key: "month", y_key: "orders", title: "月度订单量趋势" },
   },
   {
-    name: "复购用户 Top 20",
-    sql: `SELECT u.name, COUNT(DISTINCT o.id) AS order_count, ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) / 10000, 2) AS total_spent FROM users u JOIN orders o ON o.user_id = u.id JOIN order_items oi ON oi.order_id = o.id GROUP BY u.name ORDER BY order_count DESC LIMIT 20`,
-    chartConfig: { type: "bar", x_key: "name", y_key: "order_count", title: "复购用户 Top 20" },
+    name: "各地区订单状态分布",
+    sql: `SELECT r.name AS region, o.status, COUNT(*) AS cnt FROM orders o JOIN regions r ON o.region_id = r.id GROUP BY r.name, o.status ORDER BY r.name, cnt DESC`,
+    chartConfig: { type: "bar", x_key: "region", y_key: "cnt", title: "各地区订单状态分布" },
   },
 ];
 

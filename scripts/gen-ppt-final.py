@@ -78,8 +78,9 @@ prs.slide_height = H
 # 1 封面
 s = prs.slides.add_slide(prs.slide_layouts[6]); bg(s)
 txt(s, M, Inches(2.2), Inches(10), Inches(1), "QueryForge", Pt(52), WHITE, True)
-txt(s, M, Inches(3.3), Inches(10), Inches(0.6), "让业务团队自助取数，解放数据分析师的重复需求", Pt(20), SUBTEXT)
+txt(s, M, Inches(3.3), Inches(10), Inches(0.6), "AI 数据分析智能体 · 让业务团队自助取数", Pt(20), SUBTEXT)
 txt(s, M, Inches(4.2), Inches(10), Inches(0.5), "ClawHunt Builder Camp 2026 · 72 小时构建", Pt(14), SUBTEXT)
+txt(s, M, Inches(4.8), Inches(10), Inches(0.4), "基于 Olist 真实电商数据（99,441 笔订单）验证", Pt(13), ACCENT)
 footer(s, "queryforge-production-8d6f.up.railway.app")
 
 # 2 痛点
@@ -118,46 +119,69 @@ card(s, M, Inches(4.3), Inches(5.5), Inches(2.2), "智能纠错",
 card(s, Inches(6.8), Inches(4.3), Inches(5.5), Inches(2.2), "分析师预设指标库",
      "分析师预先定义常用指标\n业务人员一键选择即可查询\n确保全公司使用统一的指标定义")
 
-# 5 真实验证
+# 5 真实数据验证
 s = prs.slides.add_slide(prs.slide_layouts[6]); bg(s)
-title(s, "在真实数据上验证")
-big(s, M, Inches(1.8), "10,000", "订单")
-big(s, Inches(4.5), Inches(1.8), "8", "地区")
-big(s, Inches(8), Inches(1.8), "20", "品类")
-txt(s, M, Inches(3.5), Inches(10), Inches(0.4), "8 个核心经营指标：", Pt(16), ACCENT, True)
+title(s, "在真实数据上验证 — Olist 巴西电商平台")
+big(s, M, Inches(1.8), "99,441", "真实订单")
+big(s, Inches(4.5), Inches(1.8), "96,096", "真实用户")
+big(s, Inches(8), Inches(1.8), "74", "商品品类")
+txt(s, M, Inches(3.5), Inches(10), Inches(0.4), "来自 Kaggle 公开数据集，巴西最大电商平台真实交易数据：", Pt(16), ACCENT, True)
 bullets(s, [
-    "总营收 ¥23,256万 · 客单价 ¥23,256 · 毛利率 46.7% · 复购率 100%",
-    "完成率 66.5% · 退款率 16.6% · 连带率 2.5件 · 活跃买家 1,000",
-    "支持跨地区、跨品类、跨渠道对比分析",
+    "总营收 R$1,601万 · 客单价 R$161 · 完成率 97% · 复购率 3.1%",
+    "覆盖巴西5大地区，2016-2018年完整时间序列",
+    "数据包含订单、支付、商品、评价、物流全链路",
 ], Inches(4.0))
-footer(s, "真实电商数据验证 · 覆盖订单、商品、用户、地区、品类、渠道全链路")
+footer(s, "Olist Brazilian E-Commerce Public Dataset · Kaggle 最受欢迎电商数据集之一")
 
-# 6 双重价值
+# 6 技术架构 — 三层设计
+s = prs.slides.add_slide(prs.slide_layouts[6]); bg(s)
+title(s, "三层架构：从 Demo 到企业级产品")
+card(s, M, Inches(1.8), Inches(3.7), Inches(4.5), "受控语义层",
+     "业务语言 → 指标定义 → SQL\n不靠 LLM 猜表名\n分析师定义一次，全公司复用\n防止口径不一致")
+card(s, Inches(4.9), Inches(1.8), Inches(3.7), Inches(4.5), "验证式 Agent 循环",
+     "生成 SQL → AST 验证 → 只读执行\n→ 结果分析 → 可视化\n自纠正：出错自动修正重试\nKimi 是推理层，不是权威")
+card(s, Inches(8.9), Inches(1.8), Inches(3.7), Inches(4.5), "企业数据平面",
+     "Schema-only 模型暴露\n只读数据库连接\nAST 级 SQL 安全校验\n审计日志 + RBAC 路线图")
+footer(s, "LLM 不是安全边界 · 策略引擎和执行层才是")
+
+# 7 数据合规
+s = prs.slides.add_slide(prs.slide_layouts[6]); bg(s)
+title(s, "数据合规设计 — 企业买家最关心的问题")
+bullets(s, [
+    "Schema-only 模型暴露：LLM 只看到表名和列名，永远不接触原始数据",
+    "AST 级 SQL 验证：用 node-sql-parser 解析 SQL 语法树，只允许 SELECT 查询",
+    "只读数据库连接：数据库层面配置 readonly 模式，即使代码有漏洞也无法写入",
+    "自动 LIMIT 注入：LLM 忘记加 LIMIT 时自动补全，防止全表扫描",
+    "生产路线图：行级安全（RLS）、PII 脱敏、审计日志、SSO/SAML",
+], Inches(2.0))
+txt(s, M, Inches(5.2), Inches(10), Inches(0.5), "同样的架构模式：Snowflake Cortex、Databricks AI/BI 都采用'Schema-only + 只读执行'方案", Pt(13), ACCENT)
+footer(s, "QueryForge 不给 LLM 数据库权限 · AI 生成 SQL，数据库执行查询，策略引擎控制访问")
+
+# 8 生产路径
+s = prs.slides.add_slide(prs.slide_layouts[6]); bg(s)
+title(s, "从 Hackathon 到产品的路径")
+card(s, M, Inches(1.8), Inches(5.5), Inches(2), "Phase 1: 可售 MVP（1-2周）",
+     "SQLite → PostgreSQL 迁移\nNextAuth.js 用户认证\n语义层：指标定义 + Join 图\n审计日志 + 基础 RBAC")
+card(s, Inches(6.8), Inches(1.8), Inches(5.5), Inches(2), "Phase 2: 企业试用（1-2月）",
+     "SSO/SAML 集成\n行级安全 + PII 脱敏\n多数据源：PostgreSQL/BigQuery\n查询成本控制 + 取消机制")
+card(s, M, Inches(4.1), Inches(5.5), Inches(2), "Phase 3: 规模化（3-6月）",
+     "Snowflake/Redshift/ClickHouse\ndbt 语义层集成\n指标认证 + 谱系追踪\nVPC 部署 + BYOM")
+card(s, Inches(6.8), Inches(4.1), Inches(5.5), Inches(2), "核心指标",
+     "每查询成本 ~$0.003（Kimi K2.7）\n单次查询延迟 2-5 秒\n从 Demo 到 MVP：1 周\n从 MVP 到企业版：3 个月")
+
+# 9 双重价值
 s = prs.slides.add_slide(prs.slide_layouts[6]); bg(s)
 title(s, "一个产品，两方受益")
 card(s, M, Inches(1.8), Inches(5.5), Inches(4), "数据分析师",
-     "减少 80% 重复取数工作\n专注于指标定义和数据治理\n从"拉数的"变成"定标准的"\n有时间做真正有价值的深度分析")
+     "减少 80% 重复取数工作\n专注于指标定义和数据治理\n从\"拉数的\"变成\"定标准的\"\n有时间做真正有价值的深度分析")
 card(s, Inches(6.8), Inches(1.8), Inches(5.5), Inches(4), "业务团队",
-     "随时提问，不用排队等排期\n自己看数据，自己做决策\n从"等报表"到"看数据"\n一个需求从 3 天缩短到 10 秒")
+     "随时提问，不用排队等排期\n自己看数据，自己做决策\n从\"等报表\"到\"看数据\"\n一个需求从 3 天缩短到 10 秒")
 footer(s, "分析师被解放，业务被赋能")
 
-# 7 应用场景
-s = prs.slides.add_slide(prs.slide_layouts[6]); bg(s)
-title(s, "谁需要这个工具")
-card(s, M, Inches(1.8), Inches(5.5), Inches(2), "电商运营",
-     "每天看销售、库存、转化，快速调整营销策略和库存计划")
-card(s, Inches(6.8), Inches(1.8), Inches(5.5), Inches(2), "市场团队",
-     "活动效果、渠道对比、用户画像，实时掌握市场动态")
-card(s, M, Inches(4.1), Inches(5.5), Inches(2), "管理层",
-     "经营日报、异常预警、决策支持，随时掌握经营全貌")
-card(s, Inches(6.8), Inches(4.1), Inches(5.5), Inches(2), "财务分析",
-     "收入趋势、成本结构、利润分布，快速生成财务报表")
-footer(s, "目标用户：有数据团队但业务侧频繁提需求的中型企业")
-
-# 8 结束
+# 10 结束
 s = prs.slides.add_slide(prs.slide_layouts[6]); bg(s)
 txt(s, M, Inches(2.2), Inches(10), Inches(1), "QueryForge", Pt(52), WHITE, True)
-txt(s, M, Inches(3.3), Inches(10), Inches(0.8), "让数据分析师做更有价值的事\n让业务团队自己找到答案", Pt(18), SUBTEXT)
+txt(s, M, Inches(3.3), Inches(10), Inches(0.8), "受控的对话式分析层\n不是让 AI 替代分析师，而是让分析师的能力通过 AI 放大 10 倍", Pt(18), SUBTEXT)
 txt(s, M, Inches(4.8), Inches(10), Inches(0.4), "queryforge-production-8d6f.up.railway.app", Pt(14), ACCENT)
 txt(s, M, Inches(5.3), Inches(10), Inches(0.4), "github.com/eric-stone-plus/queryforge", Pt(12), SUBTEXT)
 footer(s, "ClawHunt Builder Camp 2026 · Track A")

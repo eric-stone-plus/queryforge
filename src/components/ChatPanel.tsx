@@ -18,8 +18,8 @@ const COLORS = ["#0969da", "#1a7f37", "#9a6700", "#cf222e", "#8250df", "#0550ae"
 const DEMO_CHIPS = [
   "各地区月度销售额趋势",
   "哪个品类利润率最高？",
-  "Top 10 畅销商品",
-  "复购率最高的用户分析",
+  "Top 10 营收品类",
+  "各地区复购率分析",
 ];
 
 function getNumericKeys(row: DataRow | undefined) {
@@ -244,7 +244,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
                     {item.r._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>离线演示</span>}
                     {item.r.corrected && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>AI 自纠正</span>}
                   </h3>
-                  {item.r.explanation && <p className="mb-3 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{item.r.explanation}</p>}
+                  {item.r.explanation && <div className="mb-3 rounded-lg p-3 text-xs leading-relaxed" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}><p className="whitespace-pre-wrap">{item.r.explanation}</p></div>}
                   <ChartResult result={item.r} />
                   {item.r.sql && (
                     <button onClick={() => {
@@ -287,7 +287,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
                 <h3 className="mb-3 text-sm font-semibold" style={{ color: "var(--text)" }}>{chartTitle}
                   {displayResult._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>离线演示</span>}
                 </h3>
-                {displayResult.explanation && <p className="mb-3 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{displayResult.explanation}</p>}
+                {displayResult.explanation && <div className="mb-3 rounded-lg p-3 text-xs leading-relaxed" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}><p className="whitespace-pre-wrap">{displayResult.explanation}</p></div>}
                 <ChartResult result={displayResult} />
               </div>
             </div>

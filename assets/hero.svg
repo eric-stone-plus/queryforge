@@ -24,9 +24,9 @@
   <rect x="212" y="138" width="80" height="22" rx="11" fill="#1f6feb22" stroke="#1f6feb44" stroke-width="1"/>
   <text x="252" y="153" font-family="-apple-system,sans-serif" font-size="11" fill="#58a6ff" text-anchor="middle">TypeScript</text>
   <rect x="302" y="138" width="80" height="22" rx="11" fill="#1f6feb22" stroke="#1f6feb44" stroke-width="1"/>
-  <text x="342" y="153" font-family="-apple-system,sans-serif" font-size="11" fill="#58a6ff" text-anchor="middle">Kimi K2.7</text>
+  <text x="342" y="153" font-family="-apple-system,sans-serif" font-size="11" fill="#58a6ff" text-anchor="middle">AI Agent</text>
   <rect x="392" y="138" width="80" height="22" rx="11" fill="#1f6feb22" stroke="#1f6feb44" stroke-width="1"/>
-  <text x="432" y="153" font-family="-apple-system,sans-serif" font-size="11" fill="#58a6ff" text-anchor="middle">SQLite</text>
+  <text x="432" y="153" font-family="-apple-system,sans-serif" font-size="11" fill="#58a6ff" text-anchor="middle">Text-to-SQL</text>
   <!-- Right: mini chart -->
   <g transform="translate(680, 40)" opacity="0.4">
     <rect x="0" y="80" width="28" height="60" rx="4" fill="#58a6ff"/>

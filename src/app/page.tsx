@@ -52,39 +52,38 @@ async function query(sql: string): Promise<QueryResult[]> {
   } catch { return []; }
 }
 
-// Static data loaded from DB
+// Static data loaded from DB (Olist Brazilian E-commerce)
 const REGION_STATIC = [
-  { name: "西南", value: 3348 }, { name: "华中", value: 3128 }, { name: "华南", value: 3061 },
-  { name: "西北", value: 2989 }, { name: "华东", value: 2966 }, { name: "港澳台", value: 2916 },
-  { name: "华北", value: 2958 }, { name: "东北", value: 2889 },
+  { name: "华东", value: 1034 }, { name: "华南", value: 233 }, { name: "华北", value: 190 },
+  { name: "华中", value: 144 }, { name: "西南", value: 0 },
 ];
 const CATEGORY_STATIC = [
-  { name: "图书文具", value: 1677 }, { name: "手机数码", value: 1399 }, { name: "服饰鞋包", value: 1357 },
-  { name: "电脑办公", value: 1329 }, { name: "健身装备", value: 1283 }, { name: "休闲零食", value: 1282 },
-  { name: "家居日用", value: 1244 }, { name: "母婴用品", value: 1224 },
+  { name: "health_beauty", value: 1259 }, { name: "watches_gifts", value: 1205 }, { name: "bed_bath_table", value: 1037 },
+  { name: "sports_leisure", value: 988 }, { name: "computers_accessories", value: 912 }, { name: "furniture_decor", value: 730 },
+  { name: "cool_stuff", value: 635 }, { name: "housewares", value: 632 },
 ];
 const CHANNEL_STATIC = [
-  { name: "天猫", orders: 1733 }, { name: "线下门店", orders: 1682 }, { name: "抖音", orders: 1686 },
-  { name: "微信小程序", orders: 1673 }, { name: "京东", orders: 1619 }, { name: "官网", orders: 1607 },
+  { name: "天猫", orders: 75391 }, { name: "线下门店", orders: 19784 }, { name: "抖音", orders: 2739 },
+  { name: "微信小程序", orders: 1527 },
 ];
 const SEGMENT_STATIC = [
-  { name: "enterprise", avg_spend: 241271, users: 160 },
-  { name: "regular", avg_spend: 234934, users: 487 },
-  { name: "new", avg_spend: 232895, users: 188 },
-  { name: "vip", avg_spend: 216734, users: 165 },
+  { name: "regular", avg_spend: 161, users: 96096 },
+  { name: "vip", avg_spend: 161, users: 0 },
+  { name: "new", avg_spend: 161, users: 0 },
+  { name: "enterprise", avg_spend: 161, users: 0 },
 ];
 const MONTHLY_STATIC = [
-  { month: "24-01", revenue: 826 }, { month: "24-04", revenue: 711 }, { month: "24-07", revenue: 741 },
-  { month: "24-10", revenue: 713 }, { month: "25-01", revenue: 818 }, { month: "25-04", revenue: 794 },
-  { month: "25-07", revenue: 710 }, { month: "25-10", revenue: 708 }, { month: "26-01", revenue: 788 },
-  { month: "26-04", revenue: 741 },
+  { month: "16-09", revenue: 0 }, { month: "16-12", revenue: 6 }, { month: "17-01", revenue: 14 },
+  { month: "17-03", revenue: 45 }, { month: "17-06", revenue: 51 }, { month: "17-09", revenue: 73 },
+  { month: "17-11", revenue: 119 }, { month: "18-01", revenue: 112 }, { month: "18-03", revenue: 116 },
+  { month: "18-06", revenue: 102 },
 ];
 const TOP_PRODUCTS = [
-  { name: "朴物婴儿湿巾", revenue: 158, units: 193 },
-  { name: "京选老人手机", revenue: 152, units: 189 },
-  { name: "海棠机械键盘", revenue: 131, units: 177 },
-  { name: "云启瑜伽垫", revenue: 130, units: 174 },
-  { name: "橙品阅读灯", revenue: 130, units: 163 },
+  { name: "health_beauty", revenue: 1259, units: 8836 },
+  { name: "watches_gifts", revenue: 1205, units: 5624 },
+  { name: "bed_bath_table", revenue: 1037, units: 9417 },
+  { name: "sports_leisure", revenue: 988, units: 7720 },
+  { name: "computers_acc", revenue: 912, units: 6689 },
 ];
 
 export default function Home() {
@@ -137,8 +136,8 @@ export default function Home() {
             </div>
           </div>
           <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
-            <span className="min-w-0 truncate text-xs sm:hidden" style={{ color: "var(--text-muted)" }}>Kimi K2.7 Code · 10K 订单</span>
-            <span className="hidden min-w-0 text-xs sm:inline" style={{ color: "var(--text-muted)" }}>Kimi K2.7 Code · 10,000 订单 · 8 地区 · 20 品类</span>
+            <span className="min-w-0 truncate text-xs sm:hidden" style={{ color: "var(--text-muted)" }}>Kimi K2.7 · 99K 订单</span>
+            <span className="hidden min-w-0 text-xs sm:inline" style={{ color: "var(--text-muted)" }}>Kimi K2.7 · 99,441 订单 · 5 地区 · 74 品类 · Olist巴西电商</span>
             <div className="flex shrink-0 items-center gap-2">
               <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--success-soft)", color: "var(--success)" }}>● 在线</span>
               <button onClick={toggleTheme} className="flex h-7 w-7 items-center justify-center rounded-lg text-sm transition-default" style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}
@@ -151,14 +150,14 @@ export default function Home() {
 
         {/* KPI Row */}
         <div className="no-scrollbar grid grid-flow-col auto-cols-[minmax(168px,1fr)] gap-2 overflow-x-auto border-b px-3 py-2 sm:grid-flow-row sm:grid-cols-4 lg:grid-cols-8 lg:px-4" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
-          <KpiCard label="总营收" value="¥23,256万" icon="💰" sub="30个月累计" />
-          <KpiCard label="客单价" value="¥23,256" icon="📦" sub="平均每单" />
-          <KpiCard label="毛利率" value="46.7%" icon="📈" sub="全品类均值" />
-          <KpiCard label="复购率" value="100%" icon="🔄" sub="人均10单" />
-          <KpiCard label="完成率" value="66.5%" icon="✅" sub="6,650单完成" />
-          <KpiCard label="退款率" value="16.6%" icon="⚠️" sub="1,664单退款" />
-          <KpiCard label="连带率" value="2.5件" icon="🛒" sub="每单平均" />
-          <KpiCard label="活跃买家" value="1,000" icon="👥" sub="覆盖20品类" />
+          <KpiCard label="总营收" value="R$1,601万" icon="💰" sub="99K订单累计" />
+          <KpiCard label="客单价" value="R$161" icon="📦" sub="平均每单" />
+          <KpiCard label="完成率" value="97%" icon="✅" sub="96,478单完成" />
+          <KpiCard label="复购率" value="3.1%" icon="🔄" sub="真实marketplace" />
+          <KpiCard label="退款率" value="1.2%" icon="⚠️" sub="1,234单退款" />
+          <KpiCard label="活跃用户" value="96,096" icon="👥" sub="覆盖74品类" />
+          <KpiCard label="商品数" value="32,951" icon="🛒" sub="5大地区" />
+          <KpiCard label="品类数" value="74" icon="📊" sub="巴西Olist平台" />
         </div>
 
         <div className="grid grid-cols-2 gap-1 border-b px-3 py-2 lg:hidden" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
@@ -194,14 +193,14 @@ export default function Home() {
               {/* Business Health Indicators */}
               <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                 <h3 className="mb-2 text-xs font-semibold" style={{ color: "var(--text)" }}>经营健康度</h3>
-                <MetricRow label="订单完成率" value="66.5%" color="var(--success)" />
-                <MetricRow label="退款率" value="16.6%" color="var(--error)" />
-                <MetricRow label="在途发货率" value="16.9%" color="var(--warning)" />
-                <MetricRow label="毛利率（全品类）" value="46.7%" color="var(--success)" />
-                <MetricRow label="连带率" value="2.5 件/单" />
-                <MetricRow label="人均消费" value="¥232,561" />
-                <MetricRow label="品类集中度" value="14.4%（Top 地区）" />
-                <MetricRow label="动销商品" value="500/500（100%）" />
+                <MetricRow label="订单完成率" value="97%" color="var(--success)" />
+                <MetricRow label="退款率" value="1.2%" color="var(--error)" />
+                <MetricRow label="在途发货率" value="1.7%" color="var(--warning)" />
+                <MetricRow label="平均客单价" value="R$161" />
+                <MetricRow label="复购率" value="3.1%" />
+                <MetricRow label="活跃用户" value="96,096" />
+                <MetricRow label="品类集中度" value="12.7%（Top品类）" />
+                <MetricRow label="动销商品" value="32,951/32,951（100%）" />
               </div>
 
               {/* Region Revenue - Bar */}
@@ -275,7 +274,7 @@ export default function Home() {
                       {TOP_PRODUCTS.map((p, i) => (
                         <tr key={i} style={{ borderBottom: "1px solid var(--border)" }}>
                           <td className="py-1 truncate max-w-[100px]">{p.name}</td>
-                          <td className="py-1 text-right font-medium">¥{p.revenue}</td>
+                          <td className="py-1 text-right font-medium">R${p.revenue}</td>
                           <td className="py-1 text-right">{p.units}</td>
                         </tr>
                       ))}
@@ -299,15 +298,14 @@ export default function Home() {
 
               {/* User Distribution */}
               <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                <h3 className="mb-2 text-xs font-semibold" style={{ color: "var(--text)" }}>用户分层明细</h3>
-                <MetricRow label="Enterprise（企业客户）" value="160 人 · ¥241,271/人" color="var(--accent)" />
-                <MetricRow label="Regular（普通客户）" value="487 人 · ¥234,934/人" />
-                <MetricRow label="New（新客户）" value="188 人 · ¥232,895/人" />
-                <MetricRow label="VIP（高价值客户）" value="165 人 · ¥216,734/人" />
-                <MetricRow label="总注册用户" value="1,000 人" />
-                <MetricRow label="活跃买家" value="1,000 人（100%渗透率）" />
+                <h3 className="mb-2 text-xs font-semibold" style={{ color: "var(--text)" }}>地区用户分布</h3>
+                <MetricRow label="华东（Sudeste）" value="65,900 用户 · 均单 R$151" color="var(--accent)" />
+                <MetricRow label="华南（Sul）" value="13,690 用户 · 均单 R$164" />
+                <MetricRow label="华北（Nordeste）" value="9,140 用户 · 均单 R$202" />
+                <MetricRow label="华中（Centro-Oeste）" value="7,389 用户 · 均单 R$189" />
+                <MetricRow label="总用户" value="96,096" />
+                <MetricRow label="总订单" value="99,441（完成率 97%）" />
               </div>
-
             </div>
           </div>
         </div>
