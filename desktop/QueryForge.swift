@@ -146,10 +146,78 @@ class LocalServer: ObservableObject {
 
 struct WebView: NSViewRepresentable {
     let url: URL
+
+    private let darkModeBootstrapScript = """
+    (() => {
+      const theme = "dark";
+      const css = `
+        :root, html[data-theme="dark"] {
+          color-scheme: dark !important;
+          --bg: #0d1117 !important;
+          --surface: #161b22 !important;
+          --surface-hover: #1c2128 !important;
+          --border: #30363d !important;
+          --text: #e6edf3 !important;
+          --text-secondary: #8b949e !important;
+          --text-muted: #6e7681 !important;
+          --accent: #58a6ff !important;
+          --accent-soft: #0d2240 !important;
+          --success: #3fb950 !important;
+          --success-soft: #0f2d16 !important;
+          --warning: #d29922 !important;
+          --warning-soft: #2e1e00 !important;
+          --error: #f85149 !important;
+          --error-soft: #3d1214 !important;
+        }
+        html, body, #__next {
+          background: var(--bg) !important;
+          color: var(--text) !important;
+        }
+      `;
+
+      const applyDarkMode = () => {
+        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.style.colorScheme = theme;
+
+        if (!document.getElementById("queryforge-dark-bootstrap")) {
+          const style = document.createElement("style");
+          style.id = "queryforge-dark-bootstrap";
+          style.textContent = css;
+          (document.head || document.documentElement).appendChild(style);
+        }
+      };
+
+      try {
+        localStorage.setItem("queryforge-theme", theme);
+      } catch (_) {}
+
+      applyDarkMode();
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", applyDarkMode, { once: true });
+      }
+    })();
+    """
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(darkModeBootstrapScript: darkModeBootstrapScript)
+    }
+
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
         config.preferences.setValue(true, forKey: "developerExtrasEnabled")
+        config.userContentController.addUserScript(
+            WKUserScript(
+                source: darkModeBootstrapScript,
+                injectionTime: .atDocumentStart,
+                forMainFrameOnly: false
+            )
+        )
         let wv = WKWebView(frame: .zero, configuration: config)
+        wv.navigationDelegate = context.coordinator
+        wv.appearance = NSAppearance(named: .darkAqua)
+        wv.underPageBackgroundColor = NSColor(red: 0.04, green: 0.05, blue: 0.09, alpha: 1)
+        wv.wantsLayer = true
+        wv.layer?.backgroundColor = NSColor(red: 0.04, green: 0.05, blue: 0.09, alpha: 1).cgColor
         wv.allowsMagnification = false
         wv.customUserAgent = "QueryForge Desktop/1.0"
         return wv
@@ -157,6 +225,18 @@ struct WebView: NSViewRepresentable {
     func updateNSView(_ wv: WKWebView, context: Context) {
         if wv.url != url {
             wv.load(URLRequest(url: url))
+        }
+    }
+
+    class Coordinator: NSObject, WKNavigationDelegate {
+        private let darkModeBootstrapScript: String
+
+        init(darkModeBootstrapScript: String) {
+            self.darkModeBootstrapScript = darkModeBootstrapScript
+        }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            webView.evaluateJavaScript(darkModeBootstrapScript)
         }
     }
 }
