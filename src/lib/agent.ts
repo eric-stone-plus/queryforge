@@ -4,13 +4,13 @@ import { Parser } from "node-sql-parser";
 import { getDb, queryDb } from "./db";
 
 const AI_API_KEY = process.env.KIMI_API_KEY || process.env.AI_API_KEY || "";
-const AI_MODEL = process.env.KIMI_MODEL || process.env.AI_MODEL || "kimi-for-coding";
+const AI_MODEL = process.env.AI_MODEL || "kimi-for-coding";
 const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || "60000");
 const AI_TEMPERATURE = Number(process.env.AI_TEMPERATURE || "1");
 
-const kimi = createOpenAICompatible({
-  name: process.env.AI_PROVIDER_NAME || "kimi",
-  baseURL: process.env.KIMI_BASE_URL || process.env.AI_BASE_URL || "https://api.kimi.com/coding/v1",
+const llm = createOpenAICompatible({
+  name: process.env.AI_PROVIDER_NAME || "openai-compatible",
+  baseURL: process.env.AI_BASE_URL || "https://api.kimi.com/coding/v1",
   apiKey: AI_API_KEY,
 });
 
@@ -114,13 +114,13 @@ export async function runAgent(
   getDb();
 
   if (!AI_API_KEY) {
-    throw new Error("Kimi API key not configured");
+    throw new Error("AI API key not configured");
   }
 
   onProgress?.({ step: "analyzing", message: "AI 正在分析您的问题..." });
 
   const { text } = await generateText({
-    model: kimi(AI_MODEL),
+    model: llm(AI_MODEL),
     system: systemPrompt,
     prompt: query,
     temperature: AI_TEMPERATURE,
@@ -160,7 +160,7 @@ Error: ${result.error}
 Respond with corrected JSON only:`;
 
   const { text: fixText } = await generateText({
-    model: kimi(AI_MODEL),
+    model: llm(AI_MODEL),
     system: systemPrompt,
     prompt: fixPrompt,
     temperature: AI_TEMPERATURE,

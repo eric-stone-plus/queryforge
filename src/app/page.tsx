@@ -136,8 +136,8 @@ export default function Home() {
             </div>
           </div>
           <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
-            <span className="min-w-0 truncate text-xs sm:hidden" style={{ color: "var(--text-muted)" }}>Kimi K2.7 · 99K 订单</span>
-            <span className="hidden min-w-0 text-xs sm:inline" style={{ color: "var(--text-muted)" }}>Kimi K2.7 · 99,441 订单 · 5 地区 · 74 品类 · Olist巴西电商</span>
+            <span className="min-w-0 truncate text-xs sm:hidden" style={{ color: "var(--text-muted)" }}>99K 订单</span>
+            <span className="hidden min-w-0 text-xs sm:inline" style={{ color: "var(--text-muted)" }}>99,441 订单 · 5 地区 · 74 品类 · Olist巴西电商</span>
             <div className="flex shrink-0 items-center gap-2">
               <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--success-soft)", color: "var(--success)" }}>● 在线</span>
               <button onClick={toggleTheme} className="flex h-7 w-7 items-center justify-center rounded-lg text-sm transition-default" style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}

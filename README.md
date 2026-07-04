@@ -44,8 +44,8 @@
 git clone https://github.com/eric-stone-plus/queryforge.git
 cd queryforge && npm install
 echo "AI_API_KEY=your_key" > .env.local
-echo "AI_BASE_URL=https://api.kimi.com/coding/v1" >> .env.local
-echo "AI_MODEL=kimi-for-coding" >> .env.local
+# Configure your AI provider in .env.local
+
 npm run dev
 ```
 

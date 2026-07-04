@@ -139,7 +139,7 @@ title(s, "三层架构：从 Demo 到企业级产品")
 card(s, M, Inches(1.8), Inches(3.7), Inches(4.5), "受控语义层",
      "业务语言 → 指标定义 → SQL\n不靠 LLM 猜表名\n分析师定义一次，全公司复用\n防止口径不一致")
 card(s, Inches(4.9), Inches(1.8), Inches(3.7), Inches(4.5), "验证式 Agent 循环",
-     "生成 SQL → AST 验证 → 只读执行\n→ 结果分析 → 可视化\n自纠正：出错自动修正重试\nKimi 是推理层，不是权威")
+     "生成 SQL → AST 验证 → 只读执行\n→ 结果分析 → 可视化\n自纠正：出错自动修正重试\nAI 是推理层，不是权威")
 card(s, Inches(8.9), Inches(1.8), Inches(3.7), Inches(4.5), "企业数据平面",
      "Schema-only 模型暴露\n只读数据库连接\nAST 级 SQL 安全校验\n审计日志 + RBAC 路线图")
 footer(s, "LLM 不是安全边界 · 策略引擎和执行层才是")
@@ -167,7 +167,7 @@ card(s, Inches(6.8), Inches(1.8), Inches(5.5), Inches(2), "Phase 2: 企业试用
 card(s, M, Inches(4.1), Inches(5.5), Inches(2), "Phase 3: 规模化（3-6月）",
      "Snowflake/Redshift/ClickHouse\ndbt 语义层集成\n指标认证 + 谱系追踪\nVPC 部署 + BYOM")
 card(s, Inches(6.8), Inches(4.1), Inches(5.5), Inches(2), "核心指标",
-     "每查询成本 ~$0.003（Kimi K2.7）\n单次查询延迟 2-5 秒\n从 Demo 到 MVP：1 周\n从 MVP 到企业版：3 个月")
+     "每查询成本 ~$0.003\n单次查询延迟 2-5 秒\n从 Demo 到 MVP：1 周\n从 MVP 到企业版：3 个月")
 
 # 9 双重价值
 s = prs.slides.add_slide(prs.slide_layouts[6]); bg(s)

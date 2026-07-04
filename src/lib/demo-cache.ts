@@ -1,4 +1,4 @@
-// Pre-cached demo results for instant demo when the Kimi API is slow or unavailable.
+// Pre-cached demo results for instant demo when the AI API is slow or unavailable.
 export const CACHED_RESULTS: Record<string, object> = {
   "各地区月度销售额趋势": {
     thinking: "用户想看各地区的月度销售额趋势。需要连接orders和regions表，按地区和月份分组计算收入。华东(Sudeste)是巴西最大市场，应该占主导。",
