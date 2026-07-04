@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Bar, BarChart, CartesianGrid, Cell, Line, LineChart,
   Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend,
@@ -91,6 +91,21 @@ export default function Home() {
   const [rerunResult, setRerunResult] = useState<ChatResult | null>(null);
   const [history, setHistory] = useState<ChatResult[]>([]);
   const [monthlyData, setMonthlyData] = useState(MONTHLY_STATIC);
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  const toggleTheme = useCallback(() => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("queryforge-theme", next);
+  }, [theme]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("queryforge-theme") as "light" | "dark" | null;
+    const initial = saved || "dark";
+    setTheme(initial);
+    document.documentElement.setAttribute("data-theme", initial);
+  }, []);
 
   useEffect(() => {
     query(`SELECT strftime('%Y-%m', o.order_date) as month, ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) / 10000, 0) as revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id GROUP BY month ORDER BY month`).then((rows) => {
@@ -123,6 +138,10 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>MiMo v2.5 Pro · 10,000 订单 · 8 地区 · 20 品类</span>
             <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--success-soft)", color: "var(--success)" }}>● 在线</span>
+            <button onClick={toggleTheme} className="flex h-7 w-7 items-center justify-center rounded-lg text-sm transition-default" style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}
+              title={theme === "light" ? "深色模式" : "浅色模式"}>
+              {theme === "light" ? "🌙" : "☀️"}
+            </button>
           </div>
         </header>
 

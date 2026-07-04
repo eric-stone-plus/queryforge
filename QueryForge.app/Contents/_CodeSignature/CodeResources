@@ -4,29 +4,18 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>Resources/data/ecommerce.db</key>
+		<key>Resources/AppIcon.icns</key>
 		<data>
-		F0BjqK/b7WELKq5cIr8KYuvWNG4=
-		</data>
-		<key>Resources/server.js</key>
-		<data>
-		EACT0+gmryH2GEPZwKDs+524DKY=
+		5Hkn79aWVlMonW6c2XkwDusPFM4=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>Resources/data/ecommerce.db</key>
+		<key>Resources/AppIcon.icns</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			zVT9fgsrR++j2Wz02RBoZuT2mCbMEclrtyxr0k5QsVc=
-			</data>
-		</dict>
-		<key>Resources/server.js</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			r+g777y9gC6k15yqIRxnPo//TVbnL4FY1r2j3zOv8ic=
+			MPlfhIbRAa7jR++xdpxY5WrBi3P09BswTrD1ifvJUac=
 			</data>
 		</dict>
 	</dict>

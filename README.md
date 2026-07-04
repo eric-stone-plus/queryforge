@@ -1,102 +1,138 @@
 # QueryForge
 
-> 让业务部门自助取数，解放数据分析师的重复需求
+<p align="center">
+  <img src="desktop/icon_1024.png" alt="QueryForge" width="128">
+</p>
 
-[![Live Demo](https://img.shields.io/badge/demo-live-blue)](https://queryforge-production-8d6f.up.railway.app)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-14.2-black)](https://nextjs.org/)
+<h3 align="center">让业务部门自助取数，解放数据分析师的重复需求</h3>
 
----
+QueryForge is an AI data analysis agent for teams that need answers faster than the analytics queue can move.
 
-## 解决什么问题
+It turns natural-language business questions into SQL, executes them against a governed SQLite data model, and returns charts plus a concise explanation. Analysts set up the data, metrics, and business definitions once; business users can then self-serve repetitive reporting requests without learning SQL or waiting for a dashboard change.
 
-数据分析师的日常：
+[Live demo](https://queryforge-production-8d6f.up.railway.app) · [macOS desktop app](https://github.com/eric-stone-plus/queryforge/releases)
 
-- 业务侧提需求 → 分析师调整口径、增加字段、改看板
-- 同一个指标，不同部门问 10 遍，改 10 遍
-- 分析师忙于取数，没时间做深度分析
-- 业务等排期，分析效率低
+## Why QueryForge
 
-**QueryForge 让分析师调整好底层数据和指标后，业务部门自己用自然语言抓取数据、生成看板、做异常分析、获取决策建议。**
+Most analytics teams spend too much time answering the same operational questions:
 
-分析师从"取数工具人"变成"数据架构师"。
+- "Can you add one more breakdown?"
+- "Can I get this by region instead?"
+- "Why did revenue dip last week?"
+- "Can you send the SQL for this metric?"
 
-## 产品能力
+QueryForge shifts that work into a controlled self-service flow. Analysts remain responsible for the data model and metric definitions. Business teams ask questions in plain language and get query results, visualizations, and explanations from the same approved data layer.
 
-**自然语言取数** — 业务人员用中文提问，AI 自动生成 SQL，返回可视化图表。不需要会 SQL，不需要等排期。
+## What It Does
 
-**数据看板自动生成** — 8 个核心经营指标 + 6 个图表面板，全部从真实数据库实时加载。
+- Converts natural-language questions into SQLite `SELECT` queries.
+- Streams query progress so users can see the agent move from intent to SQL to results.
+- Generates charts for the returned dataset.
+- Provides short business-facing explanations of the result.
+- Includes a reusable metric sidebar for analyst-approved definitions.
+- Automatically retries failed SQL with an AI self-correction loop.
+- Runs as both a hosted web app and a macOS desktop app.
 
-**指标异常分析** — AI 自动检测数据异常，给出可能原因和分析方向。
+## How It Works
 
-**决策建议** — 基于数据趋势和异常，AI 提供业务决策方向和建议。
-
-**分析师预设指标库** — 分析师预设常用指标和查询口径，业务人员一键复用。口径统一，避免重复沟通。
-
-**自纠正循环** — SQL 报错时 AI 自动修正并重试，用户看到修正过程和结果。
-
-## 工作原理
-
+```text
+User question
+  -> MiMo v2.5 Pro interprets the request
+  -> QueryForge generates SQL
+  -> SQL is validated and constrained
+  -> better-sqlite3 executes against the demo database
+  -> Results are visualized and explained
 ```
-业务人员提问 → AI 理解意图 → 生成 SQL → 安全校验 → 执行查询 → 可视化 + 建议
-                    ↑                                          │
-                    └──────── SQL 报错则自动修正 ←──────────────┘
-```
 
-## 技术路线
+If the generated SQL fails, QueryForge sends the database error back to the model, asks for a corrected query, validates it again, and retries automatically. The user sees the correction status instead of a dead-end error.
 
-| 层 | 技术 |
-|---|---|
-| 前端 | Next.js 14 · Tailwind · Recharts · 深色/浅色主题 |
-| 后端 | Next.js API Routes · SSE 流式推送 |
-| AI | MiMo v2.5 Pro · Vercel AI SDK · 自纠正循环 |
-| 数据 | better-sqlite3 · SQL AST 安全校验 · 自动 LIMIT |
-| 部署 | Railway 云端 24/7 · macOS 桌面版（SwiftUI） |
-| 质量 | [QUINTE](https://github.com/eric-stone-plus/QUINTE) 五方对抗审查 |
+## Stack
 
-## 快速开始
+| Area | Technology |
+| --- | --- |
+| Web app | Next.js 14, React, TypeScript, Tailwind CSS |
+| AI | MiMo v2.5 Pro, Vercel AI SDK, OpenAI-compatible provider |
+| Data | better-sqlite3, SQLite demo warehouse, node-sql-parser |
+| Visualization | Recharts |
+| Runtime | Next.js API routes, SSE progress streaming |
+| Deployment | Railway |
+| Desktop | macOS app distributed through GitHub Releases |
+| Quality | QUINTE protocol: 5 independent AI review agents, 3 rounds, 39 reports, 5 P0 bugs found |
+
+## Local Development
 
 ```bash
 git clone https://github.com/eric-stone-plus/queryforge.git
-cd queryforge && npm install
+cd queryforge
+npm install
+```
 
-echo "MIMO_API_KEY=your_key" > .env.local
-echo "MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1" >> .env.local
+Create `.env.local`:
 
+```bash
+MIMO_API_KEY=your_api_key
+MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
+```
+
+Start the development server:
+
+```bash
 npm run dev
-# 访问 http://localhost:3000
 ```
 
-## 项目结构
+Open `http://localhost:3000`.
 
-```
+## Project Structure
+
+```text
 src/
-  app/api/chat/route.ts     # 流式 Chat API（SSE 进度推送）
-  app/api/query/route.ts    # SQL 执行（AST 安全校验 + LIMIT）
-  app/page.tsx              # 主页：KPI 看板 + 图表 + 对话
-  components/ChatPanel.tsx   # 对话面板 + 图表 + 流式进度
-  components/Dashboard.tsx   # 多图 Grid
-  components/MetricSidebar.tsx # 分析师预设指标库
-  lib/agent.ts              # AI 推理 + SQL 生成 + 自纠正
-  lib/db.ts                 # SQLite 只读连接
-  lib/demo-cache.ts         # 离线缓存 fallback
-data/ecommerce.db           # 种子数据（10K 订单 · 500 商品）
-desktop/QueryForge.swift    # macOS 桌面版
+  app/
+    api/chat/route.ts      Streaming agent endpoint
+    api/query/route.ts     SQL execution endpoint
+    api/schema/route.ts    Schema metadata endpoint
+    page.tsx               Main product surface
+  components/
+    ChatPanel.tsx          Natural-language query interface
+    Dashboard.tsx          KPI and chart dashboard
+    MetricSidebar.tsx      Analyst-defined metric shortcuts
+  lib/
+    agent.ts               Prompting, SQL generation, self-correction
+    db.ts                  SQLite connection and query helpers
+    demo-cache.ts          Demo fallback data
+data/
+  ecommerce.db             Seed SQLite warehouse
+desktop/
+  QueryForge.swift         macOS desktop wrapper
 ```
 
-## 安全机制
+## Safety Model
 
-- SQL AST 解析器：只允许 SELECT
-- 自动 LIMIT 500：防大查询卡死
-- 只读数据库：不允许写入
-- API Key 环境变量注入：不硬编码
-- 自纠正：报错时自动修正，不给用户返回错误
+QueryForge is designed around a read-only analytics workflow:
 
-## 演示
+- Only single-statement `SELECT` queries are accepted.
+- SQL is parsed before execution.
+- Queries are automatically constrained with `LIMIT 500` when no limit is provided.
+- Database access is read-only from the product surface.
+- API keys are supplied through environment variables.
 
-**网页版**：[queryforge-production-8d6f.up.railway.app](https://queryforge-production-8d6f.up.railway.app)
+This is not a replacement for warehouse-level permissions or production data governance. Treat it as an application layer on top of data access controls you already trust.
 
-**桌面版**：[Releases](https://github.com/eric-stone-plus/queryforge/releases)（macOS）
+## Demo
+
+The hosted demo uses an ecommerce SQLite dataset with orders, order items, products, categories, users, and regions.
+
+Try questions such as:
+
+- "Show monthly revenue this year."
+- "Which product categories have the highest revenue?"
+- "Compare revenue by region."
+- "Find the top products by order volume."
+
+Live demo: [queryforge-production-8d6f.up.railway.app](https://queryforge-production-8d6f.up.railway.app)
+
+## Desktop App
+
+The macOS desktop build is published on the project's [GitHub Releases](https://github.com/eric-stone-plus/queryforge/releases) page.
 
 ## License
 

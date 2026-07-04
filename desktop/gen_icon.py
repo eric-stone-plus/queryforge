@@ -13,12 +13,6 @@ d.rounded_rectangle(
     radius=R, fill=(10, 14, 23, 255)
 )
 
-# Gradient accent line on top
-for i in range(8):
-    alpha = int(255 * (1 - i / 8))
-    d.rectangle([MARGIN + R, MARGIN + i, SIZE - MARGIN - R, MARGIN + i + 1],
-                fill=(74, 163, 255, alpha))
-
 # Letter Q
 try:
     font = ImageFont.truetype('/System/Library/Fonts/Supplemental/Futura.ttc', 420)
