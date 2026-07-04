@@ -61,11 +61,6 @@ Olist demo case 当前包含：
 - 复购用户的品类跨越路径
 - 渠道表现对比分析
 
-## Project Links
-
-- Railway phone/QR demo: <https://queryforge-production-8d6f.up.railway.app>
-- Review methodology: [docs/QUINTE-METHODOLOGY.md](docs/QUINTE-METHODOLOGY.md)
-
 ## Quick Start
 
 ```bash
