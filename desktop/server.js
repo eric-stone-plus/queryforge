@@ -50,9 +50,9 @@ function validateSQL(sql) {
 }
 
 // AI agent
-const BASE_URL = process.env.KIMI_BASE_URL || process.env.AI_BASE_URL || 'https://api.kimi.com/coding/v1';
-const API_KEY = process.env.KIMI_API_KEY || process.env.AI_API_KEY || '';
-const AI_MODEL = process.env.KIMI_MODEL || process.env.AI_MODEL || 'kimi-for-coding';
+const BASE_URL = process.env.AI_BASE_URL || 'https://example.invalid/v1';
+const API_KEY = process.env.AI_API_KEY || '';
+const AI_MODEL = process.env.AI_MODEL || 'configured-model';
 const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || '60000');
 const AI_TEMPERATURE = Number(process.env.AI_TEMPERATURE || '1');
 
@@ -61,7 +61,7 @@ JSON fields: {"thinking":"reasoning","intent":"what user wants","sql":"single va
 Rules: Revenue = SUM(oi.quantity*oi.unit_price*(1-oi.discount)). NEVER use orders.total_amount. SELECT only. SQLite syntax. Prefer ASCII column aliases; quote any Chinese aliases with double quotes.`;
 
 async function callLLM(query) {
-  if (!API_KEY) throw new Error('API key not configured');
+  if (!API_KEY || !process.env.AI_BASE_URL || !process.env.AI_MODEL) throw new Error('AI provider is not fully configured');
 
   const resp = await fetch(`${BASE_URL}/chat/completions`, {
     method: 'POST',
@@ -239,7 +239,7 @@ const server = http.createServer(async (req, res) => {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>QueryForge — AI 数据分析智能体</title>
+<title>QueryForge — 受治理的自助式商业分析层</title>
 <link rel="stylesheet" href="/_next/static/css/app.css"/>
 <style>
 :root{--bg:#fafbfc;--surface:#fff;--surface-hover:#f6f8fa;--border:#e1e4e8;--text:#24292f;--text-secondary:#656d76;--text-muted:#8b949e;--accent:#0969da;--accent-soft:#ddf4ff;--success:#1a7f37;--success-soft:#dafbe1;--warning:#9a6700;--warning-soft:#fff8c5;--error:#cf222e;--error-soft:#ffebe9}

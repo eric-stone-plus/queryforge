@@ -17,8 +17,8 @@
 ### P0：Demo 必须（今天）
 - [x] 桌面版图标修复
 - [x] 默认暗黑模式
-- [ ] README 中文化
-- [ ] PPT 重做（商业风格，不提技术栈）
+- [x] README 中文化
+- [x] PPT 重做（商业风格，不提技术栈）
 
 ### P1：产品完善（本周）
 - [ ] 截图/GIF 放 README
@@ -41,7 +41,7 @@
 
 ## 技术债
 
-- 依赖清理：@ai-sdk/openai、openai、sql.js、@faker-js/faker 未使用
+- 依赖清理：移除未使用运行时依赖，保留当前 OpenAI-compatible provider 链路
 - 测试覆盖：当前零测试
 - API Key 管理：需要 Keychain 集成
 - 错误监控：需要 Sentry 或类似方案
@@ -49,7 +49,7 @@
 ## 架构决策记录
 
 1. **SQLite 而非 PostgreSQL**：黑客松速度优先，SQLite 零配置。生产环境需迁移。
-2. **Kimi K2.7 而非 OpenAI**：中文理解好，ClawHunt/LLMgate API 兼容 OpenAI 格式，可无缝切换。
+2. **OpenAI-compatible provider 抽象**：运行时只依赖兼容 Chat Completions 的接口，实际模型通过环境变量切换。
 3. **Next.js 全栈**：前后端同仓库，部署简单。API Routes 够用，不需要独立后端。
 4. **SSE 而非 WebSocket**：单向推送够用，实现简单，HTTP 兼容性好。
 5. **QUINTE 对抗审查**：5 个 AI 互相挑刺，消除单点盲区。成本约 ¥5/次。

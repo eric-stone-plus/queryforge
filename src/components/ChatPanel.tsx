@@ -9,7 +9,7 @@ import {
 
 export type DataRow = Record<string, string | number | boolean | null>;
 export type ChartConfig = { type?: string; x_key?: string; xKey?: string; y_key?: string; yKey?: string; title?: string };
-export type ChatResult = { thinking?: string; sql?: string; data?: DataRow[]; chartConfig?: ChartConfig; chart_config?: ChartConfig; explanation?: string; error?: string; _cached?: boolean; corrected?: boolean; correctionNote?: string };
+export type ChatResult = { thinking?: string; intent?: string; sql?: string; data?: DataRow[]; chartConfig?: ChartConfig; chart_config?: ChartConfig; explanation?: string; error?: string; _cached?: boolean; corrected?: boolean; correctionNote?: string };
 
 type ChatPanelProps = { onResult?: (r: ChatResult) => void; externalResult?: ChatResult | null; className?: string };
 
@@ -104,6 +104,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<{ q: string; r: ChatResult }[]>([]);
   const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([]);
+  const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const displayResult = externalResult ?? result;
@@ -121,44 +122,54 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
     setError(null);
     setResult(null);
     setProgressSteps([]);
+    setPendingQuestion(q);
 
     try {
+      const context = history.slice(-4).map(({ q: question, r }) => ({
+        question,
+        intent: r.intent,
+        sql: r.sql,
+        explanation: r.explanation,
+      }));
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: q }),
+        body: JSON.stringify({ message: q, context }),
       });
 
+      if (!res.ok || !res.body) {
+        throw new Error("分析服务暂时不可用，请稍后重试。");
+      }
+
       // Handle SSE stream
-      const reader = res.body?.getReader();
+      const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let finalResult: ChatResult | null = null;
 
-      if (reader) {
-        let buffer = "";
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
 
-          const lines = buffer.split("\n");
-          buffer = lines.pop() || "";
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
 
-          for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (data.type === "progress") {
-                setProgressSteps((prev) => [...prev, { step: data.step, message: data.message }]);
-              } else if (data.type === "result") {
-                finalResult = data;
-              } else if (data.type === "error") {
-                throw new Error(data.error);
-              }
-            } catch (parseErr) {
-              if (parseErr instanceof Error && parseErr.message !== "Unexpected end of JSON input") {
-                throw parseErr;
-              }
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.type === "progress") {
+              setProgressSteps((prev) => [...prev, { step: data.step, message: data.message }]);
+            } else if (data.type === "result") {
+              finalResult = data;
+            } else if (data.type === "error") {
+              throw new Error(data.error);
+            }
+          } catch (parseErr) {
+            if (parseErr instanceof Error && parseErr.message !== "Unexpected end of JSON input") {
+              throw parseErr;
             }
           }
         }
@@ -173,6 +184,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
       setError(e instanceof Error ? e.message : "请求出错");
     } finally {
       setIsLoading(false);
+      setPendingQuestion(null);
     }
   }
 
@@ -197,7 +209,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
           <div className="mx-auto flex max-w-2xl flex-col items-center justify-center py-6 sm:py-20">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white sm:mb-5 sm:h-16 sm:w-16 sm:text-2xl" style={{ background: "linear-gradient(135deg, #0969da, #8250df)" }}>QF</div>
             <h2 className="mb-2 text-lg font-semibold sm:text-xl" style={{ color: "var(--text)" }}>你好，我是 QueryForge</h2>
-            <p className="mb-5 text-center text-sm leading-relaxed sm:mb-8" style={{ color: "var(--text-secondary)" }}>AI 商业数据分析智能体。用自然语言提问，自动生成 SQL 查询并可视化结果。</p>
+            <p className="mb-5 text-center text-sm leading-relaxed sm:mb-8" style={{ color: "var(--text-secondary)" }}>面向经营问题的商业分析助手。你可以直接追问原因、对比和下一步动作，我会把口径落实到当前数据上。</p>
             <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
               {DEMO_CHIPS.map((chip) => (
                 <button key={chip} onClick={() => handleChipClick(chip)} className="rounded-full px-4 py-2 text-sm font-medium transition-default" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
@@ -241,7 +253,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
                 <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                   <h3 className="mb-3 text-sm font-semibold" style={{ color: "var(--text)" }}>
                     {item.r.chartConfig?.title ?? item.r.chart_config?.title ?? "数据可视化"}
-                    {item.r._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>离线演示</span>}
+                    {item.r._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>快速结果</span>}
                     {item.r.corrected && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>AI 自纠正</span>}
                   </h3>
                   {item.r.explanation && <div className="mb-3 rounded-lg p-3 text-xs leading-relaxed" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}><p className="whitespace-pre-wrap">{item.r.explanation}</p></div>}
@@ -285,11 +297,17 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
               )}
               <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                 <h3 className="mb-3 text-sm font-semibold" style={{ color: "var(--text)" }}>{chartTitle}
-                  {displayResult._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>离线演示</span>}
+                  {displayResult._cached && <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--warning-soft)", color: "var(--warning)" }}>快速结果</span>}
                 </h3>
                 {displayResult.explanation && <div className="mb-3 rounded-lg p-3 text-xs leading-relaxed" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}><p className="whitespace-pre-wrap">{displayResult.explanation}</p></div>}
                 <ChartResult result={displayResult} />
               </div>
+            </div>
+          )}
+
+          {pendingQuestion && (
+            <div className="flex justify-end">
+              <div className="max-w-[92%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm sm:max-w-[80%]" style={{ background: "var(--accent)", color: "#fff" }}>{pendingQuestion}</div>
             </div>
           )}
 

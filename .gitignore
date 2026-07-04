@@ -59,6 +59,7 @@ __pycache__/
 data/olist/
 
 # Session notes (internal, not for upload)
+docs/HANDOFF.md
 docs/PROJECT-MEMO.md
 docs/SESSION-NOTES-*.md
 
@@ -66,3 +67,6 @@ docs/SESSION-NOTES-*.md
 debates/*/run-r*.sh
 debates/*/prompt-r*.md
 debates/*/stale-*/
+debates/**/run-r*.sh
+debates/**/prompt-r*.md
+debates/**/stale-*/

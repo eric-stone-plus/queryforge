@@ -52,15 +52,15 @@ a:hover { text-decoration: underline; }
   <div class="timeline-item">
     <div class="timeline-time">7/3 晚 — 命题发布</div>
     <div class="timeline-content">
-      <strong>选定方向：AI 数据分析智能体</strong><br>
-      ClawHunt Builder Camp 2026，Track A（让 Agent 干活）。核心痛点：分析师 80% 时间在重复取数，业务团队等排期要 1-3 天。技术选型：Next.js 14 + Vercel AI SDK + SQLite + Railway。
+      <strong>选定方向：受治理的自助式商业分析层</strong><br>
+      ClawHunt Builder Camp 2026，Track C（Business on AI）。核心痛点：业务问题越来越快，报表流程仍然很慢；数据团队需要速度，也必须保留口径、权限和审计边界。技术选型：Next.js 14 + Vercel AI SDK + SQLite + Railway。
     </div>
   </div>
   <div class="timeline-item">
     <div class="timeline-time">7/4 上午 — 代码审计</div>
     <div class="timeline-content">
       <strong>QUINTE Round 1: 5 方独立代码审计</strong><br>
-      发现 6 个 P0 缺陷：Dashboard.tsx 死代码未接入、KPI 硬编码（100% 复购率一眼假）、无客户端超时、extractJson 正则脆弱、API key 硬编码、无错误边界。全部修复。
+      发现 6 个 P0 缺陷：Dashboard.tsx 死代码未接入、KPI 硬编码、无客户端超时、extractJson 正则脆弱、API key 硬编码、无错误边界。全部修复。
     </div>
   </div>
   <div class="timeline-item">
@@ -78,17 +78,17 @@ a:hover { text-decoration: underline; }
     </div>
   </div>
   <div class="timeline-item">
-    <div class="timeline-time">7/4 晚上 — 数据迁移</div>
+    <div class="timeline-time">7/4 晚上 — 真实数据基础</div>
     <div class="timeline-content">
-      <strong>faker → Olist 真实数据迁移</strong><br>
-      QUINTE Round 4 竞品分析建议修 faker 数据。但实际执行了更激进的方案：直接迁移到 Kaggle Olist 巴西电商真实数据集（99K 订单）。迁移脚本从 O(n²) 优化到 O(n)，实际耗时 5 分钟（预估 4-6 小时）。更新 agent.ts 系统提示词、demo-cache、MetricSidebar、page.tsx、PPT。
+      <strong>Olist 真实数据基础完成</strong><br>
+      采用 Kaggle Olist 巴西电商真实数据集（99K 订单）作为本次 demo case。数据覆盖订单、支付、商品、地区、评价等维度，适合展示区域趋势、支付方式、品类关联和复购路径等商业分析问题；产品形态面向更广泛的结构化业务数据。
     </div>
   </div>
   <div class="timeline-item">
     <div class="timeline-time">7/4 深夜 — 对话质量 + 架构审查</div>
     <div class="timeline-content">
       <strong>Codex 产品工程审查 + 对话质量升级</strong><br>
-      Codex（GPT-5.5）以 Principal Product Engineer 视角审查架构。核心建议：系统提示词从"brief Chinese explanation"升级为要求完整的分析师报告（数据结论 + 趋势对比 + 业务建议 + 数据局限）。PPT 技术叙事从功能列表重构为三层架构（语义层 + 验证式 Agent + 数据平面）。
+      Codex 以 Principal Product Engineer 视角审查架构。核心建议：系统提示词从"brief Chinese explanation"升级为要求完整的分析师报告（数据结论 + 趋势对比 + 业务建议 + 数据局限）。PPT 技术叙事从功能列表重构为三层架构（语义层 + 验证式 Agent + 数据平面）。
     </div>
   </div>
 </div>
@@ -102,8 +102,8 @@ a:hover { text-decoration: underline; }
     <li><strong>Round 1 代码审计</strong> — 发现 6 个 P0 缺陷，全部修复</li>
     <li><strong>Round 2 方向决策</strong> — 确认差异化定位：分析师指标库 + 自纠正 + Schema-only</li>
     <li><strong>Round 3 打磨策略</strong> — 演示流程优化，排练优先于代码</li>
-    <li><strong>Round 4 竞品分析</strong> — 数据策略决策（faker → Olist），三层架构叙事</li>
-    <li><strong>Round 4.5 一致性审计</strong> — 全项目文件对齐检查，修复残留 faker 数据</li>
+    <li><strong>Round 4 竞品分析</strong> — 数据可信度、商业定位与三层架构叙事</li>
+    <li><strong>最终一致性审计</strong> — 全项目文件对齐检查，确保成品口径一致</li>
   </ul>
   <p>完整报告：<a href="../debates/">debates/</a></p>
   <p>方法论文档：<a href="../docs/QUINTE-METHODOLOGY.md">docs/QUINTE-METHODOLOGY.md</a></p>
@@ -112,14 +112,14 @@ a:hover { text-decoration: underline; }
 <h2>真实数据指标</h2>
 
 <div class="card">
-  <div class="card-title">Olist 巴西电商平台 — 99,441 订单 · 96,096 用户 · 32,951 商品 · 74 品类</div>
+  <div class="card-title">Demo case：Olist 巴西电商数据 — 99,441 订单 · 96,096 用户 · 32,951 商品 · 74 品类</div>
   <ul>
     <li>总营收 R$1,601 万（2016-2018 年累计）</li>
     <li>客单价 R$161</li>
     <li>完成率 97% · 退款率 1.2% · 在途 1.7%</li>
     <li>复购率 3.1%（marketplace 平台正常水平）</li>
-    <li>覆盖巴西 5 大地区：Sudeste(Sudeste) 65,900 用户 · Sul(Sul) 13,690 · Nordeste(Nordeste) 9,140 · Centro-Oeste(Centro-Oeste) 7,389</li>
-    <li>渠道：Cartão de Crédito(credit_card) 75,391 单 · Boleto(boleto) 19,784 · Voucher(voucher) 2,739 · 微信(debit_card) 1,527</li>
+    <li>覆盖巴西 5 大地区：Sudeste 65,900 用户 · Sul 13,690 · Nordeste 9,140 · Centro-Oeste 7,389 · Norte</li>
+    <li>渠道：Cartão de Crédito(credit_card) 75,391 单 · Boleto(boleto) 19,784 · Voucher(voucher) 2,739 · Cartão de Débito(debit_card) 1,527</li>
     <li>数据源：<a href="https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce">Kaggle Olist Brazilian E-Commerce</a></li>
   </ul>
 </div>
@@ -154,7 +154,7 @@ a:hover { text-decoration: underline; }
   <ul>
     <li><span class="tag tag-done">DONE</span> 网页版：<a href="https://queryforge-production-8d6f.up.railway.app">queryforge-production-8d6f.up.railway.app</a></li>
     <li><span class="tag tag-done">DONE</span> 桌面版：QueryForge.app（macOS x86_64，WKWebView）</li>
-    <li><span class="tag tag-done">DONE</span> GitHub：<a href="https://github.com/eric-stone-plus/queryforge">eric-stone-plus/queryforge</a></li>
+    <li><span class="tag tag-done">DONE</span> GitHub：<a href="https://github.com/eric-stone-plus/QueryForge">eric-stone-plus/QueryForge</a></li>
   </ul>
 </div>
 
@@ -163,7 +163,7 @@ a:hover { text-decoration: underline; }
   <ul>
     <li><span class="tag tag-done">DONE</span> README.md（精简版，三层架构 + 数据合规叙事）</li>
     <li><span class="tag tag-done">DONE</span> PPT（10 页，深色商务风 + Olist 真实数据 + 三层架构）</li>
-    <li><span class="tag tag-done">DONE</span> 讲稿（docs/speaker-notes.md，每页标注时间分配和关键话术）</li>
+    <li><span class="tag tag-done">DONE</span> 讲稿（assets/speaker-notes.docx，Mavis 负责商业叙述，Eric 负责开发阐述）</li>
     <li><span class="tag tag-done">DONE</span> QUINTE-METHODOLOGY.md（对抗审查实战故事，面向社区传播）</li>
     <li><span class="tag tag-done">DONE</span> 开发日志（本文件）</li>
     <li><span class="tag tag-done">DONE</span> 20+ 份 QUINTE 审计报告</li>
@@ -180,7 +180,7 @@ a:hover { text-decoration: underline; }
     <li><span class="tag tag-done">DONE</span> 分析师预设指标库（6 个默认指标）</li>
     <li><span class="tag tag-done">DONE</span> 4 个预缓存查询（API 故障兜底）</li>
     <li><span class="tag tag-done">DONE</span> 深色/浅色主题切换</li>
-    <li><span class="tag tag-done">DONE</span> Olist 真实数据迁移（99K 订单）</li>
+    <li><span class="tag tag-done">DONE</span> Olist 真实数据基础（99K 订单）</li>
   </ul>
 </div>
 
@@ -198,11 +198,11 @@ a:hover { text-decoration: underline; }
 </div>
 
 <div class="card">
-  <div class="card-title">数据迁移经验</div>
+  <div class="card-title">数据基础经验</div>
   <ul>
-    <li>Olist CSV → SQLite 迁移：预估 4-6 小时，实际 5 分钟（O(n²) 优化到 O(n)）</li>
-    <li>faker 数据的最大问题不是"假"，而是"一眼假"（100% 复购率、人均 10 单）</li>
-    <li>真实数据的说服力远超精心构造的模拟数据</li>
+    <li>Olist CSV → SQLite 加载：通过索引和批量写入优化，把真实数据准备压缩到分钟级</li>
+    <li>演示数据最重要的是可信：指标必须和真实业务分布一致，不能只为了好看</li>
+    <li>真实数据的说服力来自完整业务链路：订单、支付、商品、地区、评价可以互相验证</li>
     <li>迁移后必须全项目文件对齐检查（README、PPT、devlog、demo-cache、page.tsx）</li>
   </ul>
 </div>
@@ -226,7 +226,7 @@ a:hover { text-decoration: underline; }
       <td>接入 Dashboard 组件或删除死代码</td>
     </tr>
     <tr>
-      <td>KPI 卡片全部硬编码（100% 复购率一眼假）</td>
+      <td>KPI 卡片全部硬编码，无法随真实数据变化</td>
       <td><span class="tag tag-critical">CRITICAL</span></td>
       <td><span class="tag tag-fixed">已修复</span></td>
       <td>替换为 Olist 真实数据</td>
@@ -298,15 +298,14 @@ a:hover { text-decoration: underline; }
 
 <div class="card">
   <div class="card-title">数据策略决策</div>
-  <p>5 方初始推荐 Option E（修 faker），但执行期间完成了 Olist 迁移（实际 5 分钟 vs 预估 4-6 小时）。关键教训：QUINTE 的风险评估帮助识别"看起来高风险但实际可控"的任务。</p>
-  <p><strong>迁移结果：</strong></p>
+  <p>5 方初始认为真实数据准备风险较高，但执行期间发现通过索引和批量写入优化可以快速完成。关键教训：QUINTE 的风险评估帮助识别"看起来高风险但实际可控"的任务。</p>
+  <p><strong>当前数据基础：</strong></p>
   <ul>
-    <li><span class="diff-del">faker: 10K 订单 · 500 商品 · 1000 用户 · 100% 复购率</span></li>
     <li><span class="diff-add">Olist: 99K 订单 · 33K 商品 · 96K 用户 · 3.1% 复购率</span></li>
   </ul>
 </div>
 
-<h2>六、Round 4.5 — 架构审查（Codex）</h2>
+<h2>六、最终架构审查（Codex）</h2>
 
 <div class="card">
   <div class="card-title">三层架构设计</div>
@@ -345,9 +344,9 @@ a:hover { text-decoration: underline; }
   <div class="card-title">修复的不一致项</div>
   <table>
     <tr><th>文件</th><th>问题</th><th>状态</th></tr>
-    <tr><td>page.tsx</td><td>用户分层明细全是 faker 数据（487人 Regular 等）</td><td><span class="tag tag-fixed">已修复</span></td></tr>
+    <tr><td>page.tsx</td><td>用户分层与 Olist 数据口径不一致</td><td><span class="tag tag-fixed">已修复</span></td></tr>
     <tr><td>page.tsx</td><td>Top 5 表格货币符号 ¥ 应为 R$</td><td><span class="tag tag-fixed">已修复</span></td></tr>
-    <tr><td>devlog.html</td><td>全部过时数据（10K 订单、R$1,601万 等）</td><td><span class="tag tag-fixed">已重写</span></td></tr>
+    <tr><td>devlog.html</td><td>过时数据与当前 Olist 口径不一致</td><td><span class="tag tag-fixed">已重写</span></td></tr>
     <tr><td>README.md</td><td>"复购率对比" vs demo-cache 的"复购率分析"不匹配</td><td><span class="tag tag-fixed">已修复</span></td></tr>
     <tr><td>hero.svg</td><td>标签含具体模型名（AI）</td><td><span class="tag tag-fixed">已修复</span></td></tr>
     <tr><td>.gitignore</td><td>未排除 session notes 和 olist 原始数据</td><td><span class="tag tag-fixed">已修复</span></td></tr>
@@ -360,7 +359,7 @@ a:hover { text-decoration: underline; }
   <div class="card-title">产品</div>
   <ul>
     <li><span class="tag tag-done">DONE</span> 网页版：<a href="https://queryforge-production-8d6f.up.railway.app">queryforge-production-8d6f.up.railway.app</a></li>
-    <li><span class="tag tag-done">DONE</span> GitHub：<a href="https://github.com/eric-stone-plus/queryforge">eric-stone-plus/queryforge</a></li>
+    <li><span class="tag tag-done">DONE</span> GitHub：<a href="https://github.com/eric-stone-plus/QueryForge">eric-stone-plus/QueryForge</a></li>
   </ul>
 </div>
 
@@ -369,7 +368,7 @@ a:hover { text-decoration: underline; }
   <ul>
     <li><span class="tag tag-done">DONE</span> README.md（精简版，三层架构 + 数据合规叙事）</li>
     <li><span class="tag tag-done">DONE</span> PPT（10 页 + 二维码 + speaker notes）</li>
-    <li><span class="tag tag-done">DONE</span> 讲稿（docs/speaker-notes.md）</li>
+    <li><span class="tag tag-done">DONE</span> 讲稿（assets/speaker-notes.docx）</li>
     <li><span class="tag tag-done">DONE</span> QUINTE-METHODOLOGY.md（社区传播故事）</li>
     <li><span class="tag tag-done">DONE</span> 本报告（debates/report.html）</li>
     <li><span class="tag tag-done">DONE</span> 20+ 份审查报告（debates/ 子目录）</li>
@@ -387,7 +386,7 @@ a:hover { text-decoration: underline; }
     <tr><td>R3 裁决（hm + Auditor B）</td><td>4 次</td><td>~¥1/次</td><td>~¥4</td></tr>
     <tr><td><strong>总计</strong></td><td><strong>44 次调用</strong></td><td></td><td><strong>~¥24</strong></td></tr>
   </table>
-  <p>使用小米 MiMo China token plan（mimo-v2.5-pro）。每轮审查产出 5 份独立报告 + 1 份裁决。</p>
+  <p>使用多个可替换的代码与推理智能体。每轮审查产出 5 份独立报告 + 1 份裁决。</p>
 </div>
 
 <h2>十、关键教训</h2>
@@ -398,16 +397,15 @@ a:hover { text-decoration: underline; }
     <li><strong>5/5 一致 = 必修</strong> — 所有审查方都发现的问题，置信度最高，必须修复</li>
     <li><strong>分歧 = 信号</strong> — 不同意见不是噪声，而是需要人类判断的信号</li>
     <li><strong>排练 > 代码</strong> — 演示流程比功能完善更重要（5 方一致）</li>
-    <li><strong>真实数据 > 精心模拟</strong> — Olist 的 3.1% 复购率比 faker 的 100% 更有说服力</li>
+    <li><strong>真实数据 > 演示包装</strong> — Olist 的真实业务分布比刻意好看的指标更有说服力</li>
     <li><strong>教训必须写进源头</strong> — memory 不够，必须同步到 SKILL.md + SOUL.md</li>
   </ul>
 </div>
 
 <p class="meta" style="margin-top: 3rem; text-align: center;">
   Generated by QueryForge · QUINTE Protocol · 2026.07.04<br>
-  <a href="https://github.com/eric-stone-plus/queryforge">GitHub</a> · <a href="https://queryforge-production-8d6f.up.railway.app">Live Demo</a> · <a href="../docs/QUINTE-METHODOLOGY.md">Methodology</a>
+  <a href="https://github.com/eric-stone-plus/QueryForge">GitHub</a> · <a href="https://queryforge-production-8d6f.up.railway.app">Live Demo</a> · <a href="../docs/QUINTE-METHODOLOGY.md">Methodology</a>
 </p>
 
 </body>
 </html>
-

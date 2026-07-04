@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Bar, BarChart, CartesianGrid, Cell, Line, LineChart,
-  Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend,
+  Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
   Area, AreaChart,
 } from "recharts";
 import ChatPanel, { ChatResult } from "@/components/ChatPanel";
@@ -24,11 +24,11 @@ function KpiCard({ label, value, icon, sub }: { label: string; value: string; ic
   );
 }
 
-function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+function ChartCard({ title, children, bodyClassName = "h-44" }: { title: string; children: React.ReactNode; bodyClassName?: string }) {
   return (
     <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
       <h3 className="mb-2 text-xs font-semibold" style={{ color: "var(--text)" }}>{title}</h3>
-      <div className="h-44">{children}</div>
+      <div className={bodyClassName}>{children}</div>
     </div>
   );
 }
@@ -132,12 +132,12 @@ export default function Home() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #0969da, #8250df)" }}>Q</div>
             <div>
               <h1 className="text-sm font-semibold" style={{ color: "var(--text)" }}>QueryForge</h1>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>AI 商业数据分析平台 · 自然语言驱动</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>受治理的自助式商业分析层</p>
             </div>
           </div>
           <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
             <span className="min-w-0 truncate text-xs sm:hidden" style={{ color: "var(--text-muted)" }}>99K 订单</span>
-            <span className="hidden min-w-0 text-xs sm:inline" style={{ color: "var(--text-muted)" }}>99,441 订单 · 5 地区 · 74 品类 · Olist巴西电商</span>
+            <span className="hidden min-w-0 text-xs sm:inline" style={{ color: "var(--text-muted)" }}>通用商业分析工具 · Olist demo case</span>
             <div className="flex shrink-0 items-center gap-2">
               <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: "var(--success-soft)", color: "var(--success)" }}>● 在线</span>
               <button onClick={toggleTheme} className="flex h-7 w-7 items-center justify-center rounded-lg text-sm transition-default" style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}
@@ -153,11 +153,11 @@ export default function Home() {
           <KpiCard label="总营收" value="R$1,601万" icon="💰" sub="99K订单累计" />
           <KpiCard label="客单价" value="R$161" icon="📦" sub="平均每单" />
           <KpiCard label="完成率" value="97%" icon="✅" sub="96,478单完成" />
-          <KpiCard label="复购率" value="3.1%" icon="🔄" sub="真实marketplace" />
+          <KpiCard label="复购率" value="3.1%" icon="🔄" sub="真实平台分布" />
           <KpiCard label="退款率" value="1.2%" icon="⚠️" sub="1,234单退款" />
           <KpiCard label="活跃用户" value="96,096" icon="👥" sub="覆盖74品类" />
           <KpiCard label="商品数" value="32,951" icon="🛒" sub="5大地区" />
-          <KpiCard label="品类数" value="74" icon="📊" sub="巴西Olist平台" />
+          <KpiCard label="品类数" value="74" icon="📊" sub="Demo case" />
         </div>
 
         <div className="grid grid-cols-2 gap-1 border-b px-3 py-2 lg:hidden" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
@@ -220,16 +220,27 @@ export default function Home() {
 
               {/* Category Pie + Channel Bar side by side */}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <ChartCard title="品类营收占比">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid var(--border)", fontSize: 11 }} />
-                      <Pie data={CATEGORY_STATIC} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={25} outerRadius={55} paddingAngle={1}>
-                        {CATEGORY_STATIC.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                      </Pie>
-                      <Legend iconSize={6} wrapperStyle={{ fontSize: 9 }} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                <ChartCard title="品类营收占比" bodyClassName="h-56">
+                  <div className="flex h-full flex-col">
+                    <div className="min-h-0 flex-1">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                          <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid var(--border)", fontSize: 11 }} />
+                          <Pie data={CATEGORY_STATIC} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={28} outerRadius={56} paddingAngle={1}>
+                            {CATEGORY_STATIC.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-1 pt-2">
+                      {CATEGORY_STATIC.map((item, i) => (
+                        <div key={item.name} className="flex min-w-0 items-center gap-1.5">
+                          <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
+                          <span className="truncate text-[10px]" style={{ color: "var(--text-muted)" }} title={item.name}>{item.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </ChartCard>
                 <ChartCard title="渠道订单分布">
                   <ResponsiveContainer width="100%" height="100%">
@@ -299,10 +310,10 @@ export default function Home() {
               {/* User Distribution */}
               <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                 <h3 className="mb-2 text-xs font-semibold" style={{ color: "var(--text)" }}>地区用户分布</h3>
-                <MetricRow label="Sudeste（Sudeste）" value="65,900 用户 · 均单 R$151" color="var(--accent)" />
-                <MetricRow label="Sul（Sul）" value="13,690 用户 · 均单 R$164" />
-                <MetricRow label="Nordeste（Nordeste）" value="9,140 用户 · 均单 R$202" />
-                <MetricRow label="Centro-Oeste（Centro-Oeste）" value="7,389 用户 · 均单 R$189" />
+                <MetricRow label="Sudeste" value="65,900 用户 · 均单 R$151" color="var(--accent)" />
+                <MetricRow label="Sul" value="13,690 用户 · 均单 R$164" />
+                <MetricRow label="Nordeste" value="9,140 用户 · 均单 R$202" />
+                <MetricRow label="Centro-Oeste" value="7,389 用户 · 均单 R$189" />
                 <MetricRow label="总用户" value="96,096" />
                 <MetricRow label="总订单" value="99,441（完成率 97%）" />
               </div>

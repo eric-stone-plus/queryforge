@@ -3,14 +3,15 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { Parser } from "node-sql-parser";
 import { getDb, queryDb } from "./db";
 
-const AI_API_KEY = process.env.KIMI_API_KEY || process.env.AI_API_KEY || "";
-const AI_MODEL = process.env.AI_MODEL || "kimi-for-coding";
+const AI_API_KEY = process.env.AI_API_KEY || "";
+const AI_BASE_URL = process.env.AI_BASE_URL || "https://example.invalid/v1";
+const AI_MODEL = process.env.AI_MODEL || "configured-model";
 const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || "60000");
 const AI_TEMPERATURE = Number(process.env.AI_TEMPERATURE || "1");
 
 const llm = createOpenAICompatible({
   name: process.env.AI_PROVIDER_NAME || "openai-compatible",
-  baseURL: process.env.AI_BASE_URL || "https://api.kimi.com/coding/v1",
+  baseURL: AI_BASE_URL,
   apiKey: AI_API_KEY,
 });
 
@@ -30,9 +31,16 @@ export type AgentProgress = {
   message: string;
 };
 
-const systemPrompt = `You are QueryForge, a senior ecommerce data analyst for Brazilian marketplace data (Olist, 99K orders).
+export type AgentContextTurn = {
+  question: string;
+  intent?: string;
+  sql?: string;
+  explanation?: string;
+};
 
-Your job is to answer the user's business question, not merely generate SQL. Be direct, conversational, and decision-oriented.
+const systemPrompt = `You are QueryForge, a senior business analysis agent. In this demo, you are connected to the Kaggle Olist Brazilian ecommerce dataset (99K orders), so every numeric answer must come from that dataset.
+
+Your job is to answer the user's business question, not merely generate SQL. Be direct, conversational, and decision-oriented, like a domain expert who remembers the current conversation. For broader business questions, explain the analytical frame, then use the available Olist fields as the demo evidence.
 
 Respond with a single valid JSON object only. No markdown, no fences.
 
@@ -54,7 +62,10 @@ Rules:
 - Region names: Sudeste, Sul, Nordeste, Centro-Oeste, Norte.
 - Channel mapping: Cartão de Crédito=credit_card, Boleto=boleto, Voucher=voucher, Cartão de Débito=debit_card.
 - Never invent numbers. Only discuss numbers you can derive from the schema.
-- If the question is ambiguous, make a conservative assumption and state it.
+- If the user asks a follow-up such as "为什么", "那这个呢", "展开说", "和上一个比", use the conversation context to resolve what "this/that/it" refers to.
+- For why/explain/follow-up questions, still return a SQL query. The query should retrieve diagnostic metrics needed for the explanation, such as orders, total_revenue, avg_order, revenue_share, order_share, category_mix, or channel_mix.
+- Do not answer with prose only. The application must execute SQL before giving the final business explanation.
+- If the question is ambiguous even after using context, make a conservative assumption and state it.
 
 Schema:
 regions(id, name, country)
@@ -83,7 +94,7 @@ function validateSelectOnly(sql: string): string {
 function extractJson(text: string): Record<string, unknown> {
   try { return JSON.parse(text); } catch { /* continue */ }
   const start = text.indexOf("{");
-  if (start === -1) throw new Error("No JSON in response");
+  if (start === -1) throw new Error("Model response did not contain a JSON object");
   let depth = 0;
   for (let i = start; i < text.length; i++) {
     if (text[i] === "{") depth++;
@@ -93,8 +104,126 @@ function extractJson(text: string): Record<string, unknown> {
     }
   }
   const m = text.match(/\{[\s\S]*\}/);
-  if (!m) throw new Error("No JSON in response");
+  if (!m) throw new Error("Model response did not contain a JSON object");
   return JSON.parse(m[0]);
+}
+
+function normalizeAgentObject(obj: Record<string, unknown>): Record<string, unknown> {
+  if (typeof obj.sql !== "string" || obj.sql.trim().length === 0) {
+    throw new Error("Model response did not include a usable SQL query");
+  }
+
+  const chartConfig = obj.chart_config ?? obj.chartConfig;
+  if (!chartConfig || typeof chartConfig !== "object") {
+    obj.chart_config = { type: "bar", x_key: "", y_key: "", title: "数据分析结果" };
+  }
+
+  return obj;
+}
+
+async function parseOrRepairJson(rawText: string, originalPrompt: string): Promise<Record<string, unknown>> {
+  try {
+    return normalizeAgentObject(extractJson(rawText));
+  } catch {
+    const repairPrompt = `Convert the assistant output below into one valid JSON object that matches the required QueryForge schema.
+
+Rules:
+- Return JSON only. No markdown, no comments, no code fences.
+- Preserve the original SQL and business meaning when possible.
+- If the SQL is missing, infer a conservative SQLite SELECT query from the original user prompt and the schema in the system message.
+
+Original user prompt:
+${originalPrompt}
+
+Assistant output:
+${rawText}`;
+
+    const { text: repairedText } = await generateText({
+      model: llm(AI_MODEL),
+      system: systemPrompt,
+      prompt: repairPrompt,
+      temperature: 0,
+      maxOutputTokens: 2000,
+      abortSignal: AbortSignal.timeout(Math.min(AI_TIMEOUT_MS, 30000)),
+    });
+
+    try {
+      return normalizeAgentObject(extractJson(repairedText));
+    } catch (error) {
+      throw new Error("Model response could not be converted into the required JSON format", { cause: error });
+    }
+  }
+}
+
+function buildPrompt(query: string, context: AgentContextTurn[] = []): string {
+  const recent = context.slice(-4).map((turn, index) => {
+    const parts = [
+      `Turn ${index + 1}`,
+      `User question: ${turn.question}`,
+      turn.intent ? `Assistant intent: ${turn.intent}` : "",
+      turn.sql ? `SQL used: ${turn.sql}` : "",
+      turn.explanation ? `Prior explanation: ${turn.explanation.slice(0, 360)}` : "",
+    ].filter(Boolean);
+    return parts.join("\n");
+  }).join("\n\n");
+
+  return `${recent ? `Conversation context:\n${recent}\n\n` : ""}Current user question:\n${query}\n\nAnswer the current question. If it is a follow-up, explicitly connect it to the previous result in the explanation and generate SQL for the metrics needed to explain the follow-up. Return JSON only.`;
+}
+
+function buildResultPrompt(query: string, context: AgentContextTurn[], sql: string, data: Record<string, unknown>[]) {
+  const recent = context.slice(-3).map((turn) => ({
+    question: turn.question,
+    intent: turn.intent,
+    explanation: turn.explanation?.slice(0, 260),
+  }));
+  const rows = data.slice(0, 80);
+
+  return `Write the final QueryForge business analysis in Chinese using only the executed query result.
+
+Current user question:
+${query}
+
+Recent conversation context:
+${JSON.stringify(recent, null, 2)}
+
+Executed SQL:
+${sql}
+
+Query result rows:
+${JSON.stringify(rows, null, 2)}
+
+Requirements:
+- 150-250 Chinese characters.
+- Be conversational and specific, not generic.
+- Use actual numbers from the rows. Do not invent numbers.
+- Prefer Chinese business terms. Avoid exposing raw SQL column names such as order_share_pct unless necessary.
+- If this is a follow-up, connect directly to the previous result.
+- Cover: data conclusion, contrast/trend, business action, and data limitation.
+- Return plain text only, no markdown.`;
+}
+
+async function explainFromResult(
+  query: string,
+  context: AgentContextTurn[],
+  sql: string,
+  data: Record<string, unknown>[],
+  fallback: string,
+) {
+  if (!data.length) return fallback || "本次查询没有返回可分析的数据。建议调整筛选条件或扩大时间范围后再看。";
+
+  try {
+    const { text } = await generateText({
+      model: llm(AI_MODEL),
+      system: "You write concise, evidence-based Chinese business analysis. Use only supplied query results.",
+      prompt: buildResultPrompt(query, context, sql, data),
+      temperature: 0.4,
+      maxOutputTokens: 700,
+      abortSignal: AbortSignal.timeout(Math.min(AI_TIMEOUT_MS, 20000)),
+    });
+    return text.trim() || fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 function tryExecute(sql: string): { success: boolean; data?: Record<string, unknown>[]; error?: string } {
@@ -109,20 +238,22 @@ function tryExecute(sql: string): { success: boolean; data?: Record<string, unkn
 
 export async function runAgent(
   query: string,
+  context: AgentContextTurn[] = [],
   onProgress?: (p: AgentProgress) => void,
 ): Promise<AgentResult> {
   getDb();
 
-  if (!AI_API_KEY) {
-    throw new Error("AI API key not configured");
+  if (!AI_API_KEY || !process.env.AI_BASE_URL || !process.env.AI_MODEL) {
+    throw new Error("AI provider is not fully configured");
   }
 
   onProgress?.({ step: "analyzing", message: "AI 正在分析您的问题..." });
+  const prompt = buildPrompt(query, context);
 
   const { text } = await generateText({
     model: llm(AI_MODEL),
     system: systemPrompt,
-    prompt: query,
+    prompt,
     temperature: AI_TEMPERATURE,
     maxOutputTokens: 2000,
     abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS),
@@ -130,7 +261,7 @@ export async function runAgent(
 
   onProgress?.({ step: "generating_sql", message: "正在解析 SQL 查询..." });
 
-  const obj = extractJson(text);
+  const obj = await parseOrRepairJson(text, prompt);
   const sql = obj.sql as string;
 
   onProgress?.({ step: "executing", message: "正在执行数据库查询..." });
@@ -138,6 +269,7 @@ export async function runAgent(
   const result = tryExecute(sql);
 
   if (result.success) {
+    const explanation = await explainFromResult(query, context, sql, result.data!, (obj.explanation as string) ?? "");
     onProgress?.({ step: "done", message: "查询完成" });
     return {
       thinking: (obj.thinking as string) ?? "",
@@ -145,7 +277,7 @@ export async function runAgent(
       sql,
       data: result.data!,
       chartConfig: (obj.chart_config as AgentResult["chartConfig"]) ?? { type: "bar", x_key: "", y_key: "", title: "" },
-      explanation: (obj.explanation as string) ?? "",
+      explanation,
     };
   }
 
@@ -168,7 +300,7 @@ Respond with corrected JSON only:`;
     abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS),
   });
 
-  const fixObj = extractJson(fixText);
+  const fixObj = await parseOrRepairJson(fixText, fixPrompt);
   const fixedSql = fixObj.sql as string;
 
   onProgress?.({ step: "executing", message: "正在执行修正后的查询..." });
@@ -176,6 +308,7 @@ Respond with corrected JSON only:`;
   const fixResult = tryExecute(fixedSql);
 
   if (fixResult.success) {
+    const explanation = await explainFromResult(query, context, fixedSql, fixResult.data!, (fixObj.explanation as string) ?? "");
     onProgress?.({ step: "done", message: "修正成功" });
     return {
       thinking: (fixObj.thinking as string) ?? "",
@@ -183,7 +316,7 @@ Respond with corrected JSON only:`;
       sql: fixedSql,
       data: fixResult.data!,
       chartConfig: (fixObj.chart_config as AgentResult["chartConfig"]) ?? { type: "bar", x_key: "", y_key: "", title: "" },
-      explanation: (fixObj.explanation as string) ?? "",
+      explanation,
       corrected: true,
       correctionNote: `SQL 已自动修正（原始错误: ${result.error?.slice(0, 80)}）`,
     };

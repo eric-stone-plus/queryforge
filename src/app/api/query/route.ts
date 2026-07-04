@@ -18,6 +18,11 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
+function withDefaultLimit(sql: string) {
+  const normalized = sql.trim().replace(/;+\s*$/, "");
+  return normalized.toUpperCase().includes("LIMIT") ? normalized : `${normalized} LIMIT 500`;
+}
+
 export async function POST(request: Request) {
   let body: unknown;
 
@@ -54,7 +59,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const rows = getDb().prepare(sql + (sql.toUpperCase().includes("LIMIT") ? "" : " LIMIT 500")).all();
+    const rows = getDb().prepare(withDefaultLimit(sql)).all();
     return NextResponse.json({ rows, error: null });
   } catch (error) {
     return NextResponse.json(

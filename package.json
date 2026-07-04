@@ -1,7 +1,11 @@
 {
-  "name": "data-agent",
+  "name": "queryforge",
   "version": "0.1.0",
   "private": true,
+  "contributors": [
+    "Eric Stone",
+    "Codex"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,22 +13,14 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^4.0.7",
     "@ai-sdk/openai-compatible": "^3.0.5",
-    "@faker-js/faker": "^10.5.0",
     "ai": "^7.0.14",
     "better-sqlite3": "^12.11.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^1.23.0",
-    "next": "^14.2.35",
+    "next": "^15.5.20",
     "node-sql-parser": "^5.4.0",
-    "openai": "^6.45.0",
     "react": "^18",
     "react-dom": "^18",
-    "recharts": "^3.9.1",
-    "sql.js": "^1.14.1",
-    "tailwind-merge": "^3.6.0",
-    "zod": "^4.4.3"
+    "recharts": "^3.9.1"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
@@ -32,9 +28,14 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.0",
+    "eslint-config-next": "^15.5.20",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.10"
+    }
   }
 }
