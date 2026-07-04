@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+    <key>CFBundleExecutable</key><string>QueryForge</string>
+    <key>CFBundleIdentifier</key><string>com.queryforge.desktop</string>
+    <key>CFBundleName</key><string>QueryForge</string>
+    <key>CFBundleDisplayName</key><string>QueryForge</string>
+    <key>CFBundlePackageType</key><string>APPL</string>
+    <key>CFBundleIconFile</key><string>AppIcon</string>
+    <key>CFBundleShortVersionString</key><string>1.0</string>
+    <key>CFBundleVersion</key><string>1</string>
+    <key>LSMinimumSystemVersion</key><string>14.0</string>
+    <key>NSHighResolutionCapable</key><true/>
+    <key>NSAppTransportSecurity</key><dict>
+        <key>NSAllowsArbitraryLoads</key><true/>
+    </dict>
+</dict></plist>
+PLIST && \
+cp AppIcon.icns "${APP_BUNDLE}/Contents/Resources/AppIcon.icns" && \
+codesign --force --deep --sign - "${APP_BUNDLE}" 2>/dev/null && \
+echo "Built: ${APP_BUNDLE}" && \
+ls -la "${APP_BUNDLE}/Contents/MacOS/QueryForge"
