@@ -14,7 +14,7 @@ You are reviewing the R1 audit outputs from 5 independent auditors. Each auditor
 task-polish.md
 
 ## Project Source
-/Users/ericstone/Downloads/data-agent/
+
 
 ## Cross-Examination Questions
 

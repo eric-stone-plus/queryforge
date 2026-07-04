@@ -148,7 +148,7 @@ The weakest scoring dimension is 创新性 (15 pts). Text2SQL is not novel — V
 
 ## Output Format
 
-Write your analysis to: /Users/ericstone/Downloads/data-agent/debates/round4-competitive-analysis/r1-analysis-{AGENT_ID}.md
+Write your analysis to: debates/round4-competitive-analysis/r1-analysis-{AGENT_ID}.md
 
 Structure your output as:
 1. COMPETITIVE ANALYSIS (Q1)

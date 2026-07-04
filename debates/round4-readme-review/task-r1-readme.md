@@ -7,7 +7,7 @@ The project just migrated from faker-generated data to Olist Brazilian e-commerc
 
 ## Current README.md
 
-Read the full README at /Users/ericstone/Downloads/data-agent/README.md
+Read the full README at README.md
 
 ## Current Project Context
 

@@ -5,11 +5,11 @@ You are performing R2 cross-examination of the R1 analyses. Read all 5 completed
 
 ## R1 Artifacts to Review
 
-1. /Users/ericstone/Downloads/data-agent/debates/round4-competitive-analysis/r1-analysis-cw.md (CodeWhale)
-2. /Users/ericstone/Downloads/data-agent/debates/round4-competitive-analysis/r1-analysis-oc.md (OpenCode)
-3. /Users/ericstone/Downloads/data-agent/debates/round4-competitive-analysis/r1-analysis-kc.md (Kilo Code)
-4. /Users/ericstone/Downloads/data-agent/debates/round4-competitive-analysis/r1-analysis-mimo.md (MiMo)
-5. /Users/ericstone/Downloads/data-agent/debates/round4-competitive-analysis/r1-analysis-omp.md (OMP)
+1. debates/round4-competitive-analysis/r1-analysis-cw.md (CodeWhale)
+2. debates/round4-competitive-analysis/r1-analysis-oc.md (OpenCode)
+3. debates/round4-competitive-analysis/r1-analysis-kc.md (Kilo Code)
+4. debates/round4-competitive-analysis/r1-analysis-mimo.md (MiMo)
+5. debates/round4-competitive-analysis/r1-analysis-omp.md (OMP)
 
 ## Cross-Examination Questions
 
@@ -47,7 +47,7 @@ Which ONE option should we commit to? Justify with evidence.
 
 ## Output Format
 
-Write your cross-examination to: /Users/ericstone/Downloads/data-agent/debates/round4-competitive-analysis/r2-cross-{AGENT_ID}.md
+Write your cross-examination to: debates/round4-competitive-analysis/r2-cross-{AGENT_ID}.md
 
 Structure:
 1. CONSENSUS FINDINGS (unanimous across R1)

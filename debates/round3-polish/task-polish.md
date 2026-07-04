@@ -74,4 +74,4 @@ Write your analysis as structured markdown. For each question, provide:
 3. Risk factors
 4. Confidence level (high/medium/low)
 
-Write to: /Users/ericstone/Public/QUINTE/debates/queryforge-polish-20260704/r1-{AGENT_ID}.md
+Write to: debates/round3-polish/r1-{AGENT_ID}.md

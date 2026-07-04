@@ -38,4 +38,4 @@ QueryForge is a hackathon product (ClawHunt Builder Camp 2026, 72h). The PPT is 
 5. What's the optimal 5-minute pitch flow?
 
 ## Output
-Write analysis to: /Users/ericstone/Downloads/data-agent/debates/round4-ppt/r1-{AGENT_ID}.md
+Write analysis to: debates/round4-ppt/r1-{AGENT_ID}.md
