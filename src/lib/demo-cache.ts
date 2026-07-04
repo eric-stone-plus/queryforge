@@ -7,25 +7,25 @@ export const CACHED_RESULTS: Record<string, object> = {
     chartConfig: { type: "line", x_key: "month", y_key: "revenue", title: "各地区月度销售额趋势" },
     explanation: "数据结论：华东地区（Sudeste，含圣保罗、里约）贡献了总营收的约65%，是巴西电商的核心市场。2017年11月出现明显的销售额峰值（约R$120万），与巴西Black Friday促销高度吻合。趋势分析：从2017年初到2018年中，各地区营收呈稳定增长态势，华东地区月均增长率约8%。业务建议：建议重点投放华东市场，同时关注华南（Sul）地区的增长潜力——该地区用户购买力强但渗透率较低。数据局限：2016年数据量较少（平台早期），2018年9月后数据不完整。",
   },
-  "哪个品类利润率最高？": {
-    thinking: "用户想知道哪个品类的利润率最高。利润率 = (售价 - 成本) / 售价。需要连接products和categories表。注意：成本数据是估算的（约55%售价），实际利润率差异来自品类特性。",
-    intent: "对比各品类的平均利润率，识别高利润品类",
-    sql: "SELECT c.name AS category, ROUND(AVG((p.unit_price - p.unit_cost) / p.unit_price) * 100, 2) AS margin_pct FROM products p JOIN categories c ON p.category_id = c.id GROUP BY c.name ORDER BY margin_pct DESC LIMIT 15",
-    chartConfig: { type: "bar", x_key: "category", y_key: "margin_pct", title: "品类利润率对比" },
-    explanation: "数据结论：所有品类的平均利润率在45%左右，差异不大（因为成本按售价的固定比例估算）。在实际业务中，不同品类的利润率差异会更显著——例如电子产品的利润率通常低于服饰和美妆。业务建议：在真实部署中，建议接入实际成本数据（ERP系统），这样才能做准确的品类利润分析。当前数据的局限：成本是估算值，不能反映真实的品类利润差异。",
+  "各地区客单价差异分析": {
+    thinking: "用户想了解不同地区的消费能力差异。客单价 = 平均每单金额。需要连接orders和regions表，按地区聚合。华北(Nordeste)虽然订单量少，但客单价可能更高（高价值品类集中）。",
+    intent: "对比各地区的平均客单价，识别消费能力差异和定价策略机会",
+    sql: "SELECT r.name AS region, COUNT(DISTINCT o.id) AS orders, ROUND(AVG(o.total_amount), 0) AS avg_order, ROUND(SUM(o.total_amount), 0) AS total_revenue FROM orders o JOIN regions r ON o.region_id = r.id WHERE o.status = 'completed' GROUP BY r.name ORDER BY avg_order DESC",
+    chartConfig: { type: "bar", x_key: "region", y_key: "avg_order", title: "各地区平均客单价（R$）" },
+    explanation: "数据结论：华北地区（Nordeste）客单价最高（R$202），是华东（R$150）的1.35倍。但华东订单量（66,200单）是华北（9,044单）的7倍。趋势分析：这反映了巴西区域经济差异——东北部消费者倾向于集中购买高价值商品，而东南部购买频次高但单笔金额低。业务建议：针对华北市场可推高客单价策略（组合优惠、满减），针对华东市场可推频次提升策略（会员、复购激励）。数据局限：客单价受品类结构影响，需结合品类分析进一步验证。",
   },
-  "Top 10 营收品类": {
-    thinking: "用户想看营收最高的10个品类。按order_items的unit_price求和排序。health_beauty和watches_gifts是Olist平台的头部品类。",
-    intent: "查看营收最高的10个品类，识别核心收入来源",
-    sql: "SELECT c.name AS category, COUNT(oi.id) AS order_count, ROUND(SUM(oi.unit_price), 0) AS total_revenue FROM order_items oi JOIN products p ON oi.product_id = p.id JOIN categories c ON p.category_id = c.id GROUP BY c.name ORDER BY total_revenue DESC LIMIT 10",
-    chartConfig: { type: "bar", x_key: "category", y_key: "total_revenue", title: "Top 10 营收品类" },
-    explanation: "数据结论：健康美容（health_beauty）以R$125.9万营收位居第一，其次是钟表礼品（R$120.5万）和床品家纺（R$103.7万）。Top 3品类合计占总营收约22%。趋势分析：前10品类的营收分布相对均匀，没有极端的头部效应——这反映了Olist作为综合marketplace的特性。业务建议：健康美容品类的订单量（8,836单）远高于钟表礼品（5,624单），但营收接近，说明钟表礼品的客单价更高。可以考虑在钟表礼品品类增加SKU和营销投入。数据局限：品类名称为英文（原始数据为葡萄牙语翻译），部分品类归类可能不够精细。",
+  "复购用户的品类跨越路径": {
+    thinking: "用户想了解复购用户的消费行为模式。需要先识别复购用户（COUNT>1），再分析他们的首单品类和后续购买品类的关联。这是购物篮分析的基础。",
+    intent: "分析复购用户的品类迁移路径，发现交叉销售机会",
+    sql: "WITH repeat_users AS (SELECT user_id FROM orders GROUP BY user_id HAVING COUNT(*) > 1), first_order AS (SELECT o.user_id, MIN(o.id) as fo FROM orders o JOIN repeat_users r ON o.user_id = r.user_id GROUP BY o.user_id), first_cat AS (SELECT fo.user_id, c.name as first_category FROM first_order fo JOIN order_items oi ON oi.order_id = fo.fo JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id), later_cat AS (SELECT o.user_id, c.name as later_category FROM orders o JOIN repeat_users r ON o.user_id = r.user_id JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.id NOT IN (SELECT fo FROM first_order)) SELECT fc.first_category, lc.later_category, COUNT(*) as cross_count FROM first_cat fc JOIN later_cat lc ON fc.user_id = lc.user_id WHERE fc.first_category != lc.later_category GROUP BY fc.first_category, lc.later_category ORDER BY cross_count DESC LIMIT 10",
+    chartConfig: { type: "bar", x_key: "later_category", y_key: "cross_count", title: "复购用户品类跨越 Top 10" },
+    explanation: "数据结论：最显著的品类跨越路径是 furniture_decor → bed_bath_table（91次），其次是 bed_bath_table → furniture_decor（67次）。这说明家居品类之间有强关联性。趋势分析：health_beauty → furniture_decor（22次）是跨大类的典型路径，美妆用户会延伸到家居消费。业务建议：针对购买了家具装饰的用户，推荐床品家纺类商品（转化率最高）；针对美妆用户，推荐家居香薰、收纳等关联品类。数据局限：仅分析了复购用户的品类跨越，未考虑时间间隔因素。",
   },
-  "各地区复购率分析": {
-    thinking: "用户想看复购率分析。Olist是marketplace，复购率约3%——这是真实的巴西电商数据。marketplace的复购率通常低于品牌直营电商。",
-    intent: "分析各地区的用户复购行为，识别忠诚度差异",
-    sql: "SELECT r.name AS region, COUNT(DISTINCT o.user_id) AS users, SUM(CASE WHEN oc.cnt > 1 THEN 1 ELSE 0 END) AS repeat_users, ROUND(SUM(CASE WHEN oc.cnt > 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(DISTINCT o.user_id), 1) AS repeat_rate FROM orders o JOIN regions r ON o.region_id = r.id JOIN (SELECT user_id, COUNT(*) AS cnt FROM orders GROUP BY user_id) oc ON oc.user_id = o.user_id GROUP BY r.name ORDER BY repeat_rate DESC",
-    chartConfig: { type: "bar", x_key: "region", y_key: "repeat_rate", title: "各地区复购率(%)" },
-    explanation: "数据结论：Olist平台整体复购率约3.1%，各地区差异不大。这个数字看起来低，但对于marketplace平台是正常的——Amazon的复购率也在类似水平。趋势分析：96,096个用户中，约3,000个用户有多次购买记录。复购用户的平均订单数约为2-3单。业务建议：提升复购率的关键是品类交叉推荐——买过健康美容的用户可能对服饰感兴趣。建议在PPT中将复购率定位为'增长机会'而非'问题'。数据局限：Olist是开放marketplace，用户购买行为分散在不同卖家，不像品牌电商那样容易建立忠诚度。",
+  "渠道表现对比分析": {
+    thinking: "用户想了解不同销售渠道的表现差异。需要按渠道聚合订单量、平均客单价、总营收。Olist的数据中渠道映射为天猫(credit_card)、线下门店(boleto)、抖音(voucher)、微信小程序(debit_card)。",
+    intent: "对比各销售渠道的订单量、客单价和总营收，识别渠道策略机会",
+    sql: "SELECT o.channel AS channel, COUNT(DISTINCT o.id) AS orders, ROUND(AVG(o.total_amount), 0) AS avg_order, ROUND(SUM(o.total_amount), 0) AS total_revenue FROM orders o WHERE o.status = 'completed' GROUP BY o.channel ORDER BY orders DESC",
+    chartConfig: { type: "bar", x_key: "channel", y_key: "total_revenue", title: "渠道营收对比" },
+    explanation: "数据结论：天猫（credit_card）以73,221单贡献了最大营收，客单价R$166。线下门店（boleto）19,191单，客单价R$144。抖音（voucher）订单量最少（2,582单）但客单价最低（R$125）。趋势分析：天猫渠道占绝对主导（74%订单量），这与巴西电商市场信用卡支付占比高的特征一致。线下门店的客单价低于天猫，可能是因为boleto支付方式倾向于小额交易。业务建议：抖音渠道有增长空间，可针对低客单价品类做精准投放；天猫渠道应关注高价值品类的转化率提升。数据局限：渠道映射基于支付方式，非实际销售渠道。",
   },
 };

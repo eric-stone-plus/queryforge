@@ -17,9 +17,9 @@ const COLORS = ["#0969da", "#1a7f37", "#9a6700", "#cf222e", "#8250df", "#0550ae"
 
 const DEMO_CHIPS = [
   "各地区月度销售额趋势",
-  "哪个品类利润率最高？",
-  "Top 10 营收品类",
-  "各地区复购率分析",
+  "各地区客单价差异分析",
+  "复购用户的品类跨越路径",
+  "渠道表现对比分析",
 ];
 
 function getNumericKeys(row: DataRow | undefined) {
