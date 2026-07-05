@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "QueryForge — 跨境电商经营分析工具",
-  description: "本地优先的 macOS 电商分析工具。面向小微跨境电商经营者，用自然语言提问，生成只读 SQL、图表和经营建议。",
+  description: "本地优先的电商经营分析工具。面向小微跨境电商经营者，用自然语言提问，生成只读 SQL、图表和经营建议。",
 };
 
 export default function RootLayout({

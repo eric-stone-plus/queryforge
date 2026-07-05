@@ -1,19 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+type ProviderBackend = "auto" | "openai-compatible" | "anthropic";
 
 type PublicSettings = {
   mode: "desktop" | "web-demo";
   writable: boolean;
   provider: {
+    backend: ProviderBackend;
+    backendLabel: string;
     providerName: string;
     baseURL: string;
     model: string;
     timeoutMs: number;
     temperature: number;
     source: "local" | "env" | "default";
+    ready: boolean;
     configured: boolean;
+    testable: boolean;
     apiKeyConfigured: boolean;
+    connectionStatus: "missing" | "untested" | "ok" | "error";
+    connectionMessage: string;
+    testedAt: string;
   };
   tokenPlan: {
     monthlyBudget: number;
@@ -33,14 +42,21 @@ const EMPTY_SETTINGS: PublicSettings = {
   mode: "web-demo",
   writable: false,
   provider: {
+    backend: "auto",
+    backendLabel: "Auto / generic model API",
     providerName: "openai-compatible",
     baseURL: "",
     model: "",
     timeoutMs: 60000,
     temperature: 0.2,
     source: "default",
+    ready: false,
     configured: false,
+    testable: false,
     apiKeyConfigured: false,
+    connectionStatus: "missing",
+    connectionMessage: "请选择模型服务并填写 API key/token。",
+    testedAt: "",
   },
   tokenPlan: { monthlyBudget: 100000 },
   usage: {
@@ -54,8 +70,76 @@ const EMPTY_SETTINGS: PublicSettings = {
   },
 };
 
+const BACKEND_OPTIONS: Array<{ id: ProviderBackend; label: string }> = [
+  { id: "auto", label: "Auto detect" },
+  { id: "openai-compatible", label: "Chat Completions-compatible" },
+  { id: "anthropic", label: "Anthropic Messages API" },
+];
+
+const MODEL_SERVICE_OPTIONS = [
+  { id: "custom", label: "自定义 / 手动配置", baseURL: "", backend: "auto" as ProviderBackend, model: "" },
+  { id: "deepseek", label: "DeepSeek", baseURL: "https://api.deepseek.com/v1", backend: "openai-compatible" as ProviderBackend, model: "deepseek-v4-pro" },
+  { id: "moonshot", label: "Moonshot / Kimi", baseURL: "https://api.moonshot.cn/v1", backend: "openai-compatible" as ProviderBackend, model: "moonshot-v1-8k" },
+  { id: "anthropic", label: "Anthropic", baseURL: "https://api.anthropic.com/v1", backend: "anthropic" as ProviderBackend, model: "claude-sonnet-4-5" },
+  { id: "openai", label: "OpenAI", baseURL: "https://api.openai.com/v1", backend: "openai-compatible" as ProviderBackend, model: "gpt-4o-mini" },
+];
+
 function formatInt(value: number) {
   return Math.round(value).toLocaleString("en-US");
+}
+
+function formatTime(value: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("zh-CN", { hour12: false });
+}
+
+function normalizeURL(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return trimmed.replace(/\/+$/, "").replace(/\/chat\/completions?$/i, "");
+}
+
+function inferDraftProvider(baseURL: string, backend: ProviderBackend) {
+  const lower = normalizeURL(baseURL).toLowerCase();
+  if (backend === "anthropic" || lower.includes("anthropic.com")) {
+    return { backend: "anthropic" as ProviderBackend, model: "claude-sonnet-4-5", label: "Anthropic Messages API" };
+  }
+  if (lower.includes("deepseek.com")) {
+    return { backend: "openai-compatible" as ProviderBackend, model: "deepseek-v4-pro", label: "Chat Completions-compatible" };
+  }
+  if (lower.includes("moonshot.cn")) {
+    return { backend: "openai-compatible" as ProviderBackend, model: "moonshot-v1-8k", label: "Chat Completions-compatible" };
+  }
+  if (lower.includes("openai.com")) {
+    return { backend: "openai-compatible" as ProviderBackend, model: "gpt-4o-mini", label: "Chat Completions-compatible" };
+  }
+  if (backend === "openai-compatible") {
+    return { backend, model: "", label: "Chat Completions-compatible" };
+  }
+  return { backend: "auto" as ProviderBackend, model: "", label: "Auto / generic model API" };
+}
+
+function serviceIdFromDraft(baseURL: string, backend: ProviderBackend) {
+  const normalized = normalizeURL(baseURL).toLowerCase();
+  const matched = MODEL_SERVICE_OPTIONS.find((item) => item.baseURL && normalizeURL(item.baseURL).toLowerCase() === normalized);
+  if (matched) return matched.id;
+  if (!normalized && backend === "auto") return "custom";
+  return "custom";
+}
+
+function connectionMeta(status: PublicSettings["provider"]["connectionStatus"], ready: boolean) {
+  if (!ready || status === "missing") {
+    return { label: "未配置", color: "var(--text-muted)", bg: "var(--surface-hover)" };
+  }
+  if (status === "ok") {
+    return { label: "连接可用", color: "var(--success)", bg: "rgba(26, 127, 55, 0.12)" };
+  }
+  if (status === "error") {
+    return { label: "连接失败", color: "var(--error)", bg: "var(--error-soft)" };
+  }
+  return { label: "已保存未测试", color: "var(--warning)", bg: "var(--warning-soft)" };
 }
 
 function SettingInput({
@@ -89,16 +173,10 @@ function SettingInput({
   );
 }
 
-const PROVIDER_PRESETS = [
-  { id: "custom", label: "Custom endpoint", providerName: "openai-compatible", baseURL: "", model: "" },
-  { id: "moonshot", label: "Moonshot compatible", providerName: "moonshot-compatible", baseURL: "https://api.moonshot.cn/v1", model: "moonshot-v1-8k" },
-  { id: "deepseek", label: "DeepSeek compatible", providerName: "deepseek-compatible", baseURL: "https://api.deepseek.com/v1", model: "deepseek-chat" },
-  { id: "openai", label: "OpenAI compatible", providerName: "openai-compatible", baseURL: "https://api.openai.com/v1", model: "gpt-4o-mini" },
-];
-
 export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: number }) {
   const [settings, setSettings] = useState<PublicSettings>(EMPTY_SETTINGS);
   const [draft, setDraft] = useState({
+    backend: "auto" as ProviderBackend,
     providerName: "openai-compatible",
     baseURL: "",
     model: "",
@@ -108,7 +186,9 @@ export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: nu
     monthlyBudget: 100000,
   });
   const [open, setOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
   async function loadSettings() {
@@ -119,6 +199,7 @@ export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: nu
       setSettings(data);
       setDraft((current) => ({
         ...current,
+        backend: data.provider.backend || "auto",
         providerName: data.provider.providerName || "openai-compatible",
         baseURL: data.provider.baseURL || "",
         model: data.provider.model || "",
@@ -135,18 +216,51 @@ export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: nu
     loadSettings();
   }, [refreshKey]);
 
-  async function saveSettings() {
+  useEffect(() => {
+    if (open) loadSettings();
+  }, [open]);
+
+  const inferred = useMemo(() => inferDraftProvider(draft.baseURL, draft.backend), [draft.baseURL, draft.backend]);
+  const serviceId = useMemo(() => serviceIdFromDraft(draft.baseURL, draft.backend), [draft.baseURL, draft.backend]);
+
+  function statusAfterSave(data: PublicSettings) {
+    if (data.provider.connectionStatus === "ok") return "已保存，当前连接仍可用";
+    if (data.provider.connectionStatus === "missing") return data.provider.connectionMessage || "配置不完整，请选择模型服务并填写 key/token。";
+    return "已保存，尚未测试连接";
+  }
+
+  async function testConnection() {
+    setTesting(true);
+    setStatus("正在测试连接...");
+    try {
+      const res = await fetch("/api/settings/test", { method: "POST" });
+      const data = await res.json();
+      if (data.settings) setSettings(data.settings as PublicSettings);
+      if (!res.ok || !data.ok) throw new Error(data.error || "连接失败");
+      setStatus("连接可用，已写入本机状态");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "连接失败");
+      await loadSettings();
+    } finally {
+      setTesting(false);
+    }
+  }
+
+  async function saveSettings(testAfter = false) {
     setSaving(true);
     setStatus(null);
     try {
+      const backend = draft.backend === "auto" ? inferred.backend : draft.backend;
+      const model = draft.model || inferred.model;
       const res = await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: {
-            providerName: draft.providerName,
+            backend,
+            providerName: backend === "anthropic" ? "anthropic" : "openai-compatible",
             baseURL: draft.baseURL,
-            model: draft.model,
+            model,
             apiKey: draft.apiKey,
             timeoutMs: draft.timeoutMs,
             temperature: draft.temperature,
@@ -158,9 +272,26 @@ export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: nu
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "设置保存失败");
-      setSettings(data as PublicSettings);
-      setDraft((current) => ({ ...current, apiKey: "" }));
-      setStatus("已保存到本机配置");
+      const saved = data as PublicSettings;
+      setSettings(saved);
+      setDraft((current) => ({
+        ...current,
+        backend: saved.provider.backend,
+        providerName: saved.provider.providerName,
+        baseURL: saved.provider.baseURL,
+        model: saved.provider.model,
+        apiKey: "",
+        timeoutMs: saved.provider.timeoutMs,
+        temperature: saved.provider.temperature,
+        monthlyBudget: saved.tokenPlan.monthlyBudget,
+      }));
+
+      if (testAfter && saved.provider.ready) {
+        setSaving(false);
+        await testConnection();
+        return;
+      }
+      setStatus(statusAfterSave(saved));
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "设置保存失败");
     } finally {
@@ -178,6 +309,7 @@ export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: nu
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider: {
+            backend: draft.backend,
             providerName: draft.providerName,
             baseURL: draft.baseURL,
             model: draft.model,
@@ -219,22 +351,29 @@ export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: nu
     }
   }
 
-  function applyPreset(presetId: string) {
-    const preset = PROVIDER_PRESETS.find((item) => item.id === presetId);
-    if (!preset) return;
+  const modeLabel = settings.mode === "desktop" ? "本地应用" : "扫码演示";
+  const meta = connectionMeta(settings.provider.connectionStatus, settings.provider.ready);
+  const writable = settings.writable;
+  const testedAt = formatTime(settings.provider.testedAt);
+  const sourceLabel = settings.provider.source === "local" ? "本机配置" : settings.provider.source === "env" ? "环境变量" : "未保存";
+  const savedKeyLabel = settings.provider.apiKeyConfigured
+    ? settings.provider.source === "env" ? "环境变量 key 已读取" : "本机 key 已保存"
+    : "未保存 key";
+  const showModelHint = Boolean(draft.baseURL && !draft.model && !inferred.model);
+  const canSaveAndTest = writable && Boolean(draft.baseURL.trim()) && Boolean(draft.apiKey.trim() || settings.provider.apiKeyConfigured);
 
+  function applyModelService(serviceId: string) {
+    const service = MODEL_SERVICE_OPTIONS.find((item) => item.id === serviceId);
+    if (!service) return;
     setDraft((current) => ({
       ...current,
-      providerName: preset.providerName,
-      baseURL: preset.baseURL || current.baseURL,
-      model: preset.model || current.model,
+      backend: service.backend,
+      baseURL: service.baseURL,
+      model: service.model,
+      providerName: service.backend === "anthropic" ? "anthropic" : "openai-compatible",
     }));
+    if (service.id === "custom") setAdvancedOpen(true);
   }
-
-  const modeLabel = settings.mode === "desktop" ? "本地应用" : "扫码演示";
-  const providerLabel = settings.provider.configured ? "模型已配置" : "模型未配置";
-  const statusColor = settings.provider.configured ? "var(--success)" : "var(--text-muted)";
-  const writable = settings.writable;
 
   return (
     <div className="relative">
@@ -250,8 +389,8 @@ export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: nu
         title="Settings"
       >
         <span>Settings</span>
-        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full" style={{ background: statusColor }} />
-        <span className="hidden sm:inline" style={{ color: statusColor }}>{providerLabel}</span>
+        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full" style={{ background: meta.color }} />
+        <span className="hidden sm:inline" style={{ color: meta.color }}>{meta.label}</span>
         <span aria-hidden="true" style={{ color: "var(--text-muted)" }}>{open ? "▴" : "▾"}</span>
       </button>
 
@@ -261,75 +400,148 @@ export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: nu
           role="menu"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
         >
-            <div className="flex items-start justify-between gap-3 border-b px-4 py-3" style={{ borderColor: "var(--border)" }}>
-              <div>
-                <h2 className="text-sm font-semibold" style={{ color: "var(--text)" }}>Settings</h2>
-                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  {writable ? "填写模型 endpoint、model 和 API key/token。凭证只保存在本机。" : "公开扫码页为只读演示，不保存访客凭证。"}
-                </p>
+          <div className="flex items-start justify-between gap-3 border-b px-4 py-3" style={{ borderColor: "var(--border)" }}>
+            <div>
+              <h2 className="text-sm font-semibold" style={{ color: "var(--text)" }}>Settings</h2>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {writable ? "选择模型服务并填写 key/token。API URL 和 model 可在高级设置调整。" : "公开扫码页为只读演示，不保存访客凭证。"}
+              </p>
+            </div>
+            <button type="button" onClick={() => setOpen(false)} className="h-8 w-8 rounded-lg text-sm" style={{ color: "var(--text-muted)", background: "var(--surface-hover)" }}>×</button>
+          </div>
+
+          <div className="space-y-4 px-4 py-4" role="none">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>运行模式</p>
+                <p className="mt-1 text-sm font-semibold" style={{ color: "var(--text)" }}>{modeLabel}</p>
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="h-8 w-8 rounded-lg text-sm" style={{ color: "var(--text-muted)", background: "var(--surface-hover)" }}>×</button>
+              <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>调用次数</p>
+                <p className="mt-1 text-sm font-semibold" style={{ color: "var(--text)" }}>{formatInt(settings.usage.requestCount)}</p>
+              </div>
+              <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>预算占用</p>
+                <p className="mt-1 text-sm font-semibold" style={{ color: "var(--text)" }}>{settings.usage.budgetPercent}%</p>
+              </div>
             </div>
 
-            <div className="space-y-4 px-4 py-4" role="none">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>运行模式</p>
-                  <p className="mt-1 text-sm font-semibold" style={{ color: "var(--text)" }}>{modeLabel}</p>
-                </div>
-                <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>调用次数</p>
-                  <p className="mt-1 text-sm font-semibold" style={{ color: "var(--text)" }}>{formatInt(settings.usage.requestCount)}</p>
-                </div>
-                <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)", background: "var(--surface-hover)" }}>
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>预算占用</p>
-                  <p className="mt-1 text-sm font-semibold" style={{ color: "var(--text)" }}>{settings.usage.budgetPercent}%</p>
-                </div>
+            <div>
+              <div className="mb-1 flex items-center justify-between text-xs" style={{ color: "var(--text-muted)" }}>
+                <span>{formatInt(settings.usage.totalTokens)} / {formatInt(settings.tokenPlan.monthlyBudget)} tokens</span>
+                <span>{settings.usage.period || "当前周期"}</span>
               </div>
+              <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--surface-hover)" }}>
+                <div className="h-full rounded-full" style={{ width: `${settings.usage.budgetPercent}%`, background: settings.usage.budgetPercent > 85 ? "var(--warning)" : "var(--accent)" }} />
+              </div>
+            </div>
 
+            <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)", background: meta.bg }}>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>模型连接状态 · {sourceLabel}</p>
+                  <p className="mt-1 text-sm font-semibold" style={{ color: meta.color }}>{meta.label}</p>
+                </div>
+                {testedAt && <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>{testedAt}</span>}
+              </div>
+              <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                {settings.provider.connectionMessage}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium" style={{ color: "var(--text-muted)" }}>模型服务</span>
+                <select
+                  disabled={!writable}
+                  value={serviceId}
+                  onChange={(event) => applyModelService(event.target.value)}
+                  className="h-9 w-full rounded-lg border px-3 text-sm outline-none transition-default disabled:opacity-60"
+                  style={{ borderColor: "var(--border)", background: "var(--surface-hover)", color: "var(--text)" }}
+                >
+                  {MODEL_SERVICE_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>{option.label}</option>
+                  ))}
+                </select>
+              </label>
               <div>
-                <div className="mb-1 flex items-center justify-between text-xs" style={{ color: "var(--text-muted)" }}>
-                  <span>{formatInt(settings.usage.totalTokens)} / {formatInt(settings.tokenPlan.monthlyBudget)} tokens</span>
-                  <span>{settings.usage.period || "当前周期"}</span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--surface-hover)" }}>
-                  <div className="h-full rounded-full" style={{ width: `${settings.usage.budgetPercent}%`, background: settings.usage.budgetPercent > 85 ? "var(--warning)" : "var(--accent)" }} />
-                </div>
+                <SettingInput
+                  label={settings.provider.apiKeyConfigured ? `API key / token（${savedKeyLabel}，留空不覆盖）` : "API key / token"}
+                  value={draft.apiKey}
+                  disabled={!writable}
+                  type="password"
+                  placeholder="只保存在本机"
+                  onChange={(value) => setDraft((d) => ({ ...d, apiKey: value }))}
+                />
+                {settings.provider.apiKeyConfigured && writable && (
+                  <button
+                    type="button"
+                    onClick={clearApiKey}
+                    disabled={saving}
+                    className="mt-2 rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}
+                  >
+                    清除本机 API key
+                  </button>
+                )}
               </div>
+              <div className="rounded-lg border px-3 py-2 text-xs" style={{ borderColor: "var(--border)", background: "var(--surface-hover)", color: "var(--text-secondary)" }}>
+                当前识别：{draft.baseURL ? inferred.label : "未选择模型服务"}{(draft.model || inferred.model) ? ` · ${(draft.model || inferred.model)}` : draft.baseURL ? " · 需要在高级设置填写 model" : ""}
+              </div>
+              {showModelHint && (
+                <p className="text-xs" style={{ color: "var(--warning)" }}>这个 API URL 无法自动匹配 model，请展开高级设置后手动填写。</p>
+              )}
+            </div>
 
+            <button
+              type="button"
+              onClick={() => setAdvancedOpen((value) => !value)}
+              className="flex w-full items-center justify-between rounded-lg border px-3 py-2 text-xs font-medium"
+              style={{ borderColor: "var(--border)", background: "var(--surface-hover)", color: "var(--text-secondary)" }}
+            >
+              <span>高级设置</span>
+              <span>{advancedOpen ? "收起" : "展开"}</span>
+            </button>
+
+            {advancedOpen && (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <SettingInput
+                    label="API URL"
+                    value={draft.baseURL}
+                    disabled={!writable}
+                    placeholder="https://api.example.com/v1"
+                    onChange={(value) => {
+                      const next = inferDraftProvider(value, draft.backend);
+                      setDraft((d) => ({
+                        ...d,
+                        baseURL: value,
+                        model: next.model || d.model,
+                        backend: d.backend === "auto" ? "auto" : d.backend,
+                      }));
+                    }}
+                  />
+                </div>
                 <label className="block sm:col-span-2">
-                  <span className="mb-1 block text-xs font-medium" style={{ color: "var(--text-muted)" }}>Endpoint preset</span>
+                  <span className="mb-1 block text-xs font-medium" style={{ color: "var(--text-muted)" }}>Backend</span>
                   <select
                     disabled={!writable}
-                    defaultValue="custom"
-                    onChange={(event) => applyPreset(event.target.value)}
+                    value={draft.backend}
+                    onChange={(event) => {
+                      const backend = event.target.value as ProviderBackend;
+                      const next = inferDraftProvider(draft.baseURL, backend);
+                      setDraft((d) => ({ ...d, backend, model: next.model || d.model }));
+                    }}
                     className="h-9 w-full rounded-lg border px-3 text-sm outline-none transition-default disabled:opacity-60"
                     style={{ borderColor: "var(--border)", background: "var(--surface-hover)", color: "var(--text)" }}
                   >
-                    {PROVIDER_PRESETS.map((preset) => (
-                      <option key={preset.id} value={preset.id}>{preset.label}</option>
+                    {BACKEND_OPTIONS.map((option) => (
+                      <option key={option.id} value={option.id}>{option.label}</option>
                     ))}
                   </select>
                 </label>
-                <SettingInput label="Provider" value={draft.providerName} disabled={!writable} onChange={(value) => setDraft((d) => ({ ...d, providerName: value }))} />
-                <SettingInput label="Model" value={draft.model} disabled={!writable} placeholder="provider-model-name" onChange={(value) => setDraft((d) => ({ ...d, model: value }))} />
                 <div className="sm:col-span-2">
-                  <SettingInput label="Base URL" value={draft.baseURL} disabled={!writable} placeholder="https://api.example.com/v1" onChange={(value) => setDraft((d) => ({ ...d, baseURL: value }))} />
-                </div>
-                <div className="sm:col-span-2">
-                  <SettingInput label={settings.provider.apiKeyConfigured ? "API key / token（已配置，留空则不覆盖）" : "API key / token"} value={draft.apiKey} disabled={!writable} type="password" placeholder="只保存在本机" onChange={(value) => setDraft((d) => ({ ...d, apiKey: value }))} />
-                  {settings.provider.apiKeyConfigured && writable && (
-                    <button
-                      type="button"
-                      onClick={clearApiKey}
-                      disabled={saving}
-                      className="mt-2 rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
-                      style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}
-                    >
-                      清除本机 API key
-                    </button>
-                  )}
+                  <SettingInput label="Model" value={draft.model} disabled={!writable} placeholder={inferred.model || "provider-model-name"} onChange={(value) => setDraft((d) => ({ ...d, model: value }))} />
                 </div>
                 <SettingInput label="Timeout ms" value={draft.timeoutMs} disabled={!writable} type="number" onChange={(value) => setDraft((d) => ({ ...d, timeoutMs: Number(value) || 60000 }))} />
                 <SettingInput label="Temperature" value={draft.temperature} disabled={!writable} type="number" onChange={(value) => setDraft((d) => ({ ...d, temperature: Number(value) }))} />
@@ -337,17 +549,19 @@ export default function LocalSettingsPanel({ refreshKey = 0 }: { refreshKey?: nu
                   <SettingInput label="Monthly token budget" value={draft.monthlyBudget} disabled={!writable} type="number" onChange={(value) => setDraft((d) => ({ ...d, monthlyBudget: Number(value) || 100000 }))} />
                 </div>
               </div>
+            )}
 
-              {status && <p className="rounded-lg px-3 py-2 text-xs" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}>{status}</p>}
-            </div>
+            {status && <p className="rounded-lg px-3 py-2 text-xs" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}>{status}</p>}
+          </div>
 
-            <div className="flex items-center justify-between border-t px-4 py-3" style={{ borderColor: "var(--border)" }}>
-              <button type="button" onClick={resetUsage} disabled={!writable || saving} className="rounded-lg px-3 py-2 text-xs font-medium disabled:opacity-50" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}>重置用量</button>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-xs font-medium" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}>关闭</button>
-                <button type="button" onClick={saveSettings} disabled={!writable || saving} className="rounded-lg px-3 py-2 text-xs font-medium text-white disabled:opacity-50" style={{ background: "var(--accent)" }}>{saving ? "保存中..." : "保存"}</button>
-              </div>
+          <div className="flex items-center justify-between border-t px-4 py-3" style={{ borderColor: "var(--border)" }}>
+            <button type="button" onClick={resetUsage} disabled={!writable || saving || testing} className="rounded-lg px-3 py-2 text-xs font-medium disabled:opacity-50" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}>重置用量</button>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-xs font-medium" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}>关闭</button>
+              <button type="button" onClick={() => saveSettings(false)} disabled={!writable || saving || testing} className="rounded-lg px-3 py-2 text-xs font-medium disabled:opacity-50" style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}>{saving ? "保存中..." : "保存"}</button>
+              <button type="button" onClick={() => saveSettings(true)} disabled={!canSaveAndTest || saving || testing} className="rounded-lg px-3 py-2 text-xs font-medium text-white disabled:opacity-50" style={{ background: "var(--accent)" }}>{testing ? "测试中..." : "保存并测试"}</button>
             </div>
+          </div>
         </div>
       )}
     </div>

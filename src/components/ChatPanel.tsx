@@ -117,7 +117,7 @@ function normalizeError(error: unknown) {
     return "这次分析耗时偏长，请稍后重试，或把问题拆得更具体一点。";
   }
   if (/provider|api key|configured|401|403/i.test(message)) {
-    return "本地模型供应商还没有配置。打开右上角设置，填入 OpenAI-compatible API 地址、模型名和本地 API key 后，就可以进行真实对话分析。";
+    return "本地模型服务还没有配置。打开右上角 Settings，填入 API URL 和 key/token 后，就可以进行真实对话分析；特殊接口可在高级设置里手动指定 backend/model。";
   }
   if (/budget|token/i.test(message)) {
     return "本月 token 预算已触顶。可以在设置里提高预算或重置本地用量后继续分析。";
@@ -237,7 +237,7 @@ export default function ChatPanel({ onResult, externalResult, className = "" }: 
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white sm:mb-5 sm:h-16 sm:w-16 sm:text-2xl" style={{ background: "linear-gradient(135deg, #0969da, #8250df)" }}>QF</div>
             <h2 className="mb-2 text-lg font-semibold sm:text-xl" style={{ color: "var(--text)" }}>电商经营分析助手</h2>
             <p className="mb-3 text-center text-sm leading-relaxed sm:mb-4" style={{ color: "var(--text-secondary)" }}>用 Olist 巴西电商案例分析地区、品类、渠道和复购，把经营问题拆成可执行的查询与建议。</p>
-            <p className="mb-5 rounded-full px-3 py-1 text-center text-xs sm:mb-8" style={{ color: "var(--text-muted)", background: "var(--surface-hover)" }}>Settings 可配置 OpenAI-compatible endpoint、model、API key 和 token 预算</p>
+            <p className="mb-5 rounded-full px-3 py-1 text-center text-xs sm:mb-8" style={{ color: "var(--text-muted)", background: "var(--surface-hover)" }}>Settings 填 API URL 和 key/token，高级设置可手动指定 backend/model</p>
             <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
               {DEMO_CHIPS.map((chip) => (
                 <button key={chip} onClick={() => handleChipClick(chip)} className="rounded-full px-4 py-2 text-sm font-medium transition-default" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}

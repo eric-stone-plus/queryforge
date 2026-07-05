@@ -1,4 +1,5 @@
 import { generateText } from "ai";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { Parser } from "node-sql-parser";
 import { getDb, queryDb } from "./db";
@@ -89,11 +90,17 @@ function getConfiguredModel() {
     throw new Error("AI provider is not fully configured");
   }
 
-  const provider = createOpenAICompatible({
-    name: settings.providerName || "openai-compatible",
-    baseURL: settings.baseURL,
-    apiKey: settings.apiKey,
-  });
+  const provider = settings.backend === "anthropic"
+    ? createAnthropic({
+      name: settings.providerName || "anthropic",
+      baseURL: settings.baseURL,
+      apiKey: settings.apiKey,
+    })
+    : createOpenAICompatible({
+      name: settings.providerName || "openai-compatible",
+      baseURL: settings.baseURL,
+      apiKey: settings.apiKey,
+    });
 
   return {
     model: provider(settings.model),

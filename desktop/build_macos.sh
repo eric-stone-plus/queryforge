@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP="$ROOT/QueryForge.app"
 DIST="$ROOT/desktop/dist"
+APP="$DIST/QueryForge.app"
 RUNTIME="$ROOT/desktop/.runtime"
 HOST_ARCH="$(uname -m)"
 ARCH="${ARCH:-$HOST_ARCH}"
@@ -65,6 +65,7 @@ swiftc \
 cp "$ROOT/desktop/Info.plist" "$APP/Contents/Info.plist"
 cp "$ROOT/desktop/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 cp -R "$ROOT/.next/standalone/." "$APP/Contents/Resources/app/"
+rm -rf "$APP/Contents/Resources/app/data"
 mkdir -p "$APP/Contents/Resources/app/.next"
 cp -R "$ROOT/.next/static" "$APP/Contents/Resources/app/.next/static"
 if [[ -d "$ROOT/public" ]]; then
@@ -84,12 +85,10 @@ codesign --force --deep --sign - "$APP"
 touch "$APP"
 "$LSREGISTER" -f "$APP" 2>/dev/null || true
 
-rm -rf "$DIST/QueryForge.app"
-cp -R "$APP" "$DIST/QueryForge.app"
 rm -f "$DIST/QueryForge-macOS-$ARCH.zip"
 (
-  cd "$ROOT"
-  ditto -c -k --keepParent "QueryForge.app" "desktop/dist/QueryForge-macOS-$ARCH.zip"
+  cd "$DIST"
+  ditto -c -k --keepParent "QueryForge.app" "QueryForge-macOS-$ARCH.zip"
 )
 
 echo "Built $APP"

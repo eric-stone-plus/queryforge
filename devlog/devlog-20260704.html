@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QueryForge 开发日志 — 2026.07.04</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif; background: #0d1117; color: #e6edf3; line-height: 1.65; padding: 2rem; max-width: 980px; margin: 0 auto; }
+h1 { font-size: 30px; margin-bottom: 0.4rem; color: #58a6ff; }
+h2 { font-size: 20px; margin: 2rem 0 1rem; color: #d4a853; border-bottom: 1px solid #30363d; padding-bottom: 0.45rem; }
+h3 { font-size: 16px; margin: 1.2rem 0 0.5rem; color: #58a6ff; }
+p, li { font-size: 14px; color: #8b949e; margin-bottom: 0.45rem; }
+ul { padding-left: 1.4rem; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.meta { font-size: 12px; color: #6e7681; margin-bottom: 1.8rem; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+.card-title { font-size: 15px; font-weight: 650; color: #e6edf3; margin-bottom: 0.5rem; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 4px; }
+.tag-done { background: #0f2d16; color: #3fb950; }
+.tag-fix { background: #2e1e00; color: #d29922; }
+.tag-new { background: #0d2240; color: #58a6ff; }
+.timeline { border-left: 2px solid #30363d; padding-left: 1.5rem; margin: 1rem 0; }
+.timeline-item { margin-bottom: 1.45rem; position: relative; }
+.timeline-item::before { content: ""; position: absolute; left: -1.5rem; top: 7px; width: 8px; height: 8px; border-radius: 50%; background: #58a6ff; }
+.timeline-time { font-size: 12px; color: #6e7681; }
+.timeline-content { font-size: 14px; color: #8b949e; }
+table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 13px; color: #8b949e; }
+th, td { border: 1px solid #30363d; padding: 0.45rem 0.55rem; text-align: left; vertical-align: top; }
+th { color: #e6edf3; background: #1f2630; }
+</style>
+</head>
+<body>
+
+<h1>QueryForge 开发日志</h1>
+<p class="meta">2026 年 7 月 3-5 日 · ClawHunt Builder Camp · 公开开发记录</p>
+
+<h2>产品定位</h2>
+<div class="card">
+  <div class="card-title">从通用 Text-to-SQL demo 收敛到电商经营工具包</div>
+  <p>QueryForge 的最终定位是：让电商经营者获得专业数据分析能力。它不是通用聊天工具，也不是重型企业 BI，而是面向跨境电商小团队、平台卖家、外贸 SOHO、广交会参展商和小型贸易公司的本地优先经营工具包。</p>
+  <p>当前交付的是工具包里的第一个工具：订单与经营分析 workbench。真实用户通常是自己生意的老板或核心运营，分析的是自己的订单、商品、地区、渠道和复购数据。这个前提让产品更适合采用本地运行、用户自带模型 key、闭源预编译软件包分发的路径。</p>
+</div>
+
+<h2>开发时间线</h2>
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="timeline-time">7/3 晚 — 命题发布</div>
+    <div class="timeline-content"><strong>选定方向。</strong>最初从自然语言查询数据库切入，随后明确比赛需要展示商业价值，不应停留在“能生成 SQL”的技术 demo。</div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-time">7/4 上午 — 基础产品完成</div>
+    <div class="timeline-content"><strong>完成第一条分析链路。</strong>自然语言提问、SQL 生成、只读校验、SQLite 查询、图表和经营建议形成闭环，并补上客户端超时、错误兜底和缓存答案。</div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-time">7/4 下午 — 数据切换</div>
+    <div class="timeline-content"><strong>替换为 Kaggle Olist 真实数据。</strong>本地 SQLite demo 从旧模拟数据切换到 99,441 笔 Olist 巴西电商订单，形成地区、品类、渠道、客单价和复购分析的真实案例。</div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-time">7/4 晚 — 产品路径调整</div>
+    <div class="timeline-content"><strong>Railway 降级为 public QR demo。</strong>托管后端更新不稳定，不适合作为真实产品边界。Railway 保留给评委手机扫码，使用公开 Olist 数据、预设问题和缓存答案；真实产品路径切换到 macOS 本地应用。</div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-time">7/5 — 桌面端打磨</div>
+    <div class="timeline-content"><strong>完整本地应用路线。</strong>当前 demo 产物是 macOS QueryForge.app，打包本地 Next server、SQLite 数据库和 Node runtime。产品形态不限定 macOS，后续可以提供 Windows/macOS 预编译包。Settings 支持用户自助选择模型服务、填写 API key/token，并在高级设置调整 URL、backend、model 和 token 预算。</div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-time">7/5 — 演示路径确认</div>
+    <div class="timeline-content"><strong>现场 BYOK 演示。</strong>默认状态必须显示未配置；用户现场生成 DeepSeek key，打开桌面端，选择 DeepSeek，填写 key，确认 model 为 deepseek-v4-pro，保存并测试后直接自然提问。</div>
+  </div>
+</div>
+
+<h2>关键产品决策</h2>
+<div class="card">
+  <div class="card-title">为什么不是直接问通用大模型</div>
+  <ul>
+    <li>通用模型默认没有本机数据库执行权，不知道用户自己的表结构和指标口径。</li>
+    <li>通用模型不会自动保留 SQL、查询结果、指标口径和 token 用量记录。</li>
+    <li>QueryForge 的价值是 harness：schema 约束、只读 SQL、执行结果 grounding、图表、保存指标和预算管理。</li>
+  </ul>
+</div>
+<div class="card">
+  <div class="card-title">为什么适合小微电商老板</div>
+  <ul>
+    <li>数据通常属于自己的经营数据，合规边界比大型企业跨部门数据治理更简单。</li>
+    <li>不需要先采购 BI、建数据仓库或雇专职分析师。</li>
+    <li>预编译软件包/买断首发更接近小老板的决策方式；模型 token 由用户自己的 provider 账户承担。</li>
+    <li>广交会地推、卖家微信群、培训社群、服务商渠道和官网售卖都适合这种低客单价软件验证。</li>
+  </ul>
+</div>
+
+<h2>数据与指标</h2>
+<div class="card">
+  <div class="card-title">Olist demo case</div>
+  <p>Olist 是公开可复现的 demo case，不代表产品只能分析巴西电商。它用于证明 QueryForge 能处理真实订单结构和真实业务分布。</p>
+  <ul>
+    <li>99,441 订单 · 96,096 用户 · 32,951 商品 · 74 品类</li>
+    <li>总营收 R$1,601 万 · 平均客单价 R$161 · 完成率 97% · 退款率 1.2%</li>
+    <li>5 大地区均有订单：Sudeste、Sul、Nordeste、Centro-Oeste、Norte</li>
+    <li>完成订单口径：Sudeste 66,200 单、Sul 13,814、Nordeste 9,044、Centro-Oeste 5,624、Norte 1,796</li>
+    <li>Norte/Nordeste 客单价较高，Sudeste 是规模核心市场</li>
+  </ul>
+</div>
+<div class="card">
+  <div class="card-title">数据修正记录</div>
+  <ul>
+    <li><span class="tag tag-fix">FIX</span> 修正巴西州到五大区的映射，避免 Norte 空地区但页面声称 5 地区。</li>
+    <li><span class="tag tag-fix">FIX</span> Olist order_item_id 是行序号，不是购买数量；明细行 quantity 改为 1，避免品类销量口径虚高。</li>
+    <li><span class="tag tag-fix">FIX</span> 用户分层改为 single_order、repeat_2_3、repeat_4_plus，不再出现 enterprise 这类陈旧标签。</li>
+    <li><span class="tag tag-fix">FIX</span> 公开 schema 去掉 email 字段展示，API 查询层继续禁止 email 和 wildcard SELECT。</li>
+  </ul>
+</div>
+
+<h2>模型配置与隐私</h2>
+<div class="card">
+  <div class="card-title">BYOK 桌面端</div>
+  <ul>
+    <li>默认不读取仓库里的 .env.local，也不假装“模型已配置”。</li>
+    <li>普通 Settings 只保留模型服务选择和 API key/token。</li>
+    <li>高级设置提供 API URL、backend、model、timeout、temperature 和 token budget。</li>
+    <li>DeepSeek preset 默认使用 https://api.deepseek.com/v1 和 deepseek-v4-pro，便于现场演示。</li>
+    <li>当前本地 key 存在用户本机配置文件并设置 0600 权限；商业发行版应迁移到操作系统凭据管理能力（macOS Keychain / Windows Credential Manager）。</li>
+  </ul>
+</div>
+<div class="card">
+  <div class="card-title">公开 demo 边界</div>
+  <ul>
+    <li>Railway 页面是手机/二维码演示，不收集访客 API key。</li>
+    <li>公开页面使用 Olist demo case 和缓存答案，保证扫码体验稳定。</li>
+    <li>真实模型调用、token 预算和用户数据连接只在本地桌面端发生。</li>
+  </ul>
+</div>
+
+<h2>商用输出与知识产权边界</h2>
+<div class="card">
+  <div class="card-title">主流模型服务的通常边界</div>
+  <p>本段不是法律意见，而是产品材料中的合规边界说明。公开条款显示，主流模型 provider 通常会定义输入/输出权利、用户责任和限制用途：OpenAI 条款写明用户保留 Input 权利并在适用法律允许范围内拥有 Output；Anthropic 公开商业条款说明客户可保留输出权利；DeepSeek 与 Kimi/Moonshot 条款强调用户需要对输入、输出和授权负责。</p>
+  <p>因此 QueryForge 的合规叙述应当是：工具接入用户自己的模型 provider 账户，服务于用户自己的经营数据分析；QueryForge 不转售模型能力，也不承诺替用户消除第三方数据、平台条款、个人信息保护或知识产权责任。</p>
+</div>
+<div class="card">
+  <div class="card-title">对目标用户的实际含义</div>
+  <ul>
+    <li>老板分析自己的订单和商品数据，通常具备处理这些经营数据的业务合理性。</li>
+    <li>如果数据包含客户个人信息、平台限制字段、第三方图片/文案或他人商业秘密，仍需先确认处理和上传给模型服务的权利。</li>
+    <li>输出建议应作为经营分析参考，关键决策仍需要结合毛利、库存、物流、广告成本和人工判断。</li>
+  </ul>
+</div>
+
+<h2>交付物</h2>
+<div class="card">
+  <div class="card-title">产品与文档</div>
+  <ul>
+    <li><span class="tag tag-done">DONE</span> 当前 macOS demo 包：desktop/dist/QueryForge.app</li>
+    <li><span class="tag tag-done">DONE</span> 当前 macOS zip 包：desktop/dist/QueryForge-macOS-x86_64.zip</li>
+    <li><span class="tag tag-done">DONE</span> Public QR demo：<a href="https://queryforge-production-8d6f.up.railway.app">queryforge-production-8d6f.up.railway.app</a></li>
+    <li><span class="tag tag-done">DONE</span> 路演材料：Olist case、桌面端产品路径、买断制、模型商用/IP 边界、二维码</li>
+    <li><span class="tag tag-done">DONE</span> 双人讲稿：Mavis 负责商业叙述，Eric 负责开发阐述</li>
+    <li><span class="tag tag-done">DONE</span> README：产品定位、竞争生态、BYOK、key 管理和商业化路径</li>
+  </ul>
+</div>
+
+<h2>后续路线</h2>
+<div class="card">
+  <div class="card-title">从 demo 到可售小工具</div>
+  <ul>
+    <li>完善 CSV/Excel/SQLite 数据导入，让用户接入自己的订单与商品数据。</li>
+    <li>把 API key 存储迁移到操作系统凭据管理能力（macOS Keychain / Windows Credential Manager）。</li>
+    <li>增加平台卖家常用模板：地区投放、品类组合、复购路径、库存动销、广告 ROI。</li>
+    <li>官网、渠道或应用商店分发闭源预编译软件包，首发价格带继续用实际转化率和退款率校正。</li>
+  </ul>
+</div>
+
+<p class="meta" style="margin-top: 3rem; text-align: center;">
+  QueryForge · Development Record · 2026.07.04<br>
+  <a href="https://github.com/eric-stone-plus/QueryForge">GitHub</a> · <a href="https://queryforge-production-8d6f.up.railway.app">Public QR Demo</a>
+</p>
+
+</body>
+</html>

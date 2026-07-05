@@ -35,7 +35,6 @@ const schema = {
       columns: [
         { name: "id", type: "INTEGER" },
         { name: "name", type: "TEXT" },
-        { name: "email", type: "TEXT" },
         { name: "region_id", type: "INTEGER" },
         { name: "segment", type: "TEXT" },
         { name: "registered_at", type: "TEXT" },

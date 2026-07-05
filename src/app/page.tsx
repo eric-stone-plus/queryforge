@@ -53,10 +53,10 @@ async function query(sql: string): Promise<QueryResult[]> {
   } catch { return []; }
 }
 
-// Static data loaded from DB (Olist Brazilian E-commerce)
+// Static Olist snapshot used before live chart queries finish.
 const REGION_STATIC = [
   { name: "Sudeste", value: 1034 }, { name: "Sul", value: 233 }, { name: "Nordeste", value: 190 },
-  { name: "Centro-Oeste", value: 144 }, { name: "Norte", value: 0 },
+  { name: "Centro-Oeste", value: 103 }, { name: "Norte", value: 41 },
 ];
 const CATEGORY_STATIC = [
   { name: "health_beauty", value: 1259 }, { name: "watches_gifts", value: 1205 }, { name: "bed_bath_table", value: 1037 },
@@ -274,11 +274,11 @@ export default function Home() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {/* Top Products Table */}
                 <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                  <h3 className="mb-2 text-xs font-semibold" style={{ color: "var(--text)" }}>Top 5 畅销商品</h3>
+                  <h3 className="mb-2 text-xs font-semibold" style={{ color: "var(--text)" }}>Top 5 营收品类</h3>
                   <table className="w-full text-xs" style={{ color: "var(--text-secondary)" }}>
                     <thead>
                       <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                        <th className="py-1 text-left font-medium">商品</th>
+                        <th className="py-1 text-left font-medium">品类</th>
                         <th className="py-1 text-right font-medium">营收(万)</th>
                         <th className="py-1 text-right font-medium">销量</th>
                       </tr>
@@ -315,7 +315,8 @@ export default function Home() {
                 <MetricRow label="Sudeste" value="65,900 用户 · 均单 R$151" color="var(--accent)" />
                 <MetricRow label="Sul" value="13,690 用户 · 均单 R$164" />
                 <MetricRow label="Nordeste" value="9,140 用户 · 均单 R$202" />
-                <MetricRow label="Centro-Oeste" value="7,389 用户 · 均单 R$189" />
+                <MetricRow label="Centro-Oeste" value="5,595 用户 · 均单 R$178" />
+                <MetricRow label="Norte" value="1,794 用户 · 均单 R$224" />
                 <MetricRow label="总用户" value="96,096" />
                 <MetricRow label="总订单" value="99,441（完成率 97%）" />
               </div>

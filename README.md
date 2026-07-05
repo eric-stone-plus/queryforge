@@ -4,7 +4,7 @@
   <img src="assets/hero.svg" alt="QueryForge" width="100%">
 </p>
 
-**QueryForge 让电商经营者获得专业数据分析能力。** 它是一个本地优先的商业分析 workbench：用户把订单、商品、渠道、地区等结构化数据放在本机，用自然语言提问；QueryForge 调用用户自己配置的 OpenAI-compatible 模型供应商，把问题转成只读 SQL，执行查询，再生成图表和经营建议。
+**QueryForge 让电商经营者获得专业数据分析能力。** 它是一个面向小微电商经营者的本地优先分析工具包；当前交付的是第一个工具：订单与经营分析 workbench。用户把订单、商品、渠道、地区等结构化数据放在本机，用自然语言提问；QueryForge 调用用户自己配置的模型服务 API，把问题转成只读 SQL，执行查询，再生成图表和经营建议。
 
 ## Why
 
@@ -12,11 +12,13 @@
 
 直接问大模型也不等价于数据分析产品。模型默认没有数据库执行权，不知道你的表结构和指标口径，也不会自动留下 SQL、查询结果和 token 成本记录。QueryForge 的价值是做一层本地 harness：让外部模型在 schema、只读 SQL、结果 grounding、token budget 和本机凭据边界内工作。
 
+它也不是要替代通用 AI workspace、卖家 SaaS、Excel/BI 或人工报表。通用 AI 强在写作和综合推理，但缺少本机数据执行链路；卖家 SaaS 强在平台连接，但订阅成本和平台绑定更重；Excel 灵活但依赖人手；人工报表有深度但慢且不可连续追问。QueryForge 的切入点更窄：让老板用自己的订单、商品、渠道和地区数据，快速把经营问题跑成可检查的查询、图表和建议。
+
 本次比赛使用 Kaggle 的 [Olist Brazilian E-Commerce Public Dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) 作为公开 demo case。Olist 是真实巴西电商订单数据，适合展示地区、品类、渠道、客单价和复购路径分析；产品本身面向更通用的结构化经营数据。
 
 ## Product Shape
 
-- **macOS 本地应用是完整产品**：内置本地 SQLite 数据库示例，提供 Settings 下拉菜单，可自助填写 provider endpoint、model、API key/token、月度 token 预算。
+- **本地桌面应用是完整产品路径**：当前预编译 demo 包为 macOS x86_64，产品形态不绑定 macOS；后续可以提供 Windows/macOS 预编译二进制包。Settings 默认只需选择模型服务并填写 API key/token；API URL、backend、model 和 token 预算放在高级设置里。
 - **Railway 是手机扫码演示**：公开地址用于评审和路演，展示 Olist 案例和交互形态；不收集访客 API key，也不承载用户真实数据。
 - **自然语言经营问答**：中文提问，自动生成 SQL、执行查询、返回图表和分析报告。
 - **连续追问**：保留最近上下文，支持“为什么”“展开说”“和上一个比”等自然追问。
@@ -36,9 +38,17 @@ QueryForge 更适合数据治理不重、但经营决策频繁的小团队：
 
 ## Commercial Path
 
-当前商业化假设是**一次性买断**，而不是按年/按席位的重型销售模式。QueryForge 本身没有云端运维成本，真实模型调用由用户自己的 provider key 承担；对小微电商经营者来说，买断制更容易形成低决策成本。
+当前商业化假设是**面向小微企业的软件服务**，但不走重型企业 SaaS 的按席位销售。更现实的首发方式是闭源分发预编译桌面软件包：官网售卖、渠道售卖、卖家社群分发，后续用模板更新、数据导入、轻量支持和付费升级形成持续服务。真实模型调用由用户自己的 provider key 承担，QueryForge 不承担云端 token 成本。
 
-建议首发价格带为 **¥128-168**。这个区间不是精确定价结论，而是一个落地假设：它低于常见卖家 SaaS 的月费门槛，也低于多数需要团队采购的 BI 工具；同时对广交会地推、卖家微信群、培训社群和服务商渠道来说，足够接近“冲动购买”的价格带。后续应通过现场转化率、退款率和复购推荐来校正。
+建议首发价格带为 **¥128-168**。这个区间不是精确定价结论，而是一个落地假设：它低于常见卖家 SaaS 的月费门槛，也低于一次人工报表或咨询成本；同时对广交会地推、卖家微信群、培训社群和服务商渠道来说，足够接近“冲动购买”的价格带。后续应通过现场转化率、退款率和复购推荐来校正。
+
+## Model And IP Boundary
+
+QueryForge 不转售模型能力，也不把用户 API key 放进公开仓库或托管 demo。真实使用路径是 BYOK：用户在本机 Settings 里配置自己的模型服务 key/token，模型调用费用和服务条款由用户自己的 provider 账户承担。
+
+主流模型服务的公开条款通常会把输入/输出权利、使用责任和限制用途写清楚。例如 OpenAI 条款写明用户保留 Input 权利并在适用法律允许范围内拥有 Output；Anthropic 曾公开说明 API 商业条款允许客户保留输出权利；DeepSeek 和 Kimi/Moonshot 条款也强调用户需要对输入和输出负责，并确保自己有权提交输入。QueryForge 的合规边界是把这些 provider 接入本地工作台，不替用户绕过任何第三方平台条款、个人信息保护义务或知识产权限制。
+
+对目标用户来说，典型场景是老板分析自己的订单、商品、地区和渠道数据，因此“是否有权处理数据”通常更清楚。需要注意的是，如果导入的数据包含平台限制字段、客户个人信息、第三方图片/文案或他人商业秘密，使用者仍应先确认自己有权处理和上传给所选模型服务。
 
 ## Architecture
 
@@ -63,6 +73,15 @@ Olist demo case 当前包含：
 
 ## Quick Start
 
+推荐先验收预编译桌面包：
+
+1. 在 [GitHub Releases](https://github.com/eric-stone-plus/QueryForge/releases/latest) 下载 `QueryForge-macOS-x86_64.zip`。
+2. 解压后打开 `QueryForge.app`。
+3. 右上角 `Settings` 选择模型服务并填写自己的 API key/token。
+4. DeepSeek 演示可选择 `DeepSeek`，高级设置里确认 model 为 `deepseek-v4-pro`，然后点击 `保存并测试`。
+
+源码开发路径：
+
 ```bash
 git clone https://github.com/eric-stone-plus/QueryForge.git
 cd QueryForge
@@ -71,14 +90,24 @@ cp .env.example .env.local
 npm run dev
 ```
 
-本地桌面构建：
+本地桌面构建（当前 demo 为 macOS 包；产品形态不限制未来 Windows 包）：
 
 ```bash
 ./desktop/build_macos.sh
-open QueryForge.app
+open desktop/dist/QueryForge.app
 ```
 
-打开应用后，在右上角 `Settings` 下拉菜单中填写你的 provider endpoint、model、API key/token 和月度 token 预算。
+打开应用后，在右上角 `Settings` 选择模型服务并填写 API key/token。DeepSeek、Moonshot/Kimi、OpenAI、Anthropic 等常见服务会自动带出 URL 和 model；需要时再展开高级设置手动指定 API URL、backend、model 和 token 预算。
+
+现场演示 DeepSeek 路径：
+
+1. 打开 `QueryForge.app`，确认右上角状态为 `未配置`。
+2. 打开 `Settings`，选择 `DeepSeek`。
+3. 粘贴自己的 API key/token。
+4. 高级设置里确认 model，可改为 `deepseek-v4-pro`。
+5. 点击 `保存并测试`，通过后直接用自然语言提问。
+
+当前本地版本会把 key 写入用户本机配置文件并设置为 `0600` 权限；商业发行版应迁移到操作系统凭据管理能力，只在配置文件里保留 URL、backend、model 和 token 预算。
 
 ## License
 

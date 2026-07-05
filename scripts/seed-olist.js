@@ -41,7 +41,7 @@ for (const row of catTranslation) {
   catMap[row.product_category_name] = row.product_category_name_english;
 }
 
-// Map Brazilian states to5 regions
+// Map Brazilian states to the five official Brazilian macro-regions.
 const stateToRegion = {
   // Sudeste (wealthiest, most orders)
   SP: 1, RJ: 1, MG: 1, ES: 1,
@@ -49,8 +49,10 @@ const stateToRegion = {
   RS: 2, SC: 2, PR: 2,
   // Nordeste
   BA: 3, PE: 3, CE: 3, MA: 3, PB: 3, RN: 3, AL: 3, SE: 3, PI: 3,
-  // Norte + Centro-Oeste
-  AM: 4, PA: 4, GO: 4, MT: 4, MS: 4, DF: 4, RO: 4, AC: 4, AP: 4, RR: 4, TO: 4,
+  // Centro-Oeste
+  GO: 4, MT: 4, MS: 4, DF: 4,
+  // Norte
+  AM: 5, PA: 5, RO: 5, AC: 5, AP: 5, RR: 5, TO: 5,
 };
 const regionNames = ["Sudeste", "Sul", "Nordeste", "Centro-Oeste", "Norte"];
 
@@ -98,6 +100,13 @@ for (const p of payments) {
 const custIdToUniq = {};
 for (const c of customers) {
   custIdToUniq[c.customer_id] = c.customer_unique_id;
+}
+
+const orderCountByUid = {};
+for (const o of orders) {
+  const uid = custIdToUniq[o.customer_id];
+  if (!uid) continue;
+  orderCountByUid[uid] = (orderCountByUid[uid] || 0) + 1;
 }
 
 // Status mapping
@@ -186,9 +195,8 @@ const seed = db.transaction(() => {
     const cust = customers.find(c => c.customer_unique_id === uid);
     const state = cust ? cust.customer_state : "SP";
     const regionId = stateToRegion[state] || 1;
-    const city = cust ? cust.customer_city : "unknown";
-    const segments = ["regular", "regular", "regular", "vip", "new", "enterprise"];
-    const segment = segments[id % segments.length];
+    const orderCount = orderCountByUid[uid] || 0;
+    const segment = orderCount <= 1 ? "single_order" : orderCount <= 3 ? "repeat_2_3" : "repeat_4_plus";
     insertUser.run(id, `Customer ${id}`, `user${id}@olist.com.br`, regionId, segment, "2016-01-01");
   }
 
@@ -223,7 +231,7 @@ const seed = db.transaction(() => {
     for (const item of items) {
       const prodId = prodIdMap[item.product_id] || 1;
       const price = parseFloat(item.price) || 0;
-      const qty = parseInt(item.order_item_id) || 1;
+      const qty = 1;
       insertOrderItem.run(oiId++, id, prodId, qty, +price.toFixed(2), 0);
     }
   }

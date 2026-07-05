@@ -68,14 +68,4 @@ docs/HANDOFF.md
 docs/PROJECT-MEMO.md
 docs/SESSION-NOTES-*.md
 
-# QUINTE dispatch scripts (generated, not source)
-debates/quinte/
-debates/private/
-debates/archive/
-debates/task-*.md
-debates/*/run-r*.sh
-debates/*/prompt-r*.md
-debates/*/stale-*/
-debates/**/run-r*.sh
-debates/**/prompt-r*.md
-debates/**/stale-*/
+# Internal generated review artifacts (not source)

@@ -3,14 +3,20 @@ import os from "os";
 import path from "path";
 
 type ProviderSource = "local" | "env" | "default";
+export type ProviderBackend = "auto" | "openai-compatible" | "anthropic";
+export type ProviderConnectionStatus = "missing" | "untested" | "ok" | "error";
 
 export type StoredProviderSettings = {
+  backend: ProviderBackend;
   providerName: string;
   baseURL: string;
   model: string;
   apiKey: string;
   timeoutMs: number;
   temperature: number;
+  connectionStatus: ProviderConnectionStatus;
+  connectionMessage: string;
+  testedAt: string;
 };
 
 export type TokenPlan = {
@@ -47,21 +53,30 @@ type LocalSettings = {
 
 export type EffectiveProviderSettings = StoredProviderSettings & {
   source: ProviderSource;
+  ready: boolean;
   configured: boolean;
+  testable: boolean;
 };
 
 export type PublicSettings = {
   mode: "desktop" | "web-demo";
   writable: boolean;
   provider: {
+    backend: ProviderBackend;
+    backendLabel: string;
     providerName: string;
     baseURL: string;
     model: string;
     timeoutMs: number;
     temperature: number;
     source: ProviderSource;
+    ready: boolean;
     configured: boolean;
+    testable: boolean;
     apiKeyConfigured: boolean;
+    connectionStatus: ProviderConnectionStatus;
+    connectionMessage: string;
+    testedAt: string;
   };
   tokenPlan: TokenPlan;
   usage: TokenUsage & {
@@ -72,6 +87,7 @@ export type PublicSettings = {
 
 export type LocalSettingsUpdate = {
   provider?: {
+    backend?: unknown;
     providerName?: unknown;
     baseURL?: unknown;
     model?: unknown;
@@ -88,16 +104,73 @@ export type LocalSettingsUpdate = {
 const CONFIG_DIR = process.env.QUERYFORGE_CONFIG_DIR || path.join(os.homedir(), ".queryforge");
 const SETTINGS_PATH = path.join(CONFIG_DIR, "settings.json");
 const DEFAULT_PROVIDER: StoredProviderSettings = {
+  backend: "auto",
   providerName: "openai-compatible",
   baseURL: "",
   model: "",
   apiKey: "",
   timeoutMs: 60000,
   temperature: 0.2,
+  connectionStatus: "missing",
+  connectionMessage: "请选择模型服务并填写 API key/token。",
+  testedAt: "",
 };
 const DEFAULT_TOKEN_PLAN: TokenPlan = {
   monthlyBudget: 100000,
 };
+
+function isProviderBackend(value: unknown): value is ProviderBackend {
+  return value === "auto" || value === "openai-compatible" || value === "anthropic";
+}
+
+function inferProviderFromBaseURL(baseURL: string, preferredBackend: ProviderBackend = "auto") {
+  const lower = baseURL.toLowerCase();
+
+  if (preferredBackend === "anthropic" || lower.includes("anthropic.com")) {
+    return {
+      backend: "anthropic" as ProviderBackend,
+      providerName: "anthropic",
+      model: "claude-sonnet-4-5",
+      label: "Anthropic Messages API",
+    };
+  }
+  if (lower.includes("deepseek.com")) {
+    return {
+      backend: "openai-compatible" as ProviderBackend,
+      providerName: DEFAULT_PROVIDER.providerName,
+      model: "deepseek-v4-pro",
+      label: "Chat Completions-compatible",
+    };
+  }
+  if (lower.includes("moonshot.cn")) {
+    return {
+      backend: "openai-compatible" as ProviderBackend,
+      providerName: DEFAULT_PROVIDER.providerName,
+      model: "moonshot-v1-8k",
+      label: "Chat Completions-compatible",
+    };
+  }
+  if (lower.includes("openai.com")) {
+    return {
+      backend: "openai-compatible" as ProviderBackend,
+      providerName: DEFAULT_PROVIDER.providerName,
+      model: "gpt-4o-mini",
+      label: "Chat Completions-compatible",
+    };
+  }
+
+  return {
+    backend: preferredBackend === "openai-compatible" ? "openai-compatible" as ProviderBackend : "auto" as ProviderBackend,
+    providerName: DEFAULT_PROVIDER.providerName,
+    model: "",
+    label: "Auto / generic model API",
+  };
+}
+
+function backendLabel(backend: ProviderBackend, baseURL: string) {
+  const inferred = inferProviderFromBaseURL(baseURL, backend);
+  return inferred.label;
+}
 
 export function isSettingsWritable() {
   return process.env.QUERYFORGE_DESKTOP === "1" || process.env.NODE_ENV !== "production";
@@ -110,6 +183,15 @@ function currentPeriod() {
 
 function cleanString(value: unknown, fallback = "") {
   return typeof value === "string" ? value.trim() : fallback;
+}
+
+function normalizeBaseURL(value: unknown, fallback = "") {
+  let baseURL = cleanString(value, fallback);
+  if (!baseURL) return "";
+  if (!/^https?:\/\//i.test(baseURL)) baseURL = `https://${baseURL}`;
+  baseURL = baseURL.replace(/\/+$/, "");
+  baseURL = baseURL.replace(/\/chat\/completions?$/i, "");
+  return baseURL;
 }
 
 function finiteNumber(value: unknown, fallback: number) {
@@ -129,6 +211,18 @@ function clampTemperature(value: unknown, fallback: number) {
   return n;
 }
 
+function isConnectionStatus(value: unknown): value is ProviderConnectionStatus {
+  return value === "missing" || value === "untested" || value === "ok" || value === "error";
+}
+
+function providerReady(provider: Pick<StoredProviderSettings, "apiKey" | "baseURL" | "model">) {
+  return Boolean(provider.apiKey && provider.baseURL && provider.model);
+}
+
+function providerTestable(provider: Pick<StoredProviderSettings, "apiKey" | "baseURL">) {
+  return Boolean(provider.apiKey && provider.baseURL);
+}
+
 function readRawSettings(): SettingsFile {
   if (!existsSync(SETTINGS_PATH)) return {};
 
@@ -140,14 +234,34 @@ function readRawSettings(): SettingsFile {
 }
 
 function normalizeProvider(provider: Partial<StoredProviderSettings> | undefined): StoredProviderSettings {
-  return {
-    providerName: cleanString(provider?.providerName, DEFAULT_PROVIDER.providerName) || DEFAULT_PROVIDER.providerName,
-    baseURL: cleanString(provider?.baseURL, DEFAULT_PROVIDER.baseURL),
-    model: cleanString(provider?.model, DEFAULT_PROVIDER.model),
+  const baseURL = normalizeBaseURL(provider?.baseURL, DEFAULT_PROVIDER.baseURL);
+  const requestedBackend = isProviderBackend(provider?.backend) ? provider.backend : DEFAULT_PROVIDER.backend;
+  const inferred = inferProviderFromBaseURL(baseURL, requestedBackend);
+  const normalized = {
+    backend: requestedBackend === "auto" ? inferred.backend : requestedBackend,
+    providerName: cleanString(provider?.providerName, inferred.providerName) || inferred.providerName,
+    baseURL,
+    model: cleanString(provider?.model, inferred.model),
     apiKey: cleanString(provider?.apiKey, DEFAULT_PROVIDER.apiKey),
     timeoutMs: positiveInt(provider?.timeoutMs, DEFAULT_PROVIDER.timeoutMs),
     temperature: clampTemperature(provider?.temperature, DEFAULT_PROVIDER.temperature),
+    connectionStatus: isConnectionStatus(provider?.connectionStatus) ? provider.connectionStatus : DEFAULT_PROVIDER.connectionStatus,
+    connectionMessage: cleanString(provider?.connectionMessage, DEFAULT_PROVIDER.connectionMessage),
+    testedAt: cleanString(provider?.testedAt, DEFAULT_PROVIDER.testedAt),
   };
+
+  if (!providerReady(normalized)) {
+    normalized.connectionStatus = "missing";
+    normalized.connectionMessage = normalized.baseURL && !normalized.model
+      ? "已保存 API URL。该地址无法自动识别模型，请在高级设置里填写 model。"
+      : "请选择模型服务并填写 API key/token。";
+    normalized.testedAt = "";
+  } else if (normalized.connectionStatus === "missing") {
+    normalized.connectionStatus = "untested";
+    normalized.connectionMessage = "配置已保存，尚未测试连接。";
+  }
+
+  return normalized;
 }
 
 function normalizeTokenPlan(tokenPlan: Partial<TokenPlan> | undefined): TokenPlan {
@@ -205,18 +319,46 @@ function readSettings(): LocalSettings {
 }
 
 function envProvider(): StoredProviderSettings {
+  if (process.env.QUERYFORGE_DESKTOP === "1" && process.env.QUERYFORGE_ALLOW_ENV_PROVIDER !== "1") {
+    return { ...DEFAULT_PROVIDER };
+  }
+
+  const baseURL = normalizeBaseURL(process.env.AI_BASE_URL || "");
+  const requestedBackend = isProviderBackend(process.env.AI_BACKEND) ? process.env.AI_BACKEND : DEFAULT_PROVIDER.backend;
+  const inferred = inferProviderFromBaseURL(baseURL, requestedBackend);
   return {
-    providerName: process.env.AI_PROVIDER_NAME || DEFAULT_PROVIDER.providerName,
-    baseURL: process.env.AI_BASE_URL || "",
-    model: process.env.AI_MODEL || "",
+    backend: requestedBackend === "auto" ? inferred.backend : requestedBackend,
+    providerName: process.env.AI_PROVIDER_NAME || inferred.providerName,
+    baseURL,
+    model: process.env.AI_MODEL || inferred.model,
     apiKey: process.env.AI_API_KEY || "",
     timeoutMs: positiveInt(process.env.AI_TIMEOUT_MS, DEFAULT_PROVIDER.timeoutMs),
     temperature: clampTemperature(process.env.AI_TEMPERATURE, DEFAULT_PROVIDER.temperature),
+    connectionStatus: hasEnvProvider({
+      backend: requestedBackend === "auto" ? inferred.backend : requestedBackend,
+      providerName: process.env.AI_PROVIDER_NAME || inferred.providerName,
+      baseURL,
+      model: process.env.AI_MODEL || inferred.model,
+      apiKey: process.env.AI_API_KEY || "",
+      timeoutMs: positiveInt(process.env.AI_TIMEOUT_MS, DEFAULT_PROVIDER.timeoutMs),
+      temperature: clampTemperature(process.env.AI_TEMPERATURE, DEFAULT_PROVIDER.temperature),
+      connectionStatus: "untested",
+      connectionMessage: "",
+      testedAt: "",
+    }) ? "untested" : "missing",
+    connectionMessage: process.env.AI_API_KEY ? "环境变量配置尚未在本机测试。" : DEFAULT_PROVIDER.connectionMessage,
+    testedAt: "",
   };
 }
 
 function hasLocalProvider(provider: StoredProviderSettings) {
-  return Boolean(provider.baseURL || provider.model || provider.apiKey || provider.providerName !== DEFAULT_PROVIDER.providerName);
+  return Boolean(
+    provider.baseURL ||
+    provider.model ||
+    provider.apiKey ||
+    provider.backend !== DEFAULT_PROVIDER.backend ||
+    provider.providerName !== DEFAULT_PROVIDER.providerName
+  );
 }
 
 function hasEnvProvider(provider: StoredProviderSettings) {
@@ -240,19 +382,33 @@ export function getEffectiveProviderSettings(): EffectiveProviderSettings {
   const settings = readSettings();
   const env = envProvider();
   const source: ProviderSource = hasLocalProvider(settings.provider) ? "local" : hasEnvProvider(env) ? "env" : "default";
+  const selected = source === "local" ? settings.provider : source === "env" ? env : DEFAULT_PROVIDER;
   const effective = {
-    providerName: settings.provider.providerName || env.providerName || DEFAULT_PROVIDER.providerName,
-    baseURL: settings.provider.baseURL || env.baseURL,
-    model: settings.provider.model || env.model,
-    apiKey: settings.provider.apiKey || env.apiKey,
-    timeoutMs: settings.provider.timeoutMs || env.timeoutMs,
-    temperature: settings.provider.temperature ?? env.temperature,
+    backend: selected.backend,
+    providerName: selected.providerName || DEFAULT_PROVIDER.providerName,
+    baseURL: selected.baseURL,
+    model: selected.model,
+    apiKey: selected.apiKey,
+    timeoutMs: selected.timeoutMs,
+    temperature: selected.temperature,
   };
+  const ready = Boolean(effective.apiKey && effective.baseURL && effective.model);
+  const testable = providerTestable(effective);
+  const connectionStatus = ready
+    ? selected.connectionStatus
+    : "missing";
 
   return {
     ...effective,
     source,
-    configured: Boolean(effective.apiKey && effective.baseURL && effective.model),
+    connectionStatus,
+    connectionMessage: ready
+      ? selected.connectionMessage
+      : DEFAULT_PROVIDER.connectionMessage,
+    testedAt: ready && source === "local" ? selected.testedAt : "",
+    ready,
+    configured: ready,
+    testable,
   };
 }
 
@@ -266,14 +422,21 @@ export function getPublicSettings(): PublicSettings {
     mode: isDesktop ? "desktop" : "web-demo",
     writable: isSettingsWritable(),
     provider: {
+      backend: exposeProvider ? provider.backend : DEFAULT_PROVIDER.backend,
+      backendLabel: exposeProvider ? backendLabel(provider.backend, provider.baseURL) : backendLabel(DEFAULT_PROVIDER.backend, ""),
       providerName: exposeProvider ? provider.providerName : DEFAULT_PROVIDER.providerName,
       baseURL: exposeProvider ? provider.baseURL : "",
       model: exposeProvider ? provider.model : "",
       timeoutMs: exposeProvider ? provider.timeoutMs : DEFAULT_PROVIDER.timeoutMs,
       temperature: exposeProvider ? provider.temperature : DEFAULT_PROVIDER.temperature,
       source: exposeProvider ? provider.source : "default",
+      ready: exposeProvider ? provider.ready : false,
       configured: exposeProvider ? provider.configured : false,
+      testable: exposeProvider ? provider.testable : false,
       apiKeyConfigured: exposeProvider ? Boolean(provider.apiKey) : false,
+      connectionStatus: exposeProvider ? provider.connectionStatus : "missing",
+      connectionMessage: exposeProvider ? provider.connectionMessage : DEFAULT_PROVIDER.connectionMessage,
+      testedAt: exposeProvider ? provider.testedAt : "",
     },
     tokenPlan: settings.tokenPlan,
     usage: withUsageSummary(settings),
@@ -284,13 +447,24 @@ export function updateLocalSettings(update: LocalSettingsUpdate): PublicSettings
   const settings = readSettings();
 
   if (update.provider) {
+    const previous = settings.provider;
     const apiKey = cleanString(update.provider.apiKey);
     const shouldClearApiKey = update.provider.clearApiKey === true;
-    const nextProvider: Partial<StoredProviderSettings> = {
+    const requestedBackend = isProviderBackend(update.provider.backend) ? update.provider.backend : previous.backend;
+    const baseURL = update.provider.baseURL === undefined
+      ? settings.provider.baseURL
+      : normalizeBaseURL(update.provider.baseURL, settings.provider.baseURL);
+    const inferred = inferProviderFromBaseURL(baseURL, requestedBackend);
+    const baseURLChanged = baseURL !== previous.baseURL;
+    const incomingModel = update.provider.model === undefined
+      ? baseURLChanged || requestedBackend !== previous.backend ? inferred.model : settings.provider.model
+      : cleanString(update.provider.model, "");
+    const nextProvider = normalizeProvider({
       ...settings.provider,
-      providerName: cleanString(update.provider.providerName, settings.provider.providerName),
-      baseURL: cleanString(update.provider.baseURL, settings.provider.baseURL),
-      model: cleanString(update.provider.model, settings.provider.model),
+      backend: requestedBackend === "auto" ? inferred.backend : requestedBackend,
+      providerName: cleanString(update.provider.providerName, inferred.providerName),
+      baseURL,
+      model: incomingModel || inferred.model,
       apiKey: shouldClearApiKey ? "" : apiKey || settings.provider.apiKey,
       timeoutMs: update.provider.timeoutMs === undefined
         ? settings.provider.timeoutMs
@@ -298,8 +472,24 @@ export function updateLocalSettings(update: LocalSettingsUpdate): PublicSettings
       temperature: update.provider.temperature === undefined
         ? settings.provider.temperature
         : clampTemperature(update.provider.temperature, settings.provider.temperature),
-    };
-    settings.provider = normalizeProvider(nextProvider);
+    });
+
+    const connectionChanged = shouldClearApiKey
+      || Boolean(apiKey)
+      || nextProvider.backend !== previous.backend
+      || nextProvider.providerName !== previous.providerName
+      || nextProvider.baseURL !== previous.baseURL
+      || nextProvider.model !== previous.model;
+
+    if (connectionChanged) {
+      nextProvider.connectionStatus = providerReady(nextProvider) ? "untested" : "missing";
+      nextProvider.connectionMessage = providerReady(nextProvider)
+        ? "配置已保存，尚未测试连接。"
+        : DEFAULT_PROVIDER.connectionMessage;
+      nextProvider.testedAt = "";
+    }
+
+    settings.provider = nextProvider;
   }
 
   if (update.tokenPlan) {
@@ -311,6 +501,28 @@ export function updateLocalSettings(update: LocalSettingsUpdate): PublicSettings
     });
   }
 
+  writeSettings(settings);
+  return getPublicSettings();
+}
+
+export function canTestProviderSettings() {
+  return providerTestable(getEffectiveProviderSettings());
+}
+
+export function updateProviderConnectionStatus(
+  status: Exclude<ProviderConnectionStatus, "missing">,
+  message: string,
+): PublicSettings {
+  const settings = readSettings();
+  if (!providerReady(settings.provider)) {
+    settings.provider.connectionStatus = "missing";
+    settings.provider.connectionMessage = DEFAULT_PROVIDER.connectionMessage;
+    settings.provider.testedAt = "";
+  } else {
+    settings.provider.connectionStatus = status;
+    settings.provider.connectionMessage = cleanString(message, status === "ok" ? "连接可用。" : "连接失败。");
+    settings.provider.testedAt = new Date().toISOString();
+  }
   writeSettings(settings);
   return getPublicSettings();
 }

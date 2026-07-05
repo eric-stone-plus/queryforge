@@ -6,37 +6,27 @@ from pathlib import Path
 
 DOCX = Path("assets/speaker-notes.docx")
 NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+W = NS["w"]
 
 NEW_PARAS = [
     "QueryForge 路演讲稿（双人版）",
-    "分工：Mavis 负责商业叙事，Eric 负责开发与技术可信度。5 分钟演示 + 3 分钟 Q&A，可按现场时间删减。",
-    "Mavis｜商业叙述（约 2 分钟）",
-    "大家好，我们做的是 QueryForge，一个让电商经营者获得专业数据分析能力的本地分析工具。它不是企业 BI，也不是再做一张漂亮看板，而是给跨境电商小团队、平台卖家、外贸 SOHO 和广交会参展商一个能直接追问经营数据的工作台。",
-    "这个场景很具体：很多小团队有订单导出、商品表、渠道数据和地区数据，但没有专职分析师。老板想知道哪个地区值得投放、哪些品类适合组合推荐、复购用户下一步可能买什么，通常只能靠表格、经验和临时报表。QueryForge 把这些问题变成可以执行、可以复盘的查询和建议。",
-    "今天使用的是公开真实数据。我们接入 Kaggle 上的 Olist Brazilian E-Commerce Public Dataset，约 10 万笔巴西电商订单，包含订单状态、价格、支付、客户位置、商品属性和评价。巴西案例和跨境电商场景是匹配的：区域、品类、支付方式、复购和客单价都能形成真实经营问题。",
-    "商业上，我们不把它讲成按年或按席位采购的软件。更现实的路径是个人开发者推出一款实用小工具：macOS 本地应用一次买断，用户自带模型供应商的 API key/token。建议首发价格带是 128 到 168 元，用广交会地推、卖家微信群、培训社群和服务商渠道验证冲动购买和真实转化。",
-    "Eric｜开发阐述（约 2 分钟）",
-    "我讲技术实现。QueryForge 的关键不是把 SQL 生成外包给模型，而是做一层本地 harness：模型在受控边界内工作，数据库和凭据留在本机。",
-    "第一层是本地数据平面。桌面版自带 SQLite demo 数据，也可以扩展到用户自己的结构化经营数据。Settings 下拉菜单可以自助填写 OpenAI-compatible endpoint、model、API key/token 和月度 token 预算；这些配置保存在本机应用支持目录，不进入 GitHub，也不放到 Railway。",
-    "第二层是 Agent 循环。用户用中文提问，系统把问题、schema 和上下文交给外部模型生成候选 SQL；再用 AST 做只读校验，只允许单条 SELECT，限制敏感字段和通配查询，并自动补 LIMIT；执行结果回填给模型生成图表配置和经营解释。",
-    "第三层是演示边界。Railway 线上页面保留为手机扫码 demo，使用 Olist 和稳定预设答案，方便评委手机查看。真实产品路径是 macOS 桌面端：本机凭据、本地 token plan、真实 provider API 调用、SQL 执行和结果 grounding 都在本机完成。",
-    "为什么这里必须引入 Agent？因为经营分析不是一次 SQL 翻译。用户会追问原因、比较地区、拆品类、问下一步动作。QueryForge 把模型能力放进一个可检查流程：理解问题、生成 SQL、验证、执行、解释、保存指标，并把每次调用计入 token 预算。",
-    "Mavis｜收束（约 40 秒）",
-    "所以 QueryForge 的定位是：让没有专职分析师的小微电商团队，也能围绕自己的订单和商品数据做专业经营分析。它不卖模型能力，而是卖一个把模型、数据库和经营问题连接起来的本地工作台。",
-    "从 hackathon 到可售产品，第一步是把 macOS 桌面端打磨到稳定可用：Settings 配置、数据导入、只读查询、图表和问答体验；第二步做 App Store 或网站买断分发；第三步再根据真实用户反馈补 CSV/Excel 导入、更多平台模板和轻量报表导出。",
+    "分工：Mavis 负责商业叙事，Eric 负责开发与技术可信度。主讲稿控制在 3 分钟内，Q&A 只使用备用短答。",
+    "Mavis｜0:00-1:05 商业场景",
+    "大家好，我们做的是 QueryForge，一个面向小微电商经营者的本地优先分析工具包。今天展示的是第一个工具：订单与经营分析 workbench。目标用户不是大企业 BI 团队，而是跨境卖家、外贸 SOHO、广交会参展商，以及几个人规模的 Amazon、独立站和平台卖家。他们有订单、商品、渠道、地区数据，却没有专职分析师；想问哪个市场值得投放、哪些品类能组合销售、复购用户下一步可能买什么，通常只能靠 Excel 和经验。QueryForge 把这些经营问题直接变成 SQL、图表和建议。今天用 Kaggle/Olist 巴西真实电商数据做 demo，因为它有 99,441 笔订单、5 个地区和 74 个品类，足够模拟真实跨境电商分析场景。",
+    "Eric｜1:05-2:15 技术实现",
+    "技术上，QueryForge 不是把问题丢给模型聊天，而是在本地做一层 harness。数据、API key 和 token 预算留在用户机器；模型服务由用户自己配置，可以接 DeepSeek、Kimi、OpenAI、Anthropic 或其他常见 provider。系统把问题、schema 和上下文交给模型生成候选 SQL，再用 AST 做只读校验，只允许 SELECT；执行后把真实结果回填给模型生成解释。这样回答有数据库依据，也能连续追问。Railway 扫码页只是手机公开 demo；真正产品路径是本地桌面应用。当前因为开发设备是 Mac，所以用 macOS 包展示，但产品不绑定 Mac，后续可以提供 Windows 和 macOS 预编译二进制包。",
+    "Mavis｜2:15-3:00 商业收束",
+    "商业路径也按小微企业购买习惯设计。QueryForge 不卖模型 token，也不走重型按席位 SaaS；它更像一个闭源软件服务包，可以在官网、渠道、卖家社群、培训课或广交会地推里销售预编译软件，由用户自带模型 key，成本边界清楚。第一个工具先解决经营分析，后续扩展数据导入、平台模板和报表导出。它和直接问大模型的差异在于：能连接本机数据、执行查询、复盘指标口径，并控制调用成本。接下来演示三件事：看 KPI，点预设经营问题，再在本地 Settings 配置 provider key 后自然追问。",
     "演示流程",
-    "打开页面，先让评委看到 KPI：99,441 订单、R$1,601 万营收、96,096 用户、74 品类。",
-    "点击「哪个地区最值得优先投放？」或「哪些品类适合做组合推荐？」，展示图表、SQL 和分析报告。",
-    "再点「复购用户的品类跨越路径」，强调它不是静态看板，而是经营问题驱动的查询。",
-    "如果演示桌面端，打开 Settings 下拉菜单，说明 endpoint、model、API key/token 和 token budget 都由用户本机填写。",
-    "如果现场网络或 provider 不稳定，Railway 扫码页只作为公开 demo，直接使用预设问题保持演示流畅。",
-    "Q&A 预案",
-    "Q: 和普通 BI 看板有什么区别？ A: 看板回答固定问题；QueryForge 支持围绕经营问题连续追问，并把问题落到 SQL、图表和结果解释上。",
-    "Q: 和直接问大模型有什么区别？ A: 大模型默认没有数据库执行权、指标口径和查询记录。QueryForge 把模型放进本地 harness，让它看 schema、生成只读 SQL、执行查询，并基于真实结果回答。",
-    "Q: 数据真实吗？ A: 是 Kaggle Olist 公开电商数据集，约 10 万笔真实匿名商业订单。它是 demo case，不限制产品只能做巴西或电商数据。",
-    "Q: 大模型幻觉怎么办？ A: 不让模型成为权威。它生成候选 SQL，系统用 schema、AST 只读校验、数据库执行结果和二次解释约束它。",
-    "Q: 怎么商业化？ A: 更现实的是一次性买断小工具，首发价格带 128 到 168 元。目标用户是跨境电商小团队、平台卖家、外贸 SOHO 和广交会参展商，模型 token 由用户自己的 provider key 承担。",
-    "措辞参考：Kaggle/Olist 数据集说明；Gartner Data & Analytics；Tableau modern BI；IBM self-service analytics；Dun & Bradstreet trusted business data；公开报道中的广交会跨境电商展区和中小微卖家生态。",
+    "1. 先展示 KPI：99,441 订单、R$1,601 万营收、96,096 用户、74 品类、5 地区。",
+    "2. 点击「哪个地区最值得优先投放？」或「哪些品类适合做组合推荐？」展示 SQL、图表和建议。",
+    "3. 展示 Settings：用户本机选择 provider、填写 API key/token；URL、model 和预算在高级设置。",
+    "4. 如果现场网络不稳，Railway 扫码页使用预设问题保证路演不断。",
+    "备用短答",
+    "和直接问大模型的区别：QueryForge 有本机数据执行链路、只读 SQL 校验、结果 grounding 和 token 预算。",
+    "数据合规：典型用户分析自己的订单和商品数据；如果包含个人信息或平台限制字段，仍由使用者确认授权。",
+    "商业化：闭源预编译软件包 + 官网/渠道/社群销售，模型 token 由用户自己的 provider key 承担。",
+    "平台范围：当前是 macOS demo，不写死平台；产品可以扩展到 Windows/macOS 桌面包。",
 ]
 
 
@@ -55,6 +45,71 @@ def set_para_text(paragraph, text):
         run = ET.SubElement(paragraph, f"{{{NS['w']}}}r")
         t = ET.SubElement(run, f"{{{NS['w']}}}t")
         t.text = text
+
+
+def child(parent, tag):
+    found = parent.find(f"w:{tag}", NS)
+    if found is None:
+        found = ET.SubElement(parent, f"{{{W}}}{tag}")
+    return found
+
+
+def set_attr(el, name, value):
+    el.set(f"{{{W}}}{name}", value)
+
+
+def clear_direct_format(paragraph):
+    p_pr = paragraph.find("w:pPr", NS)
+    if p_pr is not None:
+        p_style = p_pr.find("w:pStyle", NS)
+        if p_style is not None:
+            p_pr.remove(p_style)
+    for run in paragraph.findall("w:r", NS):
+        r_pr = run.find("w:rPr", NS)
+        if r_pr is not None:
+            run.remove(r_pr)
+
+
+def apply_para_style(paragraph, idx):
+    clear_direct_format(paragraph)
+    p_pr = child(paragraph, "pPr")
+    spacing = child(p_pr, "spacing")
+    set_attr(spacing, "before", "80")
+    set_attr(spacing, "after", "100")
+    set_attr(spacing, "line", "312")
+    set_attr(spacing, "lineRule", "auto")
+
+    run = paragraph.find("w:r", NS)
+    if run is None:
+        run = ET.SubElement(paragraph, f"{{{W}}}r")
+    r_pr = ET.Element(f"{{{W}}}rPr")
+    run.insert(0, r_pr)
+    font = ET.SubElement(r_pr, f"{{{W}}}rFonts")
+    set_attr(font, "ascii", "Arial")
+    set_attr(font, "hAnsi", "Arial")
+    set_attr(font, "eastAsia", "Microsoft YaHei")
+    size = ET.SubElement(r_pr, f"{{{W}}}sz")
+    color = ET.SubElement(r_pr, f"{{{W}}}color")
+
+    if idx == 0:
+        set_attr(size, "val", "36")
+        set_attr(color, "val", "000000")
+        ET.SubElement(r_pr, f"{{{W}}}b")
+        jc = child(p_pr, "jc")
+        set_attr(jc, "val", "center")
+        set_attr(spacing, "before", "0")
+        set_attr(spacing, "after", "240")
+    elif idx in {2, 4, 6, 8, 13}:
+        set_attr(size, "val", "26")
+        set_attr(color, "val", "2F5F9A")
+        ET.SubElement(r_pr, f"{{{W}}}b")
+        set_attr(spacing, "before", "220")
+        set_attr(spacing, "after", "80")
+    else:
+        set_attr(size, "val", "22")
+        set_attr(color, "val", "111111")
+        if idx == 1:
+            set_attr(spacing, "after", "180")
 
 
 def main():
@@ -76,6 +131,7 @@ def main():
 
         for idx, text in enumerate(NEW_PARAS):
             set_para_text(paras[idx], text)
+            apply_para_style(paras[idx], idx)
 
         for extra in paras[len(NEW_PARAS):]:
             body.remove(extra)
